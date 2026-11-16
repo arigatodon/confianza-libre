@@ -45,6 +45,7 @@ module Factories
       "proposal_majority_percent" => "60",
       "proposal_voting_days"      => "7",
       "proposal_rules_min_level"  => "2",
+      "credit_ceiling"            => "5000",
       "rules_quorum_percent"      => "10",
       "territory_min_members_for_rules" => "0",
       "endorsements_to_verify"    => "3",

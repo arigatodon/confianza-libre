@@ -67,6 +67,39 @@
       </p>
     </section>
 
+    <%# 2b. Lo que viene %>
+    <section class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Lo que viene</h2>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        La inteligencia artificial escribe programas cada vez más rápido, y
+        también encuentra sus fallas cada vez más rápido. Vamos hacia un mundo
+        con tantas vulnerabilidades que la gente buscará refugio en unas pocas
+        aplicaciones «seguras», ofrecidas por grandes empresas.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        Esas aplicaciones no solo guardarán tus datos. Te darán créditos para
+        comprar, vender y pagar servicios, anotados en registros claros y
+        trazables, pero privados. Quien controle esas reglas decidirá qué puedes
+        comprar, a quién y cuándo. Será dinero con dueño, y un control sobre las
+        personas más estricto que cualquiera que hayamos conocido.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        <strong class="text-on-surface">No tiene por qué ser así.</strong> La
+        misma tecnología, incluida la inteligencia artificial, se puede construir
+        entre todos como un bien común: aplicaciones públicas, libres y
+        descentralizadas, con reglas iguales para todos, que nadie pueda apagar
+        ni cambiar a escondidas. Que sirvan para repartir el conocimiento y las
+        oportunidades, no para concentrarlas, y para el bienestar de todas las
+        especies, las que viven hoy y las que vendrán.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        Confianza es nuestro primer paso en esa dirección. Su código ya es
+        libre: cualquiera puede revisarlo, copiarlo y mejorarlo. Lo que falta es
+        que no dependa de un solo servidor, y ese camino lo vamos a recorrer
+        juntos, contándolo paso a paso en las novedades.
+      </p>
+    </section>
+
     <%# 3. La propuesta %>
     <section class="space-y-4">
       <h2 class="text-headline-md text-on-surface">Lo que proponemos</h2>
@@ -83,7 +116,8 @@
           <span><strong class="text-on-surface">Todos parten de cero.</strong>
           Aquí no entras con capital: entras con tu nombre. Lo que tienes es lo
           que la red confía en ti, y eso se construye participando — no se
-          compra ni se hereda.</span>
+          compra ni se hereda. Y todos tienen el mismo techo: tu reputación hace
+          que la comunidad te fíe más, pero nadie puede acumular más que otro.</span>
         </li>
         <li class="flex gap-3">
           <span class="material-symbols-outlined text-primary shrink-0 mt-1" style="font-size:20px">verified</span>
@@ -121,6 +155,14 @@
             son públicas y cada cambio del sistema se cuenta en las
             <%= link_to "novedades", announcements_path, class: "text-primary hover:underline" %>,
             en lenguaje simple. Si algo no se puede explicar en simple, todavía no está listo.
+          </p>
+        </div>
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+          <p class="text-body-lg text-on-surface-variant leading-relaxed">
+            <strong class="text-on-surface">Código libre.</strong> El
+            <%= link_to "código de Confianza", "https://github.com/arigatodon/confianza-libre", class: "text-primary hover:underline", rel: "noopener" %>
+            es público, con licencia AGPL: cualquiera puede revisarlo, copiarlo y
+            mejorarlo. Si las reglas son de todos, el código que las aplica también.
           </p>
         </div>
         <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">

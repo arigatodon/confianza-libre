@@ -1,89 +1,49 @@
-<%# Bottom Nav — sólo móvil. FAB central (sólo si está logueado) %>
+<%# Bottom Nav — sólo móvil. FAB central (sólo si está logueado).
+    Ítem activo: ícono relleno, texto azul y "línea" azul arriba (como el
+    color de línea en la señalética del transporte). Cada ítem mide ≥ 56 px. %>
 <%
   current = request.path
-  bn_link = ->(path, label, icon, active) {
-    active_class = active ? "text-primary" : "text-on-surface-variant hover:text-on-surface"
-    "flex flex-col items-center gap-0.5 w-16 py-1.5 transition-colors #{active_class}"
+  bn_item = ->(path, label, icon, active) {
+    clases = active ? "text-primary" : "text-on-surface-variant hover:text-on-surface"
+    link_to path, class: "relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 h-full transition-colors #{clases}",
+                  "aria-current": (active ? "page" : nil) do
+      safe_join([
+        (tag.span(class: "absolute top-0 inset-x-3 h-[3px] rounded-b-sm bg-primary") if active),
+        tag.span(icon, class: "material-symbols-outlined #{"icon-filled" if active}", style: "font-size:24px"),
+        tag.span(label, class: "text-[12px] leading-4 #{active ? "font-bold" : "font-medium"}")
+      ].compact)
+    end
   }
 %>
-<nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-surface-container-low/95 backdrop-blur border-t border-outline-variant/30">
-  <div class="h-16 px-4 flex items-center justify-around">
-    <%= link_to root_path, class: bn_link.call(root_path, "Inicio", "dynamic_feed", current == "/") do %>
-      <% if current == "/" %>
-        <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
-          <span class="material-symbols-outlined icon-filled" style="font-size:22px">dynamic_feed</span>
-        </span>
-      <% else %>
-        <span class="material-symbols-outlined" style="font-size:22px">dynamic_feed</span>
-      <% end %>
-      <span class="text-caption font-medium" style="font-size:10px">Inicio</span>
-    <% end %>
-
-    <%= link_to explore_path, class: bn_link.call(explore_path, "Mapa", "map", current.start_with?("/explore")) do %>
-      <% if current.start_with?("/explore") %>
-        <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
-          <span class="material-symbols-outlined icon-filled" style="font-size:22px">map</span>
-        </span>
-      <% else %>
-        <span class="material-symbols-outlined" style="font-size:22px">map</span>
-      <% end %>
-      <span class="text-caption font-medium" style="font-size:10px">Mapa</span>
-    <% end %>
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-surface-container-lowest border-t border-outline-variant/70 pb-[env(safe-area-inset-bottom)]">
+  <div class="h-16 px-1 flex items-stretch justify-around">
+    <%= bn_item.call(root_path, "Inicio", "dynamic_feed", current == "/") %>
+    <%= bn_item.call(explore_path, "Mapa", "map", current.start_with?("/explore")) %>
 
     <% if authenticated? %>
-      <%# FAB central elevado %>
-      <div class="relative -top-5">
+      <%# FAB central elevado: placa azul (la acción principal: publicar) %>
+      <div class="relative flex-1 flex justify-center">
         <%= link_to new_post_path,
-              class: "w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-lg hover:bg-organic-green-deep transition-colors border-4 border-background" do %>
-          <span class="material-symbols-outlined" style="font-size:28px">add</span>
+              class: "absolute -top-5 w-14 h-14 bg-primary text-on-primary rounded-2xl flex items-center justify-center ambient-shadow-lg hover:bg-primary-strong transition-colors" do %>
+          <span class="material-symbols-outlined" style="font-size:30px">add</span>
           <span class="sr-only">Crear publicación</span>
         <% end %>
       </div>
     <% else %>
-      <div class="w-14"></div>
+      <div class="flex-1"></div>
     <% end %>
 
     <% if authenticated? %>
-      <%= link_to wallet_path, class: bn_link.call(wallet_path, "Billetera", "account_balance_wallet", current.start_with?("/billetera")) do %>
-        <% if current.start_with?("/billetera") %>
-          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
-            <span class="material-symbols-outlined icon-filled" style="font-size:22px">account_balance_wallet</span>
-          </span>
-        <% else %>
-          <span class="material-symbols-outlined" style="font-size:22px">account_balance_wallet</span>
-        <% end %>
-        <span class="text-caption font-medium" style="font-size:10px">Billetera</span>
-      <% end %>
+      <%= bn_item.call(wallet_path, "Billetera", "account_balance_wallet", current.start_with?("/billetera")) %>
     <% else %>
-      <%= link_to posts_path, class: bn_link.call(posts_path, "Feed", "grid_view", current.start_with?("/posts")) do %>
-        <% if current.start_with?("/posts") %>
-          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
-            <span class="material-symbols-outlined icon-filled" style="font-size:22px">grid_view</span>
-          </span>
-        <% else %>
-          <span class="material-symbols-outlined" style="font-size:22px">grid_view</span>
-        <% end %>
-        <span class="text-caption font-medium" style="font-size:10px">Feed</span>
-      <% end %>
+      <%= bn_item.call(posts_path, "Feed", "grid_view", current.start_with?("/posts")) %>
     <% end %>
 
     <% if authenticated? && (u = Current.session.user) %>
       <% my_profile = profile_path(u.username || u.id) %>
-      <%= link_to my_profile, class: bn_link.call(my_profile, "Perfil", "person", current == my_profile) do %>
-        <% if current == my_profile %>
-          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
-            <span class="material-symbols-outlined icon-filled" style="font-size:22px">person</span>
-          </span>
-        <% else %>
-          <span class="material-symbols-outlined" style="font-size:22px">person</span>
-        <% end %>
-        <span class="text-caption font-medium" style="font-size:10px">Perfil</span>
-      <% end %>
+      <%= bn_item.call(my_profile, "Perfil", "person", current == my_profile) %>
     <% else %>
-      <%= link_to new_session_path, class: bn_link.call(new_session_path, "Entrar", "login", current.start_with?("/session")) do %>
-        <span class="material-symbols-outlined" style="font-size:22px">login</span>
-        <span class="text-caption font-medium" style="font-size:10px">Entrar</span>
-      <% end %>
+      <%= bn_item.call(new_session_path, "Entrar", "login", current.start_with?("/session")) %>
     <% end %>
   </div>
 </nav>

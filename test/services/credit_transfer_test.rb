@@ -98,7 +98,8 @@ class CreditTransferTest < ActiveSupport::TestCase
   end
 
   test "techo: si receiver supera credit_ceiling, el excedente va al fondo (no se pierde)" do
-    # Receptor con techo casi alcanzado: ceiling=1000, sube su balance a 970.
+    # Receptor con el techo común casi alcanzado: techo=1000, balance 970.
+    set_param("credit_ceiling", 1_000)
     @receiver.credit_account.update!(cached_balance: 970)
     @sender.update!(tx_cap: 1000)            # liberar el cap por tx
     @sender.update!(credit_floor: 100_000)   # liberar el piso

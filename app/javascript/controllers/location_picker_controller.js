@@ -116,7 +116,7 @@ export default class extends Controller {
 
     if (!this.marker) {
       const el = document.createElement("div")
-      el.style.cssText = "width:22px;height:22px;border-radius:9999px;background:#7c3aed;border:3px solid #fff;box-shadow:0 0 0 2px rgba(124,58,237,.35);transform:translate(-50%,-50%);"
+      el.style.cssText = "width:22px;height:22px;border-radius:9999px;background:#1f56a8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(31,86,168,.35);transform:translate(-50%,-50%);"
       this.marker = new maplibregl.Marker({ element: el, draggable: true })
         .setLngLat([lng, lat])
         .addTo(this.map)

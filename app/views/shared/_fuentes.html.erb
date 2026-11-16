@@ -1,0 +1,6 @@
+<%# Fuentes autoalojadas (app/assets/fonts): sin pedir nada a Google, una sola
+    descarga por familia (~40 KB c/u) y los íconos recortados a los que usa la
+    app. Las @font-face viven en app/assets/tailwind/application.css. %>
+<%= preload_link_tag "public-sans-latin.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" %>
+<%= preload_link_tag "overpass-latin.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" %>
+<%= preload_link_tag "material-symbols-outlined.woff2", as: "font", type: "font/woff2", crossorigin: "anonymous" %>

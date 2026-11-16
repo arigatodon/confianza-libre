@@ -1,4 +1,4 @@
-<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">¡Te damos la bienvenida, @<%= @user.username %>!</h1>
+<h1 style="margin:0 0 16px; font-size:22px; color:#1f56a8;">¡Te damos la bienvenida, @<%= @user.username %>!</h1>
 
 <p style="margin:0 0 16px;">
   Gracias por unirte a <strong>Confianza</strong>. Para activar tu cuenta y poder iniciar interacciones, confirma tu correo:
@@ -6,11 +6,11 @@
 
 <%= render "shared/email_cta", url: email_verification_url(@token), label: "Verificar mi email" %>
 
-<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+<p style="margin:16px 0 0; font-size:14px; color:#5b616a;">
   El enlace vence en 7 días. Si no creaste esta cuenta, puedes ignorar este mensaje.
 </p>
 
-<p style="margin:20px 0 0; font-size:13px; color:#9aa6a0;">
+<p style="margin:20px 0 0; font-size:13px; color:#80868e;">
   ¿El botón no funciona? Copia y pega este enlace en tu navegador:<br>
-  <a href="<%= email_verification_url(@token) %>" style="color:#0f5238; word-break:break-all;"><%= email_verification_url(@token) %></a>
+  <a href="<%= email_verification_url(@token) %>" style="color:#1f56a8; word-break:break-all;"><%= email_verification_url(@token) %></a>
 </p>

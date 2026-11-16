@@ -95,7 +95,7 @@ module ApplicationHelper
       end
     return "" if author_id == Current.session.user_id
 
-    classes ||= "inline-flex items-center gap-1 text-caption text-on-surface-variant hover:text-error"
+    classes ||= "inline-flex items-center gap-1 min-h-11 text-caption text-on-surface-variant hover:text-error"
     link_to new_report_path(reportable_type: reportable.class.name, reportable_id: reportable.id),
             class: classes,
             data: { turbo_frame: "_top" } do

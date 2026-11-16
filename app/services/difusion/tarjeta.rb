@@ -13,10 +13,10 @@ module Difusion
     ALTO   = 1080
     MARGEN = 80
 
-    VERDE_OSCURO = [ 15, 82, 56 ].freeze    # #0f5238 (theme-color del sitio)
-    VERDE_PROFUNDO = [ 9, 53, 36 ].freeze
-    BLANCO       = [ 255, 255, 255 ].freeze
-    DORADO       = [ 240, 200, 90 ].freeze
+    AZUL          = [ 31, 86, 168 ].freeze   # #1f56a8 azul toldo (theme-color del sitio)
+    AZUL_PROFUNDO = [ 21, 57, 109 ].freeze   # #15396d
+    BLANCO        = [ 255, 255, 255 ].freeze
+    AMARILLO      = [ 255, 198, 41 ].freeze  # #ffc629 amarillo señal
 
     def initialize(post)
       @post = post
@@ -33,20 +33,20 @@ module Difusion
     attr_reader :post
 
     # Foto del post oscurecida como fondo — o el fondo generado con IA para
-    # posts informativos (imagen_difusion) — o verde institucional si no hay.
+    # posts informativos (imagen_difusion) — o azul de marca si no hay.
     def fondo
       if (imagen = imagen_de_fondo)
         foto = Vips::Image.thumbnail_buffer(imagen.download, ANCHO, height: ALTO, crop: :attention)
         foto = foto.colourspace(:srgb)
-        foto = foto.flatten(background: VERDE_OSCURO) if foto.has_alpha?
+        foto = foto.flatten(background: AZUL) if foto.has_alpha?
         # Oscurecer para que el texto blanco sea legible.
         foto.linear([ 0.38, 0.38, 0.38 ], [ 0, 0, 0 ]).cast(:uchar)
       else
-        degradado_verde
+        degradado_marca
       end
     rescue Vips::Error, ActiveStorage::Error => e
       Rails.logger.warn("[Difusion::Tarjeta] fondo falló (#{e.class}: #{e.message}), uso degradado")
-      degradado_verde
+      degradado_marca
     end
 
     def imagen_de_fondo
@@ -57,11 +57,11 @@ module Difusion
       post.media.attached? ? post.media.find { |m| m.blob.image? } : nil
     end
 
-    # Degradado vertical entre los dos verdes de marca.
-    def degradado_verde
+    # Degradado vertical entre los dos azules de marca.
+    def degradado_marca
       rampa = Vips::Image.xyz(ANCHO, ALTO)[1].divide(ALTO - 1) # 0..1 por fila
       bandas = (0..2).map do |i|
-        rampa.linear([ VERDE_PROFUNDO[i] - VERDE_OSCURO[i] ], [ VERDE_OSCURO[i] ])
+        rampa.linear([ AZUL_PROFUNDO[i] - AZUL[i] ], [ AZUL[i] ])
       end
       bandas[0].bandjoin(bandas[1..]).cast(:uchar).copy(interpretation: :srgb)
     end
@@ -69,7 +69,7 @@ module Difusion
     def componer_textos(lienzo)
       y = MARGEN + 40
 
-      chip = texto(post.kind_label_es.upcase, font: "sans bold 30", color: DORADO, letter_spacing: true)
+      chip = texto(post.kind_label_es.upcase, font: "sans bold 30", color: AMARILLO, letter_spacing: true)
       lienzo = estampar(lienzo, chip, MARGEN, y)
       y += chip.height + 50
 
@@ -86,7 +86,7 @@ module Difusion
       autoria = texto("@#{post.user.username}#{lugar_sufijo}", font: "sans 34", color: BLANCO, opacidad: 0.9)
       lienzo = estampar(lienzo, autoria, MARGEN, ALTO - MARGEN - 130)
 
-      marca = texto("confianza.world", font: "sans bold 44", color: DORADO)
+      marca = texto("confianza.world", font: "sans bold 44", color: AMARILLO)
       lienzo = estampar(lienzo, marca, MARGEN, ALTO - MARGEN - 60)
 
       lienzo

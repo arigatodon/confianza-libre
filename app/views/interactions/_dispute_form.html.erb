@@ -1,19 +1,19 @@
 <%# locals: interaction %>
 <details class="w-full">
-  <summary class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-error/40 text-error text-label-md hover:bg-error-container">
-    <span class="material-symbols-outlined" style="font-size:18px">gavel</span>
-    Abrir disputa
+  <summary class="cursor-pointer inline-flex items-center gap-1.5 min-h-11 text-error text-label-md hover:underline underline-offset-4">
+    <span class="material-symbols-outlined" style="font-size:18px">report</span>
+    ¿Hubo un problema?
   </summary>
   <%= form_with url: dispute_interaction_path(interaction), method: :patch, local: true, class: "mt-3 space-y-2" do %>
     <label for="dispute_argument" class="text-caption text-on-surface-variant block">
-      Cuenta qué pasó (mínimo 30 caracteres). La otra parte va a poder responder y lo resuelve un moderador.
+      Cuenta qué pasó (al menos 30 letras). La otra persona puede responder y alguien de moderación decide.
     </label>
     <textarea name="dispute[argument]" id="dispute_argument" rows="3" minlength="30" required
       class="w-full rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2 text-body-md"></textarea>
     <button type="submit"
-      data-turbo-confirm="¿Abrir disputa? La interacción queda congelada hasta que un moderador resuelva."
-      class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-error text-on-error text-label-md hover:opacity-90">
-      Enviar disputa
+      data-turbo-confirm="¿Avisar del problema? El intercambio queda en pausa hasta que se resuelva."
+      class="inline-flex items-center gap-1.5 px-5 min-h-11 rounded-full bg-error text-on-error text-label-md hover:opacity-90 cursor-pointer">
+      Avisar del problema
     </button>
   <% end %>
 </details>

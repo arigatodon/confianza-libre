@@ -61,7 +61,7 @@
             <%= form_with url: resolve_moderation_identity_path(iv), method: :patch do %>
               <%= hidden_field_tag :decision, "approve" %>
               <button type="submit"
-                      class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors">
+                      class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors">
                 <span class="material-symbols-outlined" style="font-size:18px">check</span>
                 Aprobar (sube a identidad)
               </button>
@@ -70,7 +70,7 @@
             <%= form_with url: resolve_moderation_identity_path(iv), method: :patch, class: "flex gap-2" do %>
               <%= hidden_field_tag :decision, "reject" %>
               <input type="text" name="note" required placeholder="Motivo del rechazo"
-                     class="flex-1 px-3 py-2 rounded-lg bg-warm-surface border border-outline-variant/30 text-on-surface text-body-md">
+                     class="flex-1 px-3 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/30 text-on-surface text-body-md">
               <button type="submit"
                       class="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg border border-error/40 text-error text-label-md hover:bg-error-container/40 transition-colors">
                 Rechazar

@@ -13,8 +13,15 @@ class EconomicsControllerTest < ActionDispatch::IntegrationTest
     get economics_path
     assert_response :success
     assert_select "h2", /Niveles y cupo/i
-    # Piso -1.000.000 del nivel 5 visible en la tabla.
-    assert_match(/1\.000\.000/, @response.body)
+    # Piso −2.000 del nivel 5 visible en la tabla.
+    assert_match(/2\.000/, @response.body)
+  end
+
+  test "explica que el techo es común y muestra su valor vivo" do
+    set_param("credit_ceiling", 7_500)
+    get economics_path
+    assert_match(/el mismo para todas las personas/, @response.body)
+    assert_match(/7\.500\u00a0C/, @response.body) # espacio duro entre número y C
   end
 
   test "expone la antigüedad de 180 días requerida para nivel 5" do
@@ -28,5 +35,13 @@ class EconomicsControllerTest < ActionDispatch::IntegrationTest
     get economics_path
     assert_response :success
     assert_select "span", text: /tu nivel/
+  end
+
+  test "arriba un resumen en palabras; las tablas quedan en «Ver las reglas exactas»" do
+    get economics_path
+    assert_match "Todos parten de cero.", @response.body
+    assert_match "Las reglas se votan.", @response.body
+    assert_select "details summary", /Ver las reglas exactas/
+    assert_select "details table", minimum: 2
   end
 end

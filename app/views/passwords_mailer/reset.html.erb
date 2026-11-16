@@ -1,4 +1,4 @@
-<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">Restablecer tu contraseña</h1>
+<h1 style="margin:0 0 16px; font-size:22px; color:#1f56a8;">Restablecer tu contraseña</h1>
 
 <p style="margin:0 0 16px;">
   Recibimos un pedido para restablecer la contraseña de tu cuenta en Confianza. Haz clic en el botón para elegir una nueva:
@@ -6,12 +6,12 @@
 
 <%= render "shared/email_cta", url: edit_password_url(@user.password_reset_token), label: "Elegir nueva contraseña" %>
 
-<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+<p style="margin:16px 0 0; font-size:14px; color:#5b616a;">
   El enlace vence en <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
-  Si no pediste esto, ignorá este correo: tu contraseña no se modificó.
+  Si no pediste esto, ignora este correo: tu contraseña no se modificó.
 </p>
 
-<p style="margin:20px 0 0; font-size:13px; color:#9aa6a0;">
+<p style="margin:20px 0 0; font-size:13px; color:#80868e;">
   ¿El botón no funciona? Copia y pega este enlace en tu navegador:<br>
-  <a href="<%= edit_password_url(@user.password_reset_token) %>" style="color:#0f5238; word-break:break-all;"><%= edit_password_url(@user.password_reset_token) %></a>
+  <a href="<%= edit_password_url(@user.password_reset_token) %>" style="color:#1f56a8; word-break:break-all;"><%= edit_password_url(@user.password_reset_token) %></a>
 </p>

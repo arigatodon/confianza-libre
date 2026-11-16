@@ -5,7 +5,7 @@ module Difusion
   # Genera con IA el fondo de la tarjeta para publicaciones informativas
   # (noticia/blog) que no traen foto propia — así las novedades salen a las
   # redes con una imagen, como cualquier publicación de un vecino, en vez del
-  # degradado verde.
+  # degradado azul de marca.
   #
   # Usa "Nano Banana 2 Lite" (gemini-3.1-flash-lite-image) de la Gemini API:
   # el modelo liviano de imagen de Google — rápido y barato, suficiente para

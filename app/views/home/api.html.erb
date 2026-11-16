@@ -24,10 +24,10 @@
     <div class="flex flex-wrap justify-center gap-3">
       <% if authenticated? %>
         <%= link_to "Crear mi API key", settings_path(anchor: "api"),
-              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+              class: "bg-primary hover:bg-primary-strong text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
       <% else %>
         <%= link_to "Crear cuenta", signup_path,
-              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+              class: "bg-primary hover:bg-primary-strong text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
       <% end %>
     </div>
   </div>

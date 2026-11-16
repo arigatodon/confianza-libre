@@ -1,20 +1,34 @@
 class CreditLimitCalculator
   # Aplica la tabla de niveles de ECONOMIA.md § 4.1 y los thresholds de § 4.2.
-  # Devuelve el conjunto {level, credit_floor, credit_ceiling, tx_cap} más alto
-  # para el cual el usuario califica. Puede bajar si trust o cumplimiento se
+  # Devuelve el conjunto {level, credit_floor, tx_cap} más alto para el cual el
+  # usuario califica. Puede bajar si trust o cumplimiento se
   # deterioran (la función es monótona en los inputs, no recuerda el nivel
   # previo del usuario).
   #
   # Mantenemos los thresholds como tabla declarativa al inicio para que
   # ajustar la calibración no requiera tocar la lógica.
 
+  # Principio (ECONOMIA.md § 4, decisión 2026-11-16): **la confianza te da
+  # crédito, no riqueza.** El nivel mide cuánto te fía la comunidad (piso) y a
+  # qué velocidad puedes mover créditos (tope por transacción): son defensas
+  # contra el impago y las cuentas falsas, y crecen con la trayectoria, pero en
+  # un rango acotado (20× del nivel 1 al 5, no 10.000× como en v0.2).
+  # El **techo** —cuánto puedes acumular— NO depende del nivel: es el mismo para
+  # todas las personas y lo decide la comunidad por votación (`credit_ceiling`).
   LEVELS = {
-    1 => { credit_floor:       100, credit_ceiling:       1_000, tx_cap:       50 },
-    2 => { credit_floor:     1_000, credit_ceiling:      10_000, tx_cap:      250 },
-    3 => { credit_floor:    10_000, credit_ceiling:     100_000, tx_cap:    1_000 },
-    4 => { credit_floor:   100_000, credit_ceiling:   1_000_000, tx_cap:   10_000 },
-    5 => { credit_floor: 1_000_000, credit_ceiling:  10_000_000, tx_cap:  100_000 }
+    1 => { credit_floor:   100, tx_cap:  50 },
+    2 => { credit_floor:   250, tx_cap: 100 },
+    3 => { credit_floor:   500, tx_cap: 200 },
+    4 => { credit_floor: 1_000, tx_cap: 350 },
+    5 => { credit_floor: 2_000, tx_cap: 500 }
   }.freeze
+
+  COMMON_CEILING_DEFAULT = 5_000
+
+  # Techo común: igual para todos, gobernable (solo a nivel global de la red).
+  def self.common_ceiling
+    EconomicParameter.get_int("credit_ceiling", COMMON_CEILING_DEFAULT)
+  end
 
   # min_distinct: usuarios distintos con los que se completó interacción.
   # age_days crece con el nivel: a mayor cupo (y mayor pasivo comunitario que
@@ -22,6 +36,8 @@ class CreditLimitCalculator
   # un piso de -1.000.000: por eso pide la antigüedad más alta (180 días). Sin
   # ese piso temporal, una granja de cuentas sibilas podría inflar 200
   # interacciones con 100 contrapartes y saltar al cupo máximo en días.
+  # (Desde v0.3 el piso máximo es −2.000, pero la defensa temporal se mantiene:
+  # sigue siendo el pasivo más grande que la red absorbe por persona.)
   # (El rol de moderación ya NO depende del nivel — es un flag de gobernanza,
   # Fase 1.3 — así que subir de nivel no otorga poderes de policía.)
   REQUIREMENTS = {
@@ -46,7 +62,8 @@ class CreditLimitCalculator
   def call
     base = LEVELS[max_qualified_level].merge(level: max_qualified_level)
     # Padrinazgo: el bonus es aditivo al floor base del nivel y persiste
-    # mientras la columna no se resetee. El techo y el tx_cap no se tocan.
+    # mientras la columna no se resetee. El tx_cap no se toca, y el techo no
+    # sale de aquí: es común (ver `common_ceiling`).
     base.merge(credit_floor: base[:credit_floor] + @user.sponsor_bonus_floor.to_i)
   end
 

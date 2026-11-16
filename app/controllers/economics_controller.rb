@@ -9,6 +9,7 @@ class EconomicsController < ApplicationController
   def show
     @levels       = CreditLimitCalculator::LEVELS
     @requirements = CreditLimitCalculator::REQUIREMENTS
+    @common_ceiling = CreditLimitCalculator.common_ceiling
 
     # Categorías publicables con su multiplicador de cupo (excluye internas).
     @categories = Category.where(publishable: true).order(:max_credit_multiplier)

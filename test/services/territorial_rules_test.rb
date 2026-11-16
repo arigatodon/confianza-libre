@@ -103,4 +103,33 @@ class TerritorialRulesTest < ActiveSupport::TestCase
                          parameter_key: "burn_percent", parameter_value: "20")
     assert_not p.valid?
   end
+
+  # ---- techo común (ECONOMIA.md v0.3) ----
+  test "el techo común no admite override local: la propuesta tiene que ser global" do
+    proposer = create_user(username: "proptecho")
+    p = @a.proposals.new(proposer: proposer, kind: :rule_change,
+                         title: "Techo local", body: "Intento de fijar un techo solo para esta comuna",
+                         parameter_key: "credit_ceiling", parameter_value: "8000")
+    assert_not p.valid?
+    assert_match(/común a toda la red/, p.errors.full_messages.to_sentence)
+  end
+
+  test "un rule_change global del techo común cambia el techo de todas las personas" do
+    p = rule_change(territory: @a, key: "credit_ceiling", value: 8_000, global: true)
+    assert ProposalExecutor.call(p).ok?
+    EconomicParameter.reset_cache!
+
+    assert_equal 8_000, create_user(username: "cualquiera").credit_ceiling
+  end
+
+  test "con el default del sistema, una persona de nivel 1 puede proponer reglas" do
+    EconomicParameter.where(key: "proposal_rules_min_level").delete_all
+    EconomicParameter.reset_cache!
+    proposer = create_user(username: "nivel1")
+    assert_equal 1, proposer.level
+    p = @a.proposals.new(proposer: proposer, kind: :rule_change,
+                         title: "Bajar la quema", body: "Propuesta de una persona recién llegada",
+                         parameter_key: "burn_percent", parameter_value: "1")
+    assert p.valid?, p.errors.full_messages.to_sentence
+  end
 end

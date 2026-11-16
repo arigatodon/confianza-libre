@@ -49,7 +49,7 @@ class DifundirPostJob < ApplicationJob
   # Posts informativos sin foto: generar el fondo con IA una sola vez y
   # dejarlo adjunto, para que la tarjeta salga con imagen como cualquier
   # publicación con foto. Si la generación falla, la tarjeta cae sola al
-  # degradado verde — nunca bloquea la difusión.
+  # degradado azul de marca — nunca bloquea la difusión.
   def asegurar_imagen_ia(post)
     return unless post.kind.in?(KINDS_INFORMATIVOS)
     return if post.imagen_difusion.attached?

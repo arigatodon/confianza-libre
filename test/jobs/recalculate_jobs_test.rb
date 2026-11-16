@@ -43,7 +43,7 @@ class RecalculateJobsTest < ActiveJob::TestCase
     end
   end
 
-  test "RecalculateUserLevelJob persiste credit_floor/ceiling/tx_cap del nivel calculado" do
+  test "RecalculateUserLevelJob persiste credit_floor/tx_cap del nivel calculado" do
     # Configurar todo para que califique a nivel 2.
     @user.update!(verification_level: :email, trust_score: 3.5, created_at: 10.days.ago)
     3.times { |n|
@@ -55,8 +55,8 @@ class RecalculateJobsTest < ActiveJob::TestCase
 
     RecalculateUserLevelJob.perform_now(@user.id)
     assert_equal 2, @user.reload.level
-    assert_equal 1_000,  @user.credit_floor
-    assert_equal 10_000, @user.credit_ceiling
-    assert_equal 250,    @user.tx_cap
+    assert_equal 250,   @user.credit_floor
+    assert_equal 100,   @user.tx_cap
+    assert_equal 5_000, @user.credit_ceiling  # común, no sube con el nivel
   end
 end

@@ -6,15 +6,15 @@
           <%= comment.errors.full_messages.to_sentence %>
         </div>
       <% end %>
-      <%= f.text_area :body, rows: 2, required: true, placeholder: "Sumá tu comentario…" %>
+      <%= f.text_area :body, rows: 2, required: true, placeholder: "Escribe tu comentario…" %>
       <div class="flex justify-end">
         <%= f.submit "Comentar",
-              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep cursor-pointer" %>
+              class: "inline-flex items-center gap-1.5 px-5 min-h-11 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong cursor-pointer" %>
       </div>
     <% end %>
   <% else %>
     <p class="text-body-md text-on-surface-variant">
-      <%= link_to "Entrá", new_session_path, class: "text-primary font-semibold hover:underline" %> para comentar.
+      <%= link_to "Entra", new_session_path, class: "text-primary font-semibold hover:underline" %> para comentar.
     </p>
   <% end %>
 </div>

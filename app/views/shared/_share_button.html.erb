@@ -9,7 +9,7 @@
      data-action="click@window->share#cerrarFuera keydown.esc@window->share#cerrar">
   <button type="button"
           data-action="share#alternar"
-          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container transition-colors cursor-pointer">
+          class="inline-flex items-center gap-1.5 px-5 min-h-11 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container-low transition-colors cursor-pointer">
     <span class="material-symbols-outlined" style="font-size:16px">share</span>
     <span data-share-target="label">Compartir</span>
   </button>
@@ -19,13 +19,13 @@
     <a href="https://wa.me/?text=<%= u("#{text} #{url}") %>"
        target="_blank" rel="noopener"
        data-action="share#cerrar"
-       class="flex items-center gap-2 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+       class="flex items-center gap-2 px-4 min-h-11 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
       <span class="material-symbols-outlined" style="font-size:16px">forum</span>
       WhatsApp
     </a>
     <button type="button"
             data-action="share#copiar"
-            class="w-full flex items-center gap-2 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+            class="w-full flex items-center gap-2 px-4 min-h-11 text-body-md text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer">
       <span class="material-symbols-outlined" style="font-size:16px">content_copy</span>
       Copiar enlace
     </button>

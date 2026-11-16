@@ -38,7 +38,10 @@ class Proposal < ApplicationRecord
     "rules_quorum_percent"      => { label: "Quórum para reglas (% de la red activa)", min: 1, max: 50,   step: 1 },
     "endorsements_to_verify"    => { label: "Avales de vecinos para subir verificación", min: 1, max: 10, step: 1 },
     "territory_min_members_for_rules" => { label: "Miembros activos mínimos del territorio para proponer reglas", min: 0, max: 1000, step: 1 },
-    "match_daily_cap"           => { label: "Avisos de match por día (máx. por usuario)", min: 0, max: 20, step: 1 }
+    "match_daily_cap"           => { label: "Avisos de match por día (máx. por usuario)", min: 0, max: 20, step: 1 },
+    # Reglas comunes a toda la red: no admiten override local.
+    "credit_ceiling"            => { label: "Techo de saldo, igual para todos (C)", min: 1_000, max: 50_000, step: 500, global_only: true },
+    "proposal_rules_min_level"  => { label: "Nivel mínimo para proponer reglas",    min: 1, max: 5, step: 1, global_only: true }
   }.freeze
 
   belongs_to :territory
@@ -151,8 +154,11 @@ class Proposal < ApplicationRecord
 
   # Nivel mínimo para proponer cambios estructurales (reglas y categorías).
   # Gastar el fondo queda abierto a cualquier miembro: el voto ya filtra.
+  # Default 1: cualquier persona con email verificado puede proponer; el quórum
+  # y la mayoría son el filtro. (Antes era 2, y en una red sin intercambios nadie
+  # podía proponer reglas: contradecía «las reglas las cambia la comunidad».)
   def self.rules_min_level
-    EconomicParameter.get_int("proposal_rules_min_level", 2)
+    EconomicParameter.get_int("proposal_rules_min_level", 1)
   end
 
   def voted_by?(user)
@@ -208,6 +214,10 @@ class Proposal < ApplicationRecord
     value = Float(parameter_value.to_s, exception: false)
     if value.nil? || value < rule[:min] || value > rule[:max]
       errors.add(:base, "el valor para #{rule[:label]} debe estar entre #{rule[:min]} y #{rule[:max]}")
+    end
+
+    if rule[:global_only] && !global_rule?
+      errors.add(:base, "#{rule[:label]} es una regla común a toda la red: marca «Aplicar a toda la red»")
     end
   end
 

@@ -3,7 +3,7 @@
 <% yo = Current.session.user %>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
   <% unless yo.showcase? %>
-    <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-4 space-y-2">
+    <div class="rounded-xl bg-primary-fixed/60 border border-primary-fixed-dim p-4 space-y-2.5">
       <p class="text-label-md text-on-surface flex items-center gap-1.5">
         <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">storefront</span>
         ¿Ofreces algo? Crea tu vitrina
@@ -13,14 +13,14 @@
         Instagram y un QR para tu local. Gratis, en dos minutos.
       </p>
       <%= link_to onboarding_vitrina_path,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors" do %>
+            class: "inline-flex items-center gap-1.5 px-5 min-h-11 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors" do %>
         <span class="material-symbols-outlined" style="font-size:16px">rocket_launch</span>
         Crear mi vitrina
       <% end %>
     </div>
   <% end %>
 
-  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/40 p-4 space-y-2">
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/60 ambient-shadow p-4 space-y-2.5">
     <p class="text-label-md text-on-surface flex items-center gap-1.5">
       <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">handshake</span>
       Trae a tu gásfiter, tu almacén, tu vecina que cose

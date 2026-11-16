@@ -8,7 +8,7 @@
 <%
   # Etiquetas legibles para los niveles de verificación.
   verif_label = ->(key) {
-    { "email" => "Email", "phone" => "Aval vecinal", "identity" => "Identidad" }[key.to_s] || key.to_s
+    { "email" => "Email", "phone" => "Aval de vecinos", "identity" => "Identidad" }[key.to_s] || key.to_s
   }
   # Para cada nivel, el requisito mínimo de verificación = el más bajo permitido.
   # (los arrays de REQUIREMENTS están ordenados email < phone < identity)
@@ -17,332 +17,320 @@
     req = @requirements[lvl]
     req ? verif_label.call(req[:verification].first) : "—"
   }
+  resumen = [
+    [ "flag",               "Todos parten de cero.",                                  "Nadie entra con dinero: entras con tu nombre." ],
+    [ "groups",             "Todos tienen el mismo techo: #{creditos(@common_ceiling)}.", "Nadie puede juntar más que otra persona." ],
+    [ "handshake",          "La comunidad te fía.",                                   "Puedes recibir antes de dar. Si participas, te fía más." ],
+    [ "volunteer_activism", "Cada intercambio deja un poquito para tu barrio.",       "Los vecinos votan en qué usarlo." ],
+    [ "how_to_vote",        "Las reglas se votan.",                                   "Cualquiera puede proponer un cambio." ]
+  ]
 %>
 
-<article class="space-y-10 max-w-4xl">
-  <header class="space-y-3">
-    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Reglas abiertas · auditable por cualquiera</p>
+<article class="space-y-8 max-w-4xl">
+  <header class="space-y-2">
     <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Economía de Confianza</h1>
-    <p class="text-body-lg text-on-surface-variant">
-      Aquí están las reglas exactas que rigen el crédito mutuo: cómo crece tu
-      cupo, qué hace falta para subir de nivel y a dónde va cada crédito. Lo que
-      ves en esta página es <strong class="text-on-surface">lo mismo que aplica el sistema</strong> —
-      se lee de las mismas fuentes que el código en vivo. Nada oculto, nada a dedo.
-    </p>
+    <p class="text-body-lg text-on-surface-variant">Así funcionan los créditos. Todas las reglas son públicas.</p>
   </header>
 
-  <%# ─────────────────────────  NIVELES Y CUPO  ───────────────────────── %>
-  <section class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-primary icon-filled">trending_up</span>
-      <h2 class="text-headline-md text-on-surface">Niveles y cupo de crédito</h2>
-    </div>
-    <p class="text-body-md text-on-surface-variant">
-      Tu cupo no es fijo: crece con tu trayectoria en la red. Cada nivel define
-      cuánto puedes deber (<strong>piso</strong>), cuánto puedes acumular antes de
-      que el excedente vaya al fondo comunitario (<strong>techo</strong>) y el
-      máximo por transacción (<strong>tope</strong>).
-    </p>
-
-    <div class="overflow-x-auto rounded-xl border border-outline-variant/30 ambient-shadow">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-surface-container-low text-caption text-on-surface-variant uppercase tracking-wider">
-            <th class="px-4 py-3 font-semibold">Nivel</th>
-            <th class="px-4 py-3 font-semibold text-right">Piso (deuda)</th>
-            <th class="px-4 py-3 font-semibold text-right">Techo</th>
-            <th class="px-4 py-3 font-semibold text-right">Tope por tx</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @levels.each do |lvl, limits| %>
-            <% mine = @current_level == lvl %>
-            <tr class="border-t border-outline-variant/20 <%= mine ? "bg-primary-container/15" : "" %>">
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center gap-2">
-                  <span class="w-7 h-7 rounded-full grid place-items-center text-label-md font-bold <%= mine ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface" %>">
-                    <%= lvl %>
-                  </span>
-                  <% if mine %>
-                    <span class="text-caption text-primary font-semibold">tu nivel</span>
-                  <% end %>
-                </span>
-              </td>
-              <td class="px-4 py-3 text-right font-mono text-error">−<%= number_with_delimiter(limits[:credit_floor]) %></td>
-              <td class="px-4 py-3 text-right font-mono text-primary">+<%= number_with_delimiter(limits[:credit_ceiling]) %></td>
-              <td class="px-4 py-3 text-right font-mono text-on-surface"><%= number_with_delimiter(limits[:tx_cap]) %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-    <p class="text-caption text-on-surface-variant">
-      Montos en créditos (C). El nivel <strong>puede bajar</strong> si tu reputación
-      o tu cumplimiento se deterioran — no es una escalera de un solo sentido.
-    </p>
+  <%# Resumen: lo que hay que saber, en cinco frases %>
+  <section aria-labelledby="en-pocas-palabras" class="space-y-3">
+    <h2 id="en-pocas-palabras" class="text-rotulo text-on-surface-variant">En pocas palabras</h2>
+    <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <% resumen.each do |icono, frase, detalle| %>
+        <li class="flex items-start gap-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 ambient-shadow p-4">
+          <span class="w-10 h-10 rounded-lg bg-primary-fixed text-primary grid place-items-center shrink-0">
+            <span class="material-symbols-outlined icon-filled" style="font-size:22px"><%= icono %></span>
+          </span>
+          <span>
+            <span class="block text-label-md text-on-surface"><%= frase %></span>
+            <span class="block text-body-md text-on-surface-variant"><%= detalle %></span>
+          </span>
+        </li>
+      <% end %>
+    </ul>
   </section>
 
-  <%# ─────────────────────  REQUISITOS PARA SUBIR  ───────────────────── %>
-  <section class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-earth-clay icon-filled">verified</span>
-      <h2 class="text-headline-md text-on-surface">Cómo se sube de nivel</h2>
-    </div>
-    <p class="text-body-md text-on-surface-variant">
-      La progresión combina actividad real, reputación, antigüedad y verificación.
-      Cuanto más alto el cupo, mayor el pasivo que la comunidad respalda ante un
-      impago — por eso los niveles altos exigen más trayectoria.
-    </p>
-
-    <div class="overflow-x-auto rounded-xl border border-outline-variant/30 ambient-shadow">
-      <table class="w-full text-left border-collapse text-body-md">
-        <thead>
-          <tr class="bg-surface-container-low text-caption text-on-surface-variant uppercase tracking-wider">
-            <th class="px-4 py-3 font-semibold">A nivel</th>
-            <th class="px-4 py-3 font-semibold text-right">Interacciones</th>
-            <th class="px-4 py-3 font-semibold text-right">Contrapartes</th>
-            <th class="px-4 py-3 font-semibold text-right">Trust mín.</th>
-            <th class="px-4 py-3 font-semibold text-right">Antigüedad</th>
-            <th class="px-4 py-3 font-semibold">Verificación</th>
-          </tr>
-        </thead>
-        <tbody class="font-mono">
-          <%# Nivel 1: arranque tras verificar email %>
-          <tr class="border-t border-outline-variant/20">
-            <td class="px-4 py-3"><span class="font-sans font-semibold">1</span></td>
-            <td class="px-4 py-3 text-right text-on-surface-variant" colspan="4">
-              <span class="font-sans">Automático al verificar tu email.</span>
-            </td>
-            <td class="px-4 py-3"><%= min_verif.call(1) %></td>
-          </tr>
-          <% (2..5).each do |lvl| %>
-            <% req = @requirements[lvl] %>
-            <tr class="border-t border-outline-variant/20">
-              <td class="px-4 py-3"><span class="font-sans font-semibold"><%= lvl %></span></td>
-              <td class="px-4 py-3 text-right"><%= req[:completed] %></td>
-              <td class="px-4 py-3 text-right"><%= req[:distinct] %></td>
-              <td class="px-4 py-3 text-right"><%= number_with_precision(req[:trust], precision: 1) %> ★</td>
-              <td class="px-4 py-3 text-right"><%= req[:age_days] %> días</td>
-              <td class="px-4 py-3 font-sans"><%= min_verif.call(lvl) %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-    <ul class="text-caption text-on-surface-variant space-y-1 list-disc pl-5">
-      <li><strong>Interacciones</strong>: cantidad llevadas a "completada" (no canceladas ni en disputa).</li>
-      <li><strong>Contrapartes</strong>: usuarios <em>distintos</em> con los que completaste — no sirve repetir con la misma persona.</li>
-      <li><strong>Trust</strong>: promedio ponderado de las evaluaciones que recibes (1 a 5 estrellas).</li>
-      <li><strong>Antigüedad</strong>: días desde que creaste tu cuenta.</li>
-    </ul>
+  <div class="flex flex-col sm:flex-row gap-3">
     <% if @current_level %>
-      <%= link_to wallet_path, class: "inline-flex items-center gap-1.5 text-label-md text-primary hover:text-organic-green-deep transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">account_balance_wallet</span>
-        Ver tu progreso al próximo nivel en tu billetera
-        <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
+      <%= link_to wallet_path, class: "inline-flex items-center justify-center gap-2 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors" do %>
+        <span class="material-symbols-outlined" style="font-size:20px">account_balance_wallet</span>
+        Ver mi billetera
+      <% end %>
+    <% else %>
+      <%= link_to signup_path, class: "inline-flex items-center justify-center gap-2 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors" do %>
+        Unirse a la red
+        <span class="material-symbols-outlined" style="font-size:20px">arrow_forward</span>
       <% end %>
     <% end %>
-  </section>
+    <%= link_to how_it_works_path, class: "inline-flex items-center justify-center gap-2 px-6 min-h-12 rounded-full border-2 border-primary text-primary text-label-md hover:bg-primary-fixed/60 transition-colors" do %>
+      Cómo funciona
+    <% end %>
+  </div>
 
-  <%# ─────────────────────  MULTIPLICADORES  ───────────────────── %>
-  <% if @categories.any? %>
-    <section class="space-y-4">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary icon-filled">category</span>
-        <h2 class="text-headline-md text-on-surface">Multiplicadores por categoría</h2>
-      </div>
+  <%# Capa de transparencia: los números exactos, leídos de las fuentes vivas %>
+  <details class="group rounded-xl bg-surface-container-lowest border border-outline-variant/60 ambient-shadow" id="reglas">
+    <summary class="flex items-center justify-between gap-3 px-5 min-h-14 cursor-pointer">
+      <span class="flex items-center gap-2 text-label-md text-on-surface">
+        <span class="material-symbols-outlined text-primary" style="font-size:22px">fact_check</span>
+        Ver las reglas exactas
+      </span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180" style="font-size:22px">expand_more</span>
+    </summary>
+
+    <div class="px-5 pb-6 space-y-10 border-t border-outline-variant/60 pt-6">
       <p class="text-body-md text-on-surface-variant">
-        El tope por transacción se ajusta según el tipo de publicación. Una venta
-        o un delivery permiten montos mayores que una noticia o un evento. El
-        máximo real de una transacción es <span class="font-mono text-on-surface">tope × multiplicador</span>.
+        Estos números se leen de las mismas fuentes que usa el sistema.
+        Lo que ves aquí es lo que se aplica.
       </p>
-      <div class="flex flex-wrap gap-2">
-        <% @categories.each do |cat| %>
-          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container text-label-md text-on-surface">
-            <%= cat.name %>
-            <span class="font-mono text-primary">×<%= number_with_precision(cat.max_credit_multiplier, precision: 1) %></span>
-          </span>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
 
-  <%# ─────────────────────  A DÓNDE VA CADA CRÉDITO  ───────────────────── %>
-  <section class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-error icon-filled">local_fire_department</span>
-      <h2 class="text-headline-md text-on-surface">A dónde va cada crédito</h2>
-    </div>
-    <p class="text-caption text-on-surface-variant -mt-2">
-      Estos son los valores <strong>globales</strong> de la red. Cada comuna puede
-      votar sus propias reglas locales; míralas en la página de tu territorio.
-    </p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="rounded-xl bg-surface-container-low p-5 border border-outline-variant/30 space-y-2">
-        <header class="flex items-center gap-2 text-error">
-          <span class="material-symbols-outlined icon-filled" style="font-size:20px">local_fire_department</span>
-          <h3 class="text-label-md font-semibold text-on-surface">Quema — <%= number_with_precision(@burn_percent, precision: 0) %>%</h3>
-        </header>
+      <%# ─────────────────────────  NIVELES  ───────────────────────── %>
+      <section class="space-y-3">
+        <h2 class="text-headline-md text-on-surface">Niveles y cupo de crédito</h2>
         <p class="text-body-md text-on-surface-variant">
-          De cada transacción, un <strong><%= number_with_precision(@burn_percent, precision: 0) %>%</strong>
-          (mínimo <%= @min_burn_amount %> C) se retira de circulación. Esto desincentiva
-          acumular, mantiene los créditos en movimiento y le da estabilidad de
-          largo plazo al sistema.
+          Tu nivel decide cuánto te fía la comunidad y lo máximo por intercambio.
         </p>
-      </div>
-      <div class="rounded-xl bg-primary/5 p-5 border border-primary/20 space-y-2">
-        <header class="flex items-center gap-2 text-primary">
-          <span class="material-symbols-outlined icon-filled" style="font-size:20px">volunteer_activism</span>
-          <h3 class="text-label-md font-semibold text-on-surface">Fondo territorial — <%= number_with_precision(@territory_percent, precision: 0) %>%</h3>
-        </header>
         <p class="text-body-md text-on-surface-variant">
-          Otro <strong><%= number_with_precision(@territory_percent, precision: 0) %>%</strong>
-          va al fondo de tu comuna. La comunidad decide cómo se usa mediante
-          <%= link_to "propuestas votadas", territories_path, class: "text-primary hover:underline" %> —
-          ya funciona, no es promesa. El excedente de quien supera su techo
-          también se redirige aquí — anti-acumulación, no castigo.
+          Lo que puedes juntar es <strong class="text-on-surface">el mismo para todas las personas:
+          <%= creditos(@common_ceiling) %></strong>. Lo que pase de ahí va al fondo de tu barrio.
+          Solo cambia si la red lo vota.
         </p>
-      </div>
-    </div>
-  </section>
 
-  <%# ─────────────────────  DECAIMIENTO  ───────────────────── %>
-  <section class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-on-surface-variant">hourglass_bottom</span>
-      <h2 class="text-headline-md text-on-surface">Cupo inactivo en deuda</h2>
-    </div>
-    <p class="text-body-md text-on-surface-variant">
-      Si tienes balance negativo y no recibes evaluaciones positivas
-      (≥ <%= @positive_review_threshold %> ★) durante
-      <strong><%= @decay_check_days %> días</strong>, tu piso de deuda se reduce
-      un <strong><%= number_with_precision(@decay_rate_per_run * 100, precision: 0) %>%</strong>
-      por revisión diaria. Importante: <strong class="text-on-surface">no se te perdona la deuda</strong> —
-      el piso solo baja, nunca por debajo de lo que ya debes. Es para que el
-      crédito sin respaldo de reputación no quede abierto indefinidamente.
-    </p>
-  </section>
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/60">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low text-caption text-on-surface-variant">
+                <th class="px-4 py-3 font-semibold">Nivel</th>
+                <th class="px-4 py-3 font-semibold text-right">Te fían hasta</th>
+                <th class="px-4 py-3 font-semibold text-right">Máximo por intercambio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @levels.each do |lvl, limits| %>
+                <% mine = @current_level == lvl %>
+                <tr class="border-t border-outline-variant/40 <%= mine ? "bg-primary-fixed/60" : "" %>">
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-2">
+                      <span class="w-7 h-7 rounded-md grid place-items-center cifra <%= mine ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface" %>">
+                        <%= lvl %>
+                      </span>
+                      <% if mine %>
+                        <span class="text-caption text-primary font-semibold">tu nivel</span>
+                      <% end %>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right tabular-nums text-on-surface"><%= creditos(limits[:credit_floor]) %></td>
+                  <td class="px-4 py-3 text-right tabular-nums text-on-surface"><%= creditos(limits[:tx_cap]) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-caption text-on-surface-variant">
+          El nivel también puede bajar si tus reseñas empeoran o dejas intercambios sin cerrar.
+        </p>
+      </section>
 
-  <%# ─────────────────────  GOBERNANZA  ───────────────────── %>
-  <section class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="material-symbols-outlined text-earth-clay icon-filled">how_to_vote</span>
-      <h2 class="text-headline-md text-on-surface">Estas reglas las cambia la comunidad</h2>
-    </div>
-    <p class="text-body-md text-on-surface-variant">
-      Nada de esto está enterrado en el código ni se decide a dedo: las reglas
-      viven como parámetros abiertos y <strong class="text-on-surface">se cambian
-      votando</strong>. Desde cualquier <%= link_to "territorio", territories_path, class: "text-primary hover:underline" %>
-      puedes crear una propuesta de tres tipos:
-    </p>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/30 space-y-1">
-        <p class="text-label-md font-semibold text-on-surface flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-primary" style="font-size:18px">payments</span>
-          Créditos del fondo
+      <%# ─────────────────────  CÓMO SE SUBE  ───────────────────── %>
+      <section class="space-y-3">
+        <h2 class="text-headline-md text-on-surface">Cómo se sube de nivel</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Se pide más en los niveles altos, porque ahí la comunidad te fía más.
         </p>
-        <p class="text-caption text-on-surface-variant">
-          Destinar créditos del fondo territorial a un vecino o iniciativa.
-          Abierta a cualquier miembro.
-        </p>
-      </div>
-      <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/30 space-y-1">
-        <p class="text-label-md font-semibold text-on-surface flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-primary" style="font-size:18px">category</span>
-          Nueva categoría
-        </p>
-        <p class="text-caption text-on-surface-variant">
-          Proponer una categoría nueva para publicar. Si la red la aprueba,
-          se crea — la votación la trae al mundo.
-        </p>
-      </div>
-      <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/30 space-y-1">
-        <p class="text-label-md font-semibold text-on-surface flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-primary" style="font-size:18px">balance</span>
-          Cambio de regla
-        </p>
-        <p class="text-caption text-on-surface-variant">
-          Modificar un parámetro de esta página dentro de su rango seguro.
-          Al ejecutarse, aplica de verdad para toda la red.
-        </p>
-      </div>
-    </div>
 
-    <h3 class="text-label-md text-on-surface uppercase tracking-wider pt-2">Qué se puede votar hoy (valores en vivo)</h3>
-    <div class="overflow-x-auto rounded-xl border border-outline-variant/30 ambient-shadow">
-      <table class="w-full text-left border-collapse text-body-md">
-        <thead>
-          <tr class="bg-surface-container-low text-caption text-on-surface-variant uppercase tracking-wider">
-            <th class="px-4 py-3 font-semibold">Regla</th>
-            <th class="px-4 py-3 font-semibold text-right">Valor actual</th>
-            <th class="px-4 py-3 font-semibold text-right">Rango seguro</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% Proposal::GOVERNABLE_PARAMETERS.each do |key, rule| %>
-            <tr class="border-t border-outline-variant/20">
-              <td class="px-4 py-3"><%= rule[:label] %></td>
-              <td class="px-4 py-3 text-right font-mono text-primary"><%= EconomicParameter.get(key) || "—" %></td>
-              <td class="px-4 py-3 text-right font-mono text-on-surface-variant"><%= rule[:min] %>–<%= rule[:max] %></td>
-            </tr>
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/60">
+          <table class="w-full text-left border-collapse text-body-md">
+            <thead>
+              <tr class="bg-surface-container-low text-caption text-on-surface-variant">
+                <th class="px-4 py-3 font-semibold">Nivel</th>
+                <th class="px-4 py-3 font-semibold text-right">Intercambios cerrados</th>
+                <th class="px-4 py-3 font-semibold text-right">Con personas distintas</th>
+                <th class="px-4 py-3 font-semibold text-right">Reseñas (promedio)</th>
+                <th class="px-4 py-3 font-semibold text-right">Días en la red</th>
+                <th class="px-4 py-3 font-semibold">Verificación</th>
+              </tr>
+            </thead>
+            <tbody class="tabular-nums">
+              <tr class="border-t border-outline-variant/40">
+                <td class="px-4 py-3 font-semibold">1</td>
+                <td class="px-4 py-3 text-on-surface-variant" colspan="4">Al verificar tu email.</td>
+                <td class="px-4 py-3"><%= min_verif.call(1) %></td>
+              </tr>
+              <% (2..5).each do |lvl| %>
+                <% req = @requirements[lvl] %>
+                <tr class="border-t border-outline-variant/40">
+                  <td class="px-4 py-3 font-semibold"><%= lvl %></td>
+                  <td class="px-4 py-3 text-right"><%= req[:completed] %></td>
+                  <td class="px-4 py-3 text-right"><%= req[:distinct] %></td>
+                  <td class="px-4 py-3 text-right whitespace-nowrap"><%= number_with_precision(req[:trust], precision: 1) %> ★</td>
+                  <td class="px-4 py-3 text-right whitespace-nowrap"><%= req[:age_days] %> días</td>
+                  <td class="px-4 py-3"><%= min_verif.call(lvl) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-caption text-on-surface-variant">
+          Solo cuentan los intercambios cerrados por las dos partes. Repetir con la misma persona no suma personas distintas.
+        </p>
+        <% if @current_level %>
+          <%= link_to wallet_path, class: "inline-flex items-center gap-1.5 min-h-11 text-label-md text-primary hover:text-primary-strong transition-colors" do %>
+            Mira qué te falta en tu billetera
+            <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
           <% end %>
-        </tbody>
-      </table>
-    </div>
+        <% end %>
+      </section>
 
-    <h3 class="text-label-md text-on-surface uppercase tracking-wider pt-2">Escalones de participación</h3>
-    <p class="text-body-md text-on-surface-variant">
-      El poder de decidir crece con la participación, en los dos sentidos:
-    </p>
-    <ul class="space-y-2 text-body-md text-on-surface-variant list-none">
-      <li class="flex items-start gap-3">
-        <span class="material-symbols-outlined icon-filled text-primary mt-0.5" style="font-size:20px">person</span>
-        <span><strong class="text-on-surface">Para proponer</strong> cambios de reglas o
-        categorías hace falta nivel <%= EconomicParameter.get_int("proposal_rules_min_level", 2) %>:
-        la confianza para cambiar el juego se gana participando. Votar puede
-        hacerlo cualquier miembro.</span>
-      </li>
-      <li class="flex items-start gap-3">
-        <span class="material-symbols-outlined icon-filled text-primary mt-0.5" style="font-size:20px">groups</span>
-        <span><strong class="text-on-surface">El quórum escala con la red.</strong> Cambiar una
-        regla exige al menos el <%= EconomicParameter.get_int("rules_quorum_percent", 10) %>%
-        de los miembros activos (nunca menos de
-        <%= EconomicParameter.get_int("proposal_quorum", 10) %> votos). Tres personas
-        pueden decidir cuando somos veinte — no cuando seamos diez mil.</span>
-      </li>
-      <li class="flex items-start gap-3">
-        <span class="material-symbols-outlined icon-filled text-primary mt-0.5" style="font-size:20px">location_city</span>
-        <span><strong class="text-on-surface">Los territorios se ganan su voz.</strong> A medida
-        que una comuna suma miembros activos, desbloquea la capacidad de proponer
-        reglas<% min = EconomicParameter.get_int("territory_min_members_for_rules", 0) %><%= min.positive? ? " (hoy: mínimo #{min} miembros activos)" : " (hoy sin mínimo: la red está naciendo)" %>.
-        El plan es que con la escala lleguen las <strong class="text-on-surface">reglas locales</strong>:
-        cada territorio con sus propias leyes votadas, que se vuelven globales
-        sólo con mínimos de participación de toda la red.</span>
-      </li>
-    </ul>
-    <p class="text-caption text-on-surface-variant">
-      Hasta los umbrales de esta sección son gobernables: la comunidad puede
-      votar cómo se vota. Esta página existe para que cualquiera audite las
-      reglas antes de confiar en ellas.
-    </p>
+      <%# ─────────────────────  CATEGORÍAS  ───────────────────── %>
+      <% if @categories.any? %>
+        <section class="space-y-3">
+          <h2 class="text-headline-md text-on-surface">Cada categoría tiene su máximo</h2>
+          <p class="text-body-md text-on-surface-variant">
+            Una venta permite más créditos que una noticia. El número multiplica lo máximo por intercambio de tu nivel.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <% @categories.each do |cat| %>
+              <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-surface-container text-label-md text-on-surface">
+                <%= cat.name %>
+                <span class="tabular-nums text-primary">×<%= number_with_precision(cat.max_credit_multiplier, precision: 1) %></span>
+              </span>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
 
-    <div class="flex flex-wrap gap-3 pt-2">
-      <%= link_to how_it_works_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">help</span>
-        Cómo funciona
-      <% end %>
-      <%= link_to manifesto_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">history_edu</span>
-        Manifiesto
-      <% end %>
-      <%= link_to announcements_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">campaign</span>
-        Novedades
-      <% end %>
-      <%= link_to ledger_audit_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">fact_check</span>
-        Auditoría del ledger
-      <% end %>
+      <%# ─────────────────────  A DÓNDE VA CADA CRÉDITO  ───────────────────── %>
+      <section class="space-y-3">
+        <h2 class="text-headline-md text-on-surface">A dónde va cada intercambio</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60 space-y-1">
+            <p class="text-label-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined icon-filled text-primary" style="font-size:20px">volunteer_activism</span>
+              <%= number_with_precision(@territory_percent, precision: 0) %>% para tu barrio
+            </p>
+            <p class="text-body-md text-on-surface-variant">
+              Va al fondo de tu comuna. Los vecinos votan en qué usarlo con
+              <%= link_to "propuestas", territories_path, class: "text-primary hover:underline" %>.
+            </p>
+          </div>
+          <div class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60 space-y-1">
+            <p class="text-label-md text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-on-surface-variant" style="font-size:20px">delete_sweep</span>
+              <%= number_with_precision(@burn_percent, precision: 0) %>% se borra
+            </p>
+            <p class="text-body-md text-on-surface-variant">
+              Una parte pequeña se borra, para que los créditos no pierdan valor
+              (mínimo <%= creditos(@min_burn_amount) %>).
+            </p>
+          </div>
+        </div>
+        <p class="text-caption text-on-surface-variant">
+          Son los valores de toda la red. Cada comuna puede votar los suyos: míralos en la página de tu territorio.
+        </p>
+      </section>
+
+      <%# ─────────────────────  DEUDA SIN MOVIMIENTO  ───────────────────── %>
+      <section class="space-y-3">
+        <h2 class="text-headline-md text-on-surface">Si debes y no participas</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Si tu saldo es negativo y pasas <strong class="text-on-surface"><%= @decay_check_days %> días</strong>
+          sin buenas reseñas (<%= @positive_review_threshold %> ★ o más), la comunidad te fía un poco menos:
+          baja <%= number_with_precision(@decay_rate_per_run * 100, precision: 0) %>% en cada revisión diaria.
+          Lo que ya debes no cambia: solo te fía menos para lo nuevo.
+        </p>
+      </section>
+
+      <%# ─────────────────────  GOBERNANZA  ───────────────────── %>
+      <section class="space-y-4">
+        <h2 class="text-headline-md text-on-surface">Cómo se cambian estas reglas</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Desde cualquier <%= link_to "territorio", territories_path, class: "text-primary hover:underline" %>
+          se puede proponer:
+        </p>
+        <ul class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <li class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60">
+            <p class="text-label-md text-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px">payments</span>
+              Usar el fondo
+            </p>
+            <p class="text-caption text-on-surface-variant mt-1">Dar créditos del fondo a un vecino o a una iniciativa.</p>
+          </li>
+          <li class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60">
+            <p class="text-label-md text-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px">category</span>
+              Nueva categoría
+            </p>
+            <p class="text-caption text-on-surface-variant mt-1">Si la red la aprueba, se crea.</p>
+          </li>
+          <li class="rounded-xl bg-surface-container-low p-4 border border-outline-variant/60">
+            <p class="text-label-md text-on-surface flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-primary" style="font-size:18px">balance</span>
+              Cambiar una regla
+            </p>
+            <p class="text-caption text-on-surface-variant mt-1">Dentro de su rango seguro. Al aprobarse, aplica para todos.</p>
+          </li>
+        </ul>
+
+        <h3 class="text-label-md text-on-surface">Reglas que se pueden votar (valores de hoy)</h3>
+        <div class="overflow-x-auto rounded-xl border border-outline-variant/60">
+          <table class="w-full text-left border-collapse text-body-md">
+            <thead>
+              <tr class="bg-surface-container-low text-caption text-on-surface-variant">
+                <th class="px-4 py-3 font-semibold">Regla</th>
+                <th class="px-4 py-3 font-semibold text-right">Hoy</th>
+                <th class="px-4 py-3 font-semibold text-right">Rango seguro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% Proposal::GOVERNABLE_PARAMETERS.each do |key, rule| %>
+                <tr class="border-t border-outline-variant/40">
+                  <td class="px-4 py-3"><%= rule[:label] %></td>
+                  <td class="px-4 py-3 text-right tabular-nums text-primary"><%= EconomicParameter.get(key) || "—" %></td>
+                  <td class="px-4 py-3 text-right tabular-nums text-on-surface-variant whitespace-nowrap"><%= rule[:min] %>–<%= rule[:max] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-label-md text-on-surface">Quién decide</h3>
+        <ul class="space-y-2 text-body-md text-on-surface-variant">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5 shrink-0" style="font-size:20px">person</span>
+            <span>Para proponer cambios de reglas o categorías hace falta nivel <%= EconomicParameter.get_int("proposal_rules_min_level", 2) %>. Votar puede cualquier miembro.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5 shrink-0" style="font-size:20px">groups</span>
+            <span>
+              Para cambiar una regla tiene que votar al menos el <%= EconomicParameter.get_int("rules_quorum_percent", 10) %>% de los miembros activos
+              (nunca menos de <%= EconomicParameter.get_int("proposal_quorum", 10) %> votos). Mientras más gente hay, más votos se necesitan.
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5 shrink-0" style="font-size:20px">location_city</span>
+            <span>
+              Un territorio puede proponer reglas propias cuando tiene suficientes miembros activos<% min = EconomicParameter.get_int("territory_min_members_for_rules", 0) %><%= min.positive? ? " (hoy: #{min})" : " (hoy no hay mínimo: la red está naciendo)" %>.
+            </span>
+          </li>
+        </ul>
+        <p class="text-caption text-on-surface-variant">
+          Hasta estos umbrales se pueden votar.
+        </p>
+      </section>
     </div>
-  </section>
+  </details>
+
+  <nav aria-label="Más sobre Confianza" class="flex flex-wrap gap-2">
+    <%= link_to manifesto_path, class: "inline-flex items-center gap-1.5 px-4 min-h-11 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
+      <span class="material-symbols-outlined" style="font-size:18px">history_edu</span>
+      Manifiesto
+    <% end %>
+    <%= link_to announcements_path, class: "inline-flex items-center gap-1.5 px-4 min-h-11 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
+      <span class="material-symbols-outlined" style="font-size:18px">campaign</span>
+      Novedades
+    <% end %>
+    <%= link_to ledger_audit_path, class: "inline-flex items-center gap-1.5 px-4 min-h-11 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
+      <span class="material-symbols-outlined" style="font-size:18px">fact_check</span>
+      Revisar todos los movimientos
+    <% end %>
+  </nav>
 </article>

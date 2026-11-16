@@ -1,0 +1,17 @@
+<%# Logo horizontal (marca + palabra) enlazado a la portada.
+    Locals:
+      tono: :tinta (fondo claro, default) | :blanco (sobre la franja azul)
+      tamano: :md (default) | :sm | :lg %>
+<%
+  tono   = local_assigns.fetch(:tono, :tinta)
+  tamano = local_assigns.fetch(:tamano, :md)
+  marca_clase, texto_clase = {
+    sm: [ "w-7 h-7", "text-[20px]" ],
+    md: [ "w-8 h-8", "text-[23px]" ],
+    lg: [ "w-10 h-10", "text-[27px]" ]
+  }.fetch(tamano)
+%>
+<%= link_to root_path, class: "inline-flex items-center gap-2.5 min-h-11 rounded-md #{local_assigns[:clase]}" do %>
+  <%= render "shared/marca", clase: marca_clase, placa: tono != :blanco %>
+  <span class="font-display font-extrabold leading-none tracking-[-0.01em] <%= texto_clase %> <%= tono == :blanco ? "text-on-primary" : "text-ink" %>">Confianza</span>
+<% end %>

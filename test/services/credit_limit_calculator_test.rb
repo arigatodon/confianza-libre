@@ -9,9 +9,9 @@ class CreditLimitCalculatorTest < ActiveSupport::TestCase
   test "nivel 1 por default — usuario nuevo sin actividad" do
     result = CreditLimitCalculator.call(@user)
     assert_equal 1, result[:level]
-    assert_equal 100,   result[:credit_floor]
-    assert_equal 1_000, result[:credit_ceiling]
-    assert_equal 50,    result[:tx_cap]
+    assert_equal 100, result[:credit_floor]
+    assert_equal 50,  result[:tx_cap]
+    refute result.key?(:credit_ceiling), "el techo no depende del nivel"
   end
 
   test "sube a nivel 2 con 3 completadas, 2 distinct, trust 3.5, 7 días, email verified" do
@@ -24,9 +24,28 @@ class CreditLimitCalculatorTest < ActiveSupport::TestCase
     # 3 completadas con 3 senders distintos (≥ 2 requerido).
     result = CreditLimitCalculator.call(@user.reload)
     assert_equal 2, result[:level]
-    assert_equal 1_000,  result[:credit_floor]
-    assert_equal 10_000, result[:credit_ceiling]
-    assert_equal 250,    result[:tx_cap]
+    assert_equal 250, result[:credit_floor]
+    assert_equal 100, result[:tx_cap]
+  end
+
+  test "techo común: el mismo para todos los niveles y gobernable por parámetro" do
+    alto = create_user(username: "alto")
+    alto.update_columns(level: 5, credit_floor: 2_000, tx_cap: 500)
+    assert_equal 5_000, @user.credit_ceiling
+    assert_equal @user.credit_ceiling, alto.credit_ceiling
+
+    set_param("credit_ceiling", 8_000)
+    assert_equal 8_000, @user.reload.credit_ceiling
+    assert_equal 8_000, alto.reload.credit_ceiling
+  end
+
+  test "la distancia entre el nivel 1 y el 5 es acotada (≤ 20×)" do
+    l1 = CreditLimitCalculator::LEVELS[1]
+    l5 = CreditLimitCalculator::LEVELS[5]
+    assert l5[:credit_floor] <= 20 * l1[:credit_floor]
+    assert l5[:tx_cap]       <= 20 * l1[:tx_cap]
+    assert l5[:credit_floor] < CreditLimitCalculator.common_ceiling,
+           "nadie debería poder deber más de lo que cualquiera puede acumular"
   end
 
   test "no sube a nivel 2 si falta antigüedad" do

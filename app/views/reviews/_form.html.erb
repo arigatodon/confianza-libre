@@ -8,38 +8,28 @@
 
   <%= f.hidden_field :interaction_id, value: interaction.id %>
 
-  <p class="text-caption text-on-surface-variant flex items-center gap-2">
-    <span class="material-symbols-outlined" style="font-size:14px">person</span>
-    Evaluando a
-    <%= link_to "@#{reviewed_user.username || reviewed_user.email_address}",
-                profile_path(reviewed_user.username || reviewed_user.id),
-                class: "text-primary font-semibold hover:underline" %>
-    <% if interaction.agreed_credits.to_i > 0 %>
-      · <span class="text-on-surface-variant">acuerdo: <%= interaction.agreed_credits %> C</span>
-    <% end %>
-  </p>
-
-  <div>
-    <%= f.label :score, "Puntaje", class: "block text-label-md text-on-surface mb-1" %>
-    <div class="flex gap-3 flex-wrap">
+  <fieldset>
+    <legend class="block text-label-md text-on-surface mb-2">¿Cuántas estrellas le das a @<%= reviewed_user.username || reviewed_user.email_address %>?</legend>
+    <div class="flex gap-2 flex-wrap">
       <% (1..5).each do |n| %>
-        <label class="flex items-center gap-1 cursor-pointer text-body-md text-on-surface px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors">
+        <label class="flex items-center gap-1.5 cursor-pointer text-body-md text-on-surface px-3 min-h-11 rounded-full border border-outline-variant has-[:checked]:border-2 has-[:checked]:border-secondary has-[:checked]:bg-secondary-fixed/60 transition-colors">
           <%= f.radio_button :score, n, checked: review.score == n %>
-          <span class="text-earth-clay"><%= "★" * n %></span>
+          <span class="text-secondary" aria-hidden="true"><%= "★" * n %></span>
+          <span class="sr-only"><%= n %> <%= n == 1 ? "estrella" : "estrellas" %></span>
         </label>
       <% end %>
     </div>
-  </div>
+  </fieldset>
 
   <% if post.category.max_credit_multiplier.to_f > 0.2 %>
     <div>
-      <%= f.label :comment, "Comentario", class: "block text-label-md text-on-surface mb-1" %>
-      <%= f.text_area :comment, rows: 3, placeholder: "Cuenta cómo fue la interacción…" %>
+      <%= f.label :comment, "Cuéntalo en una frase (opcional)", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.text_area :comment, rows: 2, placeholder: "Ej: Llegó a la hora y quedó perfecto." %>
     </div>
   <% end %>
 
   <div class="flex justify-end">
-    <%= f.submit "Enviar evaluación",
-          class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep cursor-pointer" %>
+    <%= f.submit "Enviar reseña",
+          class: "inline-flex items-center gap-1.5 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong cursor-pointer" %>
   </div>
 <% end %>

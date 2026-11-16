@@ -50,9 +50,9 @@
 <article class="space-y-8">
   <header class="space-y-4">
     <div class="flex items-center gap-2">
-      <span class="inline-flex items-center gap-1.5 text-caption font-semibold <%= post_kind_text_color(@post.kind) %> bg-surface-container-low px-3 py-1 rounded-full">
-        <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= visual[:icon] %></span>
-        <%= @post.kind_label_es %>
+      <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md <%= post_kind_badge(@post.kind) %>">
+        <span class="material-symbols-outlined icon-filled" style="font-size:16px"><%= visual[:icon] %></span>
+        <span class="text-rotulo"><%= @post.kind_label_es %></span>
       </span>
       <span class="text-caption text-on-surface-variant">·</span>
       <span class="text-caption text-on-surface-variant"><%= @post.category.name %></span>
@@ -64,11 +64,11 @@
 
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <%= link_to profile_path(@post.user.username || @post.user.id),
-            class: "flex items-center gap-3 group" do %>
+            class: "flex items-center gap-3 min-h-11 group" do %>
         <% if @post.user.avatar.attached? && @post.user.avatar.image? %>
           <%= image_tag @post.user.avatar, class: "w-10 h-10 rounded-full object-cover border border-outline-variant" %>
         <% else %>
-          <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-sm font-semibold">
+          <span class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-sm font-semibold">
             <%= (@post.user.username || @post.user.email_address).first.upcase %>
           </span>
         <% end %>
@@ -83,15 +83,15 @@
       <div class="flex items-center gap-2 flex-wrap">
         <% if @post.suggested_credits.to_i > 0 %>
           <span class="text-caption font-semibold bg-primary-container/30 text-on-surface px-3 py-1.5 rounded-full flex items-center gap-1">
-            <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:14px">payments</span>
-            <%= @post.suggested_credits %> C sugeridos
+            <span class="material-symbols-outlined icon-filled text-primary-strong" style="font-size:14px">payments</span>
+            Sugiere <%= creditos(@post.suggested_credits) %>
           </span>
         <% end %>
         <% if @post.latitude && @post.longitude %>
-          <span class="text-caption text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full flex items-center gap-1">
-            <span class="material-symbols-outlined icon-filled" style="font-size:14px">location_on</span>
-            <%= number_with_precision(@post.latitude, precision: 4) %>, <%= number_with_precision(@post.longitude, precision: 4) %>
-          </span>
+          <%= link_to explore_path, class: "text-caption text-on-surface-variant bg-surface-container px-3 min-h-11 rounded-full inline-flex items-center gap-1 hover:bg-surface-container-high" do %>
+            <span class="material-symbols-outlined icon-filled" style="font-size:16px">location_on</span>
+            Está en el mapa
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -158,30 +158,36 @@
       <% end %>
     </div>
   <% elsif authenticated? %>
-    <div class="flex justify-end -mt-2">
+    <%= form_with url: post_interactions_path(@post), method: :post, local: true,
+          class: "rounded-xl border border-outline-variant/60 border-l-4 border-l-primary bg-surface-container-lowest p-5 ambient-shadow space-y-3" do |f| %>
+      <div>
+        <h2 class="text-headline-sm text-on-surface"><%= @post.pedido? ? "¿Puedes ayudar?" : "¿Te interesa?" %></h2>
+        <p class="text-body-md text-on-surface-variant">Pídelo aquí. Después conversan y se ponen de acuerdo.</p>
+      </div>
+      <div class="flex flex-wrap items-end gap-3">
+        <% if @post.category&.allows_credit %>
+          <div class="flex flex-col">
+            <%= label_tag "interaction_agreed_credits", "¿Cuántos créditos ofreces?",
+                  class: "text-label-md text-on-surface mb-1" %>
+            <%= number_field_tag "interaction[agreed_credits]",
+                  @post.suggested_credits || 0,
+                  id: "interaction_agreed_credits", min: 0, step: 1, class: "w-32", inputmode: "numeric" %>
+            <% if @post.suggested_credits.to_i > 0 %>
+              <p class="text-caption text-on-surface-variant mt-1">
+                Sugiere <%= creditos(@post.suggested_credits) %>. Puedes ofrecer otro número.
+              </p>
+            <% end %>
+          </div>
+        <% else %>
+          <%= hidden_field_tag "interaction[agreed_credits]", 0 %>
+        <% end %>
+        <%= f.submit "Pedir intercambio",
+              class: "inline-flex items-center gap-2 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors cursor-pointer" %>
+      </div>
+    <% end %>
+    <div class="flex justify-end -mt-4">
       <%= report_link(@post) %>
     </div>
-    <%= form_with url: post_interactions_path(@post), method: :post, local: true,
-          class: "rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow flex flex-wrap items-end gap-3" do |f| %>
-      <% if @post.category&.allows_credit %>
-        <div class="flex flex-col">
-          <%= label_tag "interaction[agreed_credits]", "Créditos a ofrecer (C)",
-                class: "text-label-md text-on-surface mb-1" %>
-          <%= number_field_tag "interaction[agreed_credits]",
-                @post.suggested_credits || 0,
-                min: 0, step: 1, class: "w-32" %>
-          <% if @post.suggested_credits.to_i > 0 %>
-            <p class="text-caption text-on-surface-variant mt-1">
-              Sugerido: <%= @post.suggested_credits %> C — puedes contraproponer.
-            </p>
-          <% end %>
-        </div>
-      <% else %>
-        <%= hidden_field_tag "interaction[agreed_credits]", 0 %>
-      <% end %>
-      <%= f.submit "Iniciar interacción",
-            class: "inline-flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
-    <% end %>
   <% end %>
 
   <section class="space-y-4 pt-6 border-t border-outline-variant/40">
@@ -200,8 +206,8 @@
   <% if @pending_review_interactions.any? %>
     <section class="space-y-4 pt-6 border-t border-outline-variant/40">
       <h2 class="text-headline-md text-on-surface flex items-center gap-2">
-        <span class="material-symbols-outlined icon-filled text-earth-clay">star</span>
-        Evalúa <%= @pending_review_interactions.size == 1 ? "esta interacción" : "tus interacciones pendientes" %>
+        <span class="material-symbols-outlined icon-filled text-secondary">star</span>
+        <%= @pending_review_interactions.size == 1 ? "Deja tu reseña" : "Te faltan reseñas por dejar" %>
       </h2>
       <% @pending_review_interactions.each do |interaction| %>
         <% reviewed_user = interaction.other_party(Current.session.user) %>
@@ -222,7 +228,7 @@
 
   <% if @review_pairs.any? %>
     <section class="space-y-3 pt-6 border-t border-outline-variant/40">
-      <h2 class="text-headline-md text-on-surface">Evaluaciones</h2>
+      <h2 class="text-headline-md text-on-surface">Reseñas</h2>
       <% @review_pairs.each do |pair| %>
         <%= render "reviews/review_pair", pair: pair %>
       <% end %>

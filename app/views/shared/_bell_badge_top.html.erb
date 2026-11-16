@@ -1,6 +1,6 @@
 <%# locals: count
      Badge para el top bar (mobile): punto absoluto sobre el ícono de la campana. %>
 <span id="bell-badge-top"
-      class="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-primary text-on-primary text-[10px] font-bold <%= "hidden" if count.to_i.zero? %>">
+      class="absolute top-1 right-1 <%= count.to_i.zero? ? "hidden" : "inline-flex" %> items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-signal text-ink ring-2 ring-primary text-[11px] font-bold">
   <%= count.to_i > 9 ? "9+" : count.to_i %>
 </span>

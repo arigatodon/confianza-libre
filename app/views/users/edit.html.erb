@@ -208,7 +208,7 @@
 
       <div class="pt-2 flex items-center justify-between gap-3 flex-wrap">
         <%= f.submit "Guardar cambios",
-              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors cursor-pointer" %>
         <%= link_to "Cancelar", profile_path(@user.username || @user.id),
               class: "text-label-md text-on-surface-variant hover:text-on-surface" %>
       </div>
@@ -299,7 +299,7 @@
           <input type="file" name="identity_verification[documents][]" accept="image/*" multiple required
                  class="block w-full text-body-md text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary file:text-on-primary file:cursor-pointer">
           <button type="submit"
-                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer">
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors cursor-pointer">
             <span class="material-symbols-outlined" style="font-size:18px">upload</span>
             Enviar para verificación
           </button>

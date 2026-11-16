@@ -3,11 +3,11 @@
   viewer       = Current.session&.user
   can_propose_rules = viewer && viewer.level.to_i >= Proposal.rules_min_level
   kind_options = [
-    [ "fund_transfer", "payments",     "Créditos del fondo", "Destinar créditos del fondo territorial a un vecino o iniciativa." ],
-    [ "new_category",  "category",     "Nueva categoría",    "Proponer una categoría nueva para publicar en la red." ],
-    [ "rule_change",   "balance",      "Cambio de regla",    "Cambiar un parámetro económico de la red (las reglas del juego)." ],
-    [ "grant_moderation",  "shield_person", "Nombrar moderador",   "Dar el rol de moderador a un vecino (resuelve reportes y disputas)." ],
-    [ "revoke_moderation", "remove_moderator", "Revocar moderación", "Quitar el rol de moderador a quien lo tiene." ]
+    [ "fund_transfer", "payments",     "Usar el fondo",      "Dar créditos del fondo a un vecino o a una iniciativa." ],
+    [ "new_category",  "category",     "Nueva categoría",    "Una categoría nueva para publicar." ],
+    [ "rule_change",   "balance",      "Cambiar una regla",  "Cambiar una regla de los créditos." ],
+    [ "grant_moderation",  "shield_person", "Nombrar moderador",   "Alguien que ayuda a resolver problemas y reportes." ],
+    [ "revoke_moderation", "remove_moderator", "Quitar moderación", "Quitarle ese rol a quien lo tiene." ]
   ]
 %>
 <%= form_with model: proposal, url: territory_proposals_path(territory.slug),
@@ -42,30 +42,29 @@
     </div>
     <% unless can_propose_rules %>
       <p class="text-caption text-on-surface-variant mt-2">
-        Para proponer reglas o categorías necesitas <strong>nivel <%= Proposal.rules_min_level %></strong>:
-        la confianza para cambiar el juego se gana participando.
+        Para proponer reglas o categorías necesitas el <strong>Nivel <%= Proposal.rules_min_level %></strong>.
       </p>
     <% end %>
   </fieldset>
 
   <div>
-    <%= f.label :title, "Título", class: "block text-label-md text-on-surface mb-1" %>
-    <%= f.text_field :title, required: true, placeholder: "Ej: 200 C para el evento de barrio" %>
+    <%= f.label :title, "Ponle un nombre", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_field :title, required: true, placeholder: "Ej: Plantas para la plaza" %>
   </div>
 
   <div>
-    <%= f.label :body, "Detalle", class: "block text-label-md text-on-surface mb-1" %>
-    <%= f.text_area :body, rows: 4, required: true, placeholder: "Cuenta qué propones, por qué la comunidad ganaría con esto." %>
+    <%= f.label :body, "¿Por qué es bueno para el barrio?", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_area :body, rows: 3, required: true, placeholder: "Cuéntalo en pocas palabras." %>
   </div>
 
   <%# --- Campos de fund_transfer --- %>
   <div data-proposal-form-target="section" data-kind="fund_transfer" class="grid grid-cols-2 gap-3">
     <div>
-      <%= f.label :amount, "Monto (C)", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.label :amount, "¿Cuántos créditos?", class: "block text-label-md text-on-surface mb-1" %>
       <%= f.number_field :amount, min: 1, step: 1, required: true %>
     </div>
     <div>
-      <%= f.label :beneficiary_id, "Beneficiario (username)", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.label :beneficiary_id, "¿Para quién?", class: "block text-label-md text-on-surface mb-1" %>
       <%= f.collection_select :beneficiary_id,
             User.where.not(id: Current.session&.user_id).order(:username),
             :id, :username,
@@ -79,7 +78,7 @@
     <%= f.text_field :category_name, required: true, maxlength: 40,
           placeholder: "Ej: Huerta y semillas" %>
     <p class="text-caption text-on-surface-variant mt-1">
-      Si la comunidad la aprueba, la categoría queda disponible para publicar.
+      Si la aprueban, cualquiera podrá usarla.
     </p>
   </div>
 
@@ -98,16 +97,16 @@
       <%= f.label :parameter_value, "Nuevo valor", class: "block text-label-md text-on-surface mb-1" %>
       <%= f.number_field :parameter_value, step: 1, required: true %>
       <p class="text-caption text-on-surface-variant mt-1">
-        Tiene que caer dentro del rango seguro de la regla.
+        Debe estar dentro del rango que aparece arriba.
       </p>
     </div>
     <label class="md:col-span-2 flex items-start gap-2 cursor-pointer">
       <%= f.check_box :parameter_global, { checked: proposal.global_rule? }, "1", "0" %>
       <span>
-        <span class="block text-body-md text-on-surface">Aplicar a toda la red</span>
+        <span class="block text-body-md text-on-surface">Cambiarla para toda la red</span>
         <span class="block text-caption text-on-surface-variant">
-          Desmarcado, el cambio rige solo en <strong><%= territory.name %></strong> (regla local).
-          Marcado, cambia el valor global de la red y necesita el quórum de toda la comunidad.
+          Si no lo marcas, solo cambia en <strong><%= territory.name %></strong>.
+          Si lo marcas, cambia para todos y necesita más votos.
         </span>
       </span>
     </label>
@@ -133,12 +132,12 @@
 
   <div class="flex items-center justify-between gap-3">
     <p class="text-caption text-on-surface-variant">
-      Quórum base: <strong><%= EconomicParameter.get_int("proposal_quorum", 10) %></strong> votos
-      (para reglas y categorías sube al <strong><%= EconomicParameter.get_int("rules_quorum_percent", 10) %>%</strong> de la red activa) ·
-      Mayoría: <strong><%= EconomicParameter.get_decimal("proposal_majority_percent", 60.0) %>%</strong> ·
-      Votación abre por <strong><%= EconomicParameter.get_int("proposal_voting_days", 7) %></strong> días.
+      La votación dura <%= contar(EconomicParameter.get_int("proposal_voting_days", 7), "día") %>.
+      Necesita al menos <%= contar(EconomicParameter.get_int("proposal_quorum", 10), "voto") %>
+      y que <%= (EconomicParameter.get_decimal("proposal_majority_percent", 60.0).to_f / 10).ceil %> de cada 10 sean a favor.
+      <%= link_to "Reglas exactas", economics_path(anchor: "reglas"), class: "text-primary hover:underline" %>
     </p>
-    <%= f.submit "Crear propuesta",
-          class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" %>
+    <%= f.submit "Proponer",
+          class: "inline-flex items-center gap-1.5 px-5 min-h-11 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong cursor-pointer" %>
   </div>
 <% end %>

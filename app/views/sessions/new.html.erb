@@ -2,8 +2,8 @@
 
 <section class="max-w-md mx-auto space-y-6 pt-6">
   <header class="space-y-2 text-center">
-    <span class="inline-flex w-14 h-14 rounded-2xl bg-primary text-on-primary items-center justify-center mx-auto">
-      <span class="material-symbols-outlined icon-filled" style="font-size:28px">handshake</span>
+    <span class="inline-flex mx-auto">
+      <%= render "shared/marca", clase: "w-14 h-14" %>
     </span>
     <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Entrar</h1>
     <p class="text-body-md text-on-surface-variant">Tu comunidad, cerca de ti.</p>
@@ -24,7 +24,7 @@
 
       <div class="pt-2 flex items-center justify-between gap-3 flex-wrap">
         <%= form.submit "Entrar",
-              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors cursor-pointer" %>
         <%= link_to "Olvidé mi contraseña", new_password_path,
               class: "text-caption text-on-surface-variant hover:text-on-surface" %>
       </div>

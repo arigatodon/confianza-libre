@@ -78,14 +78,14 @@ export default class extends Controller {
       if (post.lat == null || post.lng == null) return
       const el = document.createElement("div")
       el.className = "map-marker"
-      el.style.cssText = "background:#7c3aed;color:#fff;padding:4px 8px;border-radius:9999px;font-size:11px;font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,.15);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translate(-50%,-100%);cursor:pointer;"
+      el.style.cssText = "background:#1f56a8;color:#fff;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid #fff;box-shadow:0 2px 6px rgba(21,24,28,.2);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translate(-50%,-100%);cursor:pointer;"
       el.textContent = post.title || "·"
 
       const popup = new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(
         `<div style="font-family:inherit;font-size:12px;line-height:1.3;max-width:200px">
            <div style="font-weight:600;margin-bottom:2px">${this.#escape(post.title || "")}</div>
-           <div style="color:#6b7280;text-transform:uppercase;font-size:10px;margin-bottom:6px">${this.#escape(post.kind || "")}</div>
-           ${post.url ? `<a href="${post.url}" data-turbo-frame="_top" style="color:#7c3aed;text-decoration:underline">Ver publicación</a>` : ""}
+           <div style="color:#4a4f57;text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-size:10px;margin-bottom:6px">${this.#escape(post.kind || "")}</div>
+           ${post.url ? `<a href="${post.url}" data-turbo-frame="_top" style="color:#1f56a8;text-decoration:underline;font-weight:600">Ver publicación</a>` : ""}
          </div>`
       )
 
@@ -120,7 +120,7 @@ export default class extends Controller {
   #placeUserMarker(lat, lng) {
     if (this.userMarker) this.userMarker.remove()
     const dot = document.createElement("div")
-    dot.style.cssText = "width:18px;height:18px;border-radius:9999px;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 2px rgba(37,99,235,.35);"
+    dot.style.cssText = "width:18px;height:18px;border-radius:9999px;background:#ffc629;border:4px solid #1f56a8;box-shadow:0 0 0 3px rgba(255,255,255,.9);"
     this.userMarker = new maplibregl.Marker({ element: dot })
       .setLngLat([lng, lat])
       .setPopup(new maplibregl.Popup({ offset: 14, closeButton: false }).setText("Estás aquí"))

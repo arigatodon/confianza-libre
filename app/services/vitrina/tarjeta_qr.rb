@@ -16,10 +16,10 @@ module Vitrina
     ALTO   = 1350
     MARGEN = 80
 
-    VERDE_OSCURO   = [ 15, 82, 56 ].freeze   # #0f5238
-    VERDE_PROFUNDO = [ 9, 53, 36 ].freeze
-    BLANCO         = [ 255, 255, 255 ].freeze
-    DORADO         = [ 240, 200, 90 ].freeze
+    AZUL          = [ 31, 86, 168 ].freeze   # #1f56a8 azul toldo (theme-color del sitio)
+    AZUL_PROFUNDO = [ 21, 57, 109 ].freeze   # #15396d
+    BLANCO        = [ 255, 255, 255 ].freeze
+    AMARILLO      = [ 255, 198, 41 ].freeze  # #ffc629 amarillo señal
 
     CAJA_QR = 760  # lado de la caja blanca
     QR      = 640  # lado del QR dentro de la caja
@@ -31,7 +31,7 @@ module Vitrina
     end
 
     def render
-      lienzo = degradado_verde
+      lienzo = degradado_marca
       lienzo = componer_textos_superiores(lienzo)
       lienzo = estampar_qr(lienzo)
       lienzo = componer_textos_inferiores(lienzo)
@@ -42,10 +42,10 @@ module Vitrina
 
     attr_reader :user, :url, :destino
 
-    def degradado_verde
+    def degradado_marca
       rampa = Vips::Image.xyz(ANCHO, ALTO)[1].divide(ALTO - 1)
       bandas = (0..2).map do |i|
-        rampa.linear([ VERDE_PROFUNDO[i] - VERDE_OSCURO[i] ], [ VERDE_OSCURO[i] ])
+        rampa.linear([ AZUL_PROFUNDO[i] - AZUL[i] ], [ AZUL[i] ])
       end
       bandas[0].bandjoin(bandas[1..]).cast(:uchar).copy(interpretation: :srgb)
     end
@@ -78,7 +78,7 @@ module Vitrina
     end
 
     def componer_textos_inferiores(lienzo)
-      llamado = texto("Escanea y mira mi vitrina", font: "sans bold 44", color: DORADO)
+      llamado = texto("Escanea y mira mi vitrina", font: "sans bold 44", color: AMARILLO)
       lienzo = centrar(lienzo, llamado, 340 + CAJA_QR + 60)
 
       marca = texto(url_legible, font: "sans bold 40", color: BLANCO)

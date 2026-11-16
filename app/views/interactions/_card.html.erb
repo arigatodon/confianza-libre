@@ -1,10 +1,27 @@
 <%# locals: interaction, viewer %>
 <% other = interaction.other_party(viewer) %>
-<% role  = interaction.sender_id == viewer.id ? "Enviada" : "Recibida" %>
+<%
+  # Qué te toca hacer, en palabras (si te toca algo).
+  te_toca =
+    if interaction.negotiation_open? && interaction.awaiting_response_from == viewer
+      "Te toca responder"
+    elsif interaction.in_progress? && !interaction.confirmed_by?(viewer)
+      "Confirma si ya está hecho"
+    elsif interaction.completed? && interaction.review_pending_for?(viewer)
+      "Deja tu reseña"
+    end
+%>
 <%= link_to interaction_path(interaction),
-      class: "block rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow hover:bg-surface-container transition-colors" do %>
+      class: "block rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4 ambient-shadow hover:border-outline transition-colors #{"border-l-4 border-l-signal" if te_toca}" do %>
   <header class="flex items-center justify-between gap-2 mb-2">
-    <span class="text-caption text-on-surface-variant"><%= role %></span>
+    <% if te_toca %>
+      <span class="inline-flex items-center gap-1 text-caption font-semibold px-2 py-0.5 rounded-md bg-signal text-ink">
+        <span class="material-symbols-outlined icon-filled" style="font-size:14px">notifications_active</span>
+        <%= te_toca %>
+      </span>
+    <% else %>
+      <span></span>
+    <% end %>
     <span class="inline-flex items-center gap-1.5 text-caption font-semibold px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface">
       <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= interaction.status_icon %></span>
       <%= interaction.status_label_es %>
@@ -20,8 +37,8 @@
     </span>
     <% if interaction.agreed_credits.to_i > 0 %>
       <span class="flex items-center gap-1 text-on-surface">
-        <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:14px">payments</span>
-        <%= interaction.agreed_credits %> C
+        <span class="material-symbols-outlined icon-filled text-primary-strong" style="font-size:14px">payments</span>
+        <%= creditos(interaction.agreed_credits) %>
       </span>
     <% end %>
   </div>

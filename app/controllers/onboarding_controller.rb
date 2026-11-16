@@ -1,7 +1,7 @@
 class OnboardingController < ApplicationController
   skip_before_action :require_onboarding
 
-  TOTAL_STEPS = 7
+  TOTAL_STEPS = 5
 
   def show
     @step = params[:step].to_i

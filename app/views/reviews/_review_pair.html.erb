@@ -8,7 +8,7 @@
       <% if primary.reviewer.avatar.attached? && primary.reviewer.avatar.image? %>
         <%= image_tag primary.reviewer.avatar, class: "w-7 h-7 rounded-full object-cover border border-outline-variant" %>
       <% else %>
-        <span class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-xs font-semibold">
+        <span class="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-xs font-semibold">
           <%= (primary.reviewer.username || primary.reviewer.email_address).first.upcase %>
         </span>
       <% end %>
@@ -16,7 +16,7 @@
         @<%= primary.reviewer.username || primary.reviewer.email_address %>
       </span>
     <% end %>
-    <span class="text-earth-clay flex items-center" aria-label="Puntaje">
+    <span class="text-secondary flex items-center" aria-label="Puntaje">
       <% primary.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span><% end %>
       <% (5 - primary.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:14px">star</span><% end %>
     </span>
@@ -40,7 +40,7 @@
           <%= link_to "@#{counter.reviewer.username || counter.reviewer.email_address}",
                 profile_path(counter.reviewer.username || counter.reviewer.id),
                 class: "text-primary font-semibold hover:underline" %>
-          <span class="text-earth-clay inline-flex items-center align-middle ml-1">
+          <span class="text-secondary inline-flex items-center align-middle ml-1">
             <% counter.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:12px">star</span><% end %>
             <% (5 - counter.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:12px">star</span><% end %>
           </span>

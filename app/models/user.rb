@@ -1,4 +1,9 @@
 class User < ApplicationRecord
+  # El techo de saldo es común a toda la red (ECONOMIA.md § 4.1, v0.3) y se lee
+  # en vivo de EconomicParameter. La columna `credit_ceiling` quedó obsoleta: se
+  # ignora ahora y se elimina en una migración posterior (expand → contract).
+  self.ignored_columns += [ "credit_ceiling" ]
+
   extend FriendlyId
   include PgSearch::Model
   friendly_id :username, use: :slugged
@@ -79,13 +84,21 @@ class User < ApplicationRecord
 
   PLANTILLA_DEFAULT = { nombre: "Clásica", icono: "person", seccion_posts: "Publicaciones", cta: "Contactar", posts_primero: false }.freeze
 
-  # Acentos permitidos (paleta Capital Comunitario): todos con contraste
-  # suficiente para texto blanco encima.
+  # Acentos permitidos (identidad "Señal de barrio", docs/identidad-visual.md):
+  # todos con contraste AA para texto blanco encima. El primero es el default.
   ACCENT_COLORS = {
-    "#0f5238" => "Verde",
-    "#924c00" => "Tierra",
-    "#004d6c" => "Azul",
+    "#1f56a8" => "Azul",
+    "#0e6e55" => "Verde",
+    "#8a5a00" => "Tierra",
     "#333333" => "Grafito"
+  }.freeze
+
+  # Acentos de la paleta anterior: quien los eligió sigue siendo válido y su
+  # vitrina se muestra con el par equivalente de la paleta nueva.
+  ACCENT_COLORS_ANTERIORES = {
+    "#0f5238" => "#0e6e55",
+    "#924c00" => "#8a5a00",
+    "#004d6c" => "#1f56a8"
   }.freeze
 
   has_one_attached :portada
@@ -110,7 +123,7 @@ class User < ApplicationRecord
   validates :whatsapp, format: { with: /\A\+?\d{8,15}\z/, message: "debe ser un número con código de país, ej: +56912345678" }, allow_blank: true
   validates :horario, length: { maximum: 120 }
   validates :vitrina_plantilla, inclusion: { in: VITRINA_PLANTILLAS.keys, message: "no es una plantilla válida" }, allow_blank: true
-  validates :accent_color, inclusion: { in: ACCENT_COLORS.keys, message: "no es un color permitido" }, allow_blank: true
+  validates :accent_color, inclusion: { in: ACCENT_COLORS.keys + ACCENT_COLORS_ANTERIORES.keys, message: "no es un color permitido" }, allow_blank: true
   validate :vitrina_links_deben_ser_http
 
   # Vitrinas: perfiles que eligieron ser públicos (escaparate de servicios).
@@ -121,7 +134,8 @@ class User < ApplicationRecord
   end
 
   def acento
-    accent_color.presence || "#0f5238"
+    color = accent_color.presence || ACCENT_COLORS.keys.first
+    ACCENT_COLORS_ANTERIORES.fetch(color, color)
   end
 
   # Link de contacto directo. El texto lleva al negocio el contexto de dónde
@@ -236,6 +250,11 @@ class User < ApplicationRecord
     account = accounts.create!(account_type: "user", cached_balance: 0)
     association(:credit_account).target = account
     account
+  end
+
+  # Cuánto puede acumular cualquier persona: el mismo techo para todos.
+  def credit_ceiling
+    CreditLimitCalculator.common_ceiling
   end
 
   # Saldo disponible (cached + colchón negativo permitido por el nivel).

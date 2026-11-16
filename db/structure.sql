@@ -3260,6 +3260,9 @@ ALTER TABLE ONLY public.reviews
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20261116140000'),
+('20261116130000'),
+('20261116120000'),
 ('20260927180000'),
 ('20260927120000'),
 ('20260826120100'),

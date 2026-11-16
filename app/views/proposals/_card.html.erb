@@ -3,13 +3,13 @@
   status_color = case proposal.status
                  when "open"     then "bg-primary-container/20 text-primary"
                  when "passed"   then "bg-primary text-on-primary"
-                 when "executed" then "bg-organic-green-deep text-on-primary"
+                 when "executed" then "bg-primary-strong text-on-primary"
                  when "failed"   then "bg-error-container text-on-error-container"
                  when "canceled" then "bg-surface-container text-on-surface-variant"
                  end
 %>
 <%= link_to proposal_path(proposal),
-      class: "block rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow hover:bg-surface-container transition-colors" do %>
+      class: "block rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4 ambient-shadow hover:border-outline transition-colors" do %>
   <header class="flex items-start justify-between gap-2 mb-2">
     <h3 class="text-label-md text-on-surface flex-1 min-w-0 leading-snug">
       <%= proposal.title %>
@@ -27,7 +27,7 @@
       </span>
       <span class="flex items-center gap-1 text-primary font-semibold">
         <span class="material-symbols-outlined icon-filled" style="font-size:14px">payments</span>
-        <%= number_with_delimiter(proposal.amount) %> C
+        <%= creditos(proposal.amount) %>
       </span>
     <% elsif proposal.new_category? %>
       <span class="flex items-center gap-1">
@@ -54,12 +54,12 @@
     <div class="mt-3 flex items-center gap-2 text-caption text-on-surface-variant">
       <span class="material-symbols-outlined" style="font-size:14px">how_to_vote</span>
       <%= proposal.yes_votes %> a favor · <%= proposal.no_votes %> en contra
-      · cierra <%= time_ago_in_words(proposal.voting_closes_at) %>
+      · cierra en <%= time_ago_in_words(proposal.voting_closes_at) %>
     </div>
   <% elsif proposal.passed? || proposal.executed? %>
     <div class="mt-3 flex items-center gap-2 text-caption text-primary font-semibold">
       <span class="material-symbols-outlined icon-filled" style="font-size:14px">check_circle</span>
-      <%= proposal.yes_votes %> de <%= proposal.total_votes %> votos (<%= number_with_precision(proposal.majority_pct, precision: 0) %>%)
+      Aprobada: <%= proposal.yes_votes %> de <%= contar(proposal.total_votes, "voto") %> a favor
     </div>
   <% end %>
 <% end %>

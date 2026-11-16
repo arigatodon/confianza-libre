@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Confianza">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f5238">
+    <meta name="theme-color" content="#1f56a8">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -21,46 +21,38 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    <%= render "shared/fuentes" %>
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-background text-on-background font-body antialiased selection:bg-primary/20">
-    <%# Top App Bar marketing %>
-    <header class="bg-surface/90 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/30 transition-all duration-200">
-      <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-(--container-3xl) mx-auto h-20">
-        <%= link_to root_path, class: "flex items-center gap-2" do %>
-          <span class="w-9 h-9 rounded-lg bg-primary text-on-primary grid place-items-center">
-            <span class="material-symbols-outlined icon-filled" style="font-size:20px">handshake</span>
-          </span>
-          <span class="text-headline-md text-primary font-bold tracking-tight">Confianza</span>
-        <% end %>
+  <body class="bg-background text-on-background font-body antialiased overflow-x-hidden">
+    <%# Cabecera marketing: placa blanca con la franja azul de señalética arriba %>
+    <header class="bg-surface-container-lowest/95 backdrop-blur-md sticky top-0 z-50 border-b border-outline-variant/60 border-t-4 border-t-primary">
+      <div class="flex justify-between items-center gap-3 w-full px-margin-mobile md:px-margin-desktop max-w-(--container-3xl) mx-auto h-16 md:h-[72px]">
+        <%= render "shared/logo", tamano: :md %>
 
-        <nav class="hidden md:flex gap-8">
+        <nav class="hidden md:flex gap-1">
           <%= link_to "Cómo funciona", how_it_works_path,
-                class: "text-on-surface-variant font-medium hover:text-primary transition-colors text-label-md" %>
+                class: "text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors text-label-md px-3 min-h-11 inline-flex items-center rounded-md" %>
           <%= link_to "Manifiesto", manifesto_path,
-                class: "text-on-surface-variant font-medium hover:text-primary transition-colors text-label-md" %>
+                class: "text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors text-label-md px-3 min-h-11 inline-flex items-center rounded-md" %>
           <%= link_to "Novedades", announcements_path,
-                class: "text-on-surface-variant font-medium hover:text-primary transition-colors text-label-md" %>
+                class: "text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors text-label-md px-3 min-h-11 inline-flex items-center rounded-md" %>
           <%= link_to "Explorar", explore_path,
-                class: "text-on-surface-variant font-medium hover:text-primary transition-colors text-label-md" %>
+                class: "text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors text-label-md px-3 min-h-11 inline-flex items-center rounded-md" %>
         </nav>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
           <% if authenticated? %>
             <%= link_to "Ir al feed", root_path,
-                  class: "bg-primary hover:bg-organic-green-deep text-on-primary px-5 md:px-6 py-2 rounded-full text-label-md transition-colors shadow-sm" %>
+                  class: "bg-primary hover:bg-primary-strong text-on-primary px-5 md:px-6 min-h-11 inline-flex items-center rounded-full text-label-md transition-colors" %>
           <% else %>
             <%= link_to "Crear cuenta", signup_path,
-                  class: "hidden sm:inline-block text-primary hover:text-organic-green-deep px-3 py-2 rounded-full text-label-md transition-colors" %>
+                  class: "hidden sm:inline-flex items-center min-h-11 text-primary hover:bg-primary-fixed/60 px-4 rounded-full text-label-md transition-colors" %>
             <%= link_to "Ingresar", new_session_path,
-                  class: "bg-primary hover:bg-organic-green-deep text-on-primary px-5 md:px-6 py-2 rounded-full text-label-md transition-colors shadow-sm" %>
+                  class: "bg-primary hover:bg-primary-strong text-on-primary px-5 md:px-6 min-h-11 inline-flex items-center rounded-full text-label-md transition-colors" %>
           <% end %>
         </div>
       </div>
@@ -70,35 +62,35 @@
       <%= yield %>
     </main>
 
-    <%# Footer %>
-    <footer class="bg-surface-container-low mt-20 border-t border-outline-variant/30">
-      <div class="max-w-(--container-3xl) mx-auto px-margin-mobile md:px-margin-desktop py-10 flex flex-col md:flex-row justify-between items-center gap-4">
-        <%= link_to root_path, class: "flex items-center gap-2" do %>
-          <span class="w-8 h-8 rounded-lg bg-primary text-on-primary grid place-items-center">
-            <span class="material-symbols-outlined icon-filled" style="font-size:18px">handshake</span>
-          </span>
-          <span class="text-headline-md text-primary font-bold">Confianza</span>
-        <% end %>
-        <p class="text-body-md text-on-surface-variant text-sm text-center md:text-left">
-          © <%= Date.current.year %> Confianza. Capital Comunitario para el Territorio.
-        </p>
-        <div class="flex flex-wrap justify-center gap-6">
+    <%# Pie: franja azul profunda, cierra la página como un letrero %>
+    <footer class="bg-primary-container text-on-primary-container mt-12 foco-claro">
+      <div class="h-1.5 flex" aria-hidden="true">
+        <span class="flex-[6] bg-primary"></span><span class="flex-1 bg-signal"></span>
+      </div>
+      <div class="max-w-(--container-3xl) mx-auto px-margin-mobile md:px-margin-desktop py-10 flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
+        <div class="flex flex-col items-center md:items-start gap-3">
+          <%= render "shared/logo", tono: :blanco, tamano: :md %>
+          <p class="text-body-md text-on-primary-container text-sm text-center md:text-left">
+            © <%= Date.current.year %> Confianza. Capital Comunitario para el Territorio.
+          </p>
+        </div>
+        <div class="flex flex-wrap justify-center md:justify-end gap-x-2 gap-y-0 max-w-xl">
           <%= link_to "Cómo funciona", how_it_works_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "Manifiesto", manifesto_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "Novedades", announcements_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "Economía", economics_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "Ingresar", new_session_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
-          <%= link_to "Feedback", new_feedback_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
+          <%= link_to "Tu opinión", new_feedback_path,
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "API", api_docs_path,
-                class: "text-on-surface-variant hover:text-primary transition-colors text-label-md" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
           <%= link_to "Privacidad", privacy_path,
-                class: "text-label-md text-on-surface-variant hover:text-primary transition-colors" %>
+                class: "text-label-md text-on-primary hover:underline underline-offset-4 px-3 min-h-11 inline-flex items-center" %>
         </div>
       </div>
     </footer>

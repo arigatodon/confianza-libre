@@ -5,7 +5,7 @@
       <% if review.reviewer.avatar.attached? && review.reviewer.avatar.image? %>
         <%= image_tag review.reviewer.avatar, class: "w-7 h-7 rounded-full object-cover border border-outline-variant" %>
       <% else %>
-        <span class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-xs font-semibold">
+        <span class="w-7 h-7 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-xs font-semibold">
           <%= (review.reviewer.username || review.reviewer.email_address).first.upcase %>
         </span>
       <% end %>
@@ -13,7 +13,7 @@
         @<%= review.reviewer.username || review.reviewer.email_address %>
       </span>
     <% end %>
-    <span class="text-earth-clay flex items-center" aria-label="Puntaje">
+    <span class="text-secondary flex items-center" aria-label="Puntaje">
       <% review.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span><% end %>
       <% (5 - review.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:14px">star</span><% end %>
     </span>

@@ -70,23 +70,23 @@
     </div>
   <% end %>
 
-  <header class="rounded-xl bg-surface-container-lowest border-t-[3px] border-primary ambient-shadow overflow-hidden"
+  <header class="rounded-xl bg-surface-container-lowest border border-outline-variant/60 border-t-4 border-t-primary ambient-shadow overflow-hidden"
           style="border-top-color: <%= @user.acento %>">
     <% if @full_view && @user.portada.attached? && @user.portada.image? %>
       <%= image_tag @user.portada, class: "w-full h-40 md:h-52 object-cover", alt: "Portada de @#{@user.username}" %>
     <% end %>
-    <div class="p-6 space-y-5">
-    <div class="flex items-start gap-4">
+    <div class="p-4 sm:p-6 space-y-5">
+    <div class="flex flex-wrap items-start gap-4">
       <div class="trust-ring shrink-0" style="--trust: <%= trust %>">
         <% if @user.avatar.attached? && @user.avatar.image? %>
           <%= image_tag @user.avatar, class: "w-20 h-20 rounded-full object-cover border-4 border-surface-container-lowest" %>
         <% else %>
-          <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-2xl font-semibold border-4 border-surface-container-lowest">
+          <div class="w-20 h-20 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-2xl font-bold font-display border-4 border-surface-container-lowest">
             <%= (@user.username || @user.email_address).first.upcase %>
           </div>
         <% end %>
       </div>
-      <div class="flex-1 min-w-0">
+      <div class="flex-1 min-w-[10rem]">
         <h1 class="text-headline-md text-on-surface truncate">@<%= @user.username || @user.email_address %></h1>
         <% if @user.headline.present? %>
           <p class="text-body-md text-on-surface font-medium mt-0.5"><%= @user.headline %></p>
@@ -116,74 +116,60 @@
             </span>
           </p>
         <% end %>
-        <% if @full_view && @user.bio.present? %>
-          <p class="text-body-md text-on-surface-variant mt-3"><%= simple_format @user.bio %></p>
-        <% end %>
       </div>
       <% if authenticated? && Current.session.user_id == @user.id %>
         <%= link_to settings_path,
-              class: "shrink-0 inline-flex items-center gap-1 text-label-md text-primary border border-primary px-4 py-2 rounded-full hover:bg-primary-fixed/40 transition-colors" do %>
+              class: "shrink-0 inline-flex items-center gap-1 text-label-md text-primary border-2 border-primary px-4 min-h-11 rounded-full hover:bg-primary-fixed/60 transition-colors" do %>
           <span class="material-symbols-outlined" style="font-size:16px">edit</span>
           Editar
         <% end %>
       <% elsif authenticated? %>
-        <div class="shrink-0 flex flex-col items-end gap-2">
+        <div class="shrink-0 w-full sm:w-auto flex flex-row flex-wrap sm:flex-col sm:items-end gap-2">
           <%= button_to conversations_path, params: { user_id: @user.id }, method: :post,
-                class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-4 py-2 rounded-full hover:bg-organic-green-deep transition-colors cursor-pointer" do %>
+                class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-4 min-h-11 rounded-full hover:bg-primary-strong transition-colors cursor-pointer" do %>
             <span class="material-symbols-outlined" style="font-size:16px">forum</span>
             Mensaje
           <% end %>
           <% if @can_endorse %>
             <%= button_to endorsements_path(endorsed_id: @user.id), method: :post,
-                  class: "inline-flex items-center gap-1 text-label-md text-primary border border-primary px-4 py-2 rounded-full hover:bg-primary-fixed/40 transition-colors cursor-pointer",
+                  class: "inline-flex items-center gap-1 text-label-md text-primary border-2 border-primary px-4 min-h-11 rounded-full hover:bg-primary-fixed/60 transition-colors cursor-pointer",
                   form: { data: { turbo_confirm: "Avalar significa dar fe de que @#{@user.username} es una persona real y de fiar. ¿Confirmas?" } } do %>
               <span class="material-symbols-outlined" style="font-size:16px">verified_user</span>
               Avalar
             <% end %>
           <% elsif @already_endorsed %>
-            <span class="inline-flex items-center gap-1 text-label-md text-primary px-4 py-2">
+            <span class="inline-flex items-center gap-1 text-label-md text-primary px-4 min-h-11">
               <span class="material-symbols-outlined icon-filled" style="font-size:16px">verified_user</span>
               Lo avalaste
             </span>
           <% end %>
           <%= report_link(@user, label: "Reportar perfil",
-                classes: "inline-flex items-center gap-1 text-label-md text-on-surface-variant hover:text-error border border-outline-variant px-4 py-2 rounded-full hover:border-error/40 transition-colors") %>
+                classes: "inline-flex items-center gap-1 text-label-md text-on-surface-variant hover:text-error border border-outline-variant px-4 min-h-11 rounded-full hover:border-error/40 transition-colors") %>
         </div>
       <% end %>
     </div>
 
-    <% if @full_view %>
-    <dl class="grid grid-cols-3 gap-3 pt-2">
-      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
-        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Publicaciones</dt>
-        <dd class="text-headline-md text-on-surface mt-1"><%= @stats[:posts_count] %></dd>
-      </div>
-      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
-        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Interacciones</dt>
-        <dd class="text-headline-md text-on-surface mt-1"><%= @stats[:interactions_completed] %></dd>
-      </div>
-      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
-        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Reseñas</dt>
-        <dd class="text-headline-md text-on-surface mt-1 flex items-center justify-center gap-1">
-          <%= @stats[:reviews_received_count] %>
-          <% if @stats[:avg_score] %>
-            <span class="text-caption text-earth-clay font-normal flex items-center">
-              <span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span>
-              <%= @stats[:avg_score] %>
-            </span>
-          <% end %>
-        </dd>
-      </div>
-    </dl>
+    <% if @full_view && @user.bio.present? %>
+      <div class="text-body-md text-on-surface-variant"><%= simple_format @user.bio %></div>
     <% end %>
 
-    <div class="flex flex-wrap gap-2 text-caption text-on-surface-variant">
-      <span class="px-3 py-1 rounded-full bg-primary-fixed/40 text-on-primary-fixed-variant flex items-center gap-1">
-        Confianza · <strong class="text-on-surface"><%= @user.trust_score %></strong>
-      </span>
-      <span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant flex items-center gap-1">
-        Territorio · <strong class="text-on-surface"><%= @user.territory_score %></strong>
-      </span>
+    <%# Reputación en estrellas y lo hecho en palabras (sin decimales) %>
+    <div class="rounded-lg bg-surface-container-low border border-outline-variant/60 p-4 space-y-2">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <% if @full_view && @stats[:avg_score] %>
+          <%= estrellas(@stats[:avg_score], tamano: 22) %>
+          <span class="text-body-md text-on-surface-variant"><%= contar(@stats[:reviews_received_count], "reseña") %></span>
+        <% elsif @full_view %>
+          <span class="text-body-md text-on-surface-variant">Todavía sin reseñas</span>
+        <% end %>
+        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-secondary text-on-secondary text-label-md">Nivel <%= @user.level %></span>
+      </div>
+      <% if @full_view %>
+        <p class="text-body-md text-on-surface">
+          <%= contar(@stats[:interactions_completed], "intercambio cerrado", "intercambios cerrados") %>
+          · <%= contar(@stats[:posts_count], "publicación", "publicaciones") %>
+        </p>
+      <% end %>
     </div>
 
     <%# Contacto directo de la vitrina: WhatsApp con CTA según plantilla,
@@ -222,7 +208,7 @@
           visible para la comunidad de Confianza.
         </p>
         <%= link_to new_user_path,
-              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors" do %>
+              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors" do %>
           <span class="material-symbols-outlined" style="font-size:16px">person_add</span>
           Únete para ver el perfil completo
         <% end %>
@@ -290,18 +276,18 @@
   <% if @sponsored&.any? %>
     <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 space-y-3">
       <h2 class="text-label-md text-on-surface uppercase tracking-wider flex items-center gap-1">
-        <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:16px">handshake</span>
+        <span class="material-symbols-outlined icon-filled text-primary-strong" style="font-size:16px">handshake</span>
         Mis ahijados · <%= @sponsored.size %>
       </h2>
       <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <% @sponsored.each do |ahijado| %>
           <li>
             <%= link_to profile_path(ahijado),
-                  class: "flex items-center gap-3 p-2 rounded-lg hover:bg-warm-surface transition-colors" do %>
+                  class: "flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container-lowest transition-colors" do %>
               <% if ahijado.avatar.attached? && ahijado.avatar.image? %>
                 <%= image_tag ahijado.avatar, class: "w-9 h-9 rounded-full object-cover" %>
               <% else %>
-                <div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-label-md font-semibold shrink-0">
+                <div class="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-label-md font-semibold shrink-0">
                   <%= ahijado.username.first.upcase %>
                 </div>
               <% end %>

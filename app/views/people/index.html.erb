@@ -23,7 +23,7 @@
         es para la comunidad.
       </p>
       <%= link_to "Únete a Confianza", new_user_path,
-            class: "inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors shrink-0" %>
+            class: "inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors shrink-0" %>
     </div>
   <% end %>
 
@@ -31,7 +31,7 @@
         data: { controller: "auto-submit" } do %>
     <%= text_field_tag :q, @query, placeholder: "Buscar por usuario o bio…",
           autocomplete: "off", class: "flex-1" %>
-    <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer">
+    <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors cursor-pointer">
       <span class="material-symbols-outlined" style="font-size:18px">search</span>
     </button>
   <% end %>
@@ -64,7 +64,7 @@
               </span>
             </span>
             <span class="ml-auto text-caption text-on-surface-variant shrink-0 flex items-center gap-1">
-              <span class="material-symbols-outlined icon-filled text-earth-clay" style="font-size:14px">star</span>
+              <span class="material-symbols-outlined icon-filled text-secondary" style="font-size:14px">star</span>
               <%= number_with_precision(person.trust_score, precision: 1) %>
             </span>
           <% end %>
@@ -81,7 +81,7 @@
             <% end %>
             <% if authenticated? && Current.session.user_id != person.id %>
               <%= button_to conversations_path, params: { user_id: person.id }, method: :post,
-                    class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-organic-green-deep transition-colors cursor-pointer" do %>
+                    class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-primary-strong transition-colors cursor-pointer" do %>
                 <span class="material-symbols-outlined" style="font-size:14px">forum</span>
                 Mensaje
               <% end %>

@@ -1,0 +1,25 @@
+<%# Ilustración de portada: plano de un barrio cualquiera (calles, una avenida,
+    una plaza y un borde costero) con señales de lo que la gente ofrece. Es
+    decorativa: no representa usuarios ni actividad real. %>
+<svg viewBox="0 0 480 400" preserveAspectRatio="xMidYMid slice" class="absolute inset-0 w-full h-full" aria-hidden="true" focusable="false">
+  <rect width="480" height="400" fill="#e9e8e2"/>
+  <%# Mar / borde costero %>
+  <path d="M0 300 C60 290 90 320 150 330 S250 360 290 400 L0 400 Z" fill="#cfdff3"/>
+  <path d="M0 300 C60 290 90 320 150 330 S250 360 290 400" fill="none" stroke="#a9c2ea" stroke-width="3"/>
+  <%# Calles %>
+  <g stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="square">
+    <path d="M0 70 H480"/>
+    <path d="M0 170 H480"/>
+    <path d="M60 255 H480"/>
+    <path d="M90 0 V300"/>
+    <path d="M200 0 V335"/>
+    <path d="M310 0 V370"/>
+    <path d="M410 0 V400"/>
+  </g>
+  <%# Avenida principal %>
+  <path d="M-10 230 L480 20" stroke="#ffe9a6" stroke-width="20" fill="none"/>
+  <path d="M-10 230 L480 20" stroke="#f2c14e" stroke-width="2" stroke-dasharray="10 10" fill="none"/>
+  <%# Plaza %>
+  <rect x="215" y="185" width="80" height="56" rx="6" fill="#d2f1e6"/>
+  <circle cx="255" cy="213" r="12" fill="#8fd5bf"/>
+</svg>

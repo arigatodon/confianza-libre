@@ -4,11 +4,13 @@
 <% unless request.path.start_with?("/feedback", "/moderacion") %>
   <div class="hidden md:block fixed bottom-6 right-6 z-40">
     <%= link_to new_feedback_path,
-          class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high/95 backdrop-blur border border-outline-variant/40 text-on-surface text-label-md ambient-shadow hover:bg-primary hover:text-on-primary hover:border-primary transition-colors" do %>
-      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">campaign</span>
+          class: "group inline-flex items-center gap-2.5 pl-3 pr-4 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant text-on-surface text-label-md ambient-shadow-lg hover:border-primary transition-colors" do %>
+      <span class="w-8 h-8 rounded-md bg-signal text-ink grid place-items-center">
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px">campaign</span>
+      </span>
       <span class="flex flex-col leading-tight">
-        <span class="text-caption uppercase tracking-wide opacity-70" style="font-size:9px">Beta</span>
-        <span>Mandanos feedback</span>
+        <span class="text-rotulo text-on-surface-variant" style="font-size:10px">Beta</span>
+        <span>Mándanos tu opinión</span>
       </span>
     <% end %>
   </div>

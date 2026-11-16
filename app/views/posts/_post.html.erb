@@ -2,50 +2,52 @@
   visual = post_kind_visual(post.kind)
   thumb  = post.media.attached? ? post.media.find { |m| m.image? } : nil
 %>
+<%# Tarjeta del feed: placa blanca con la "línea" de color del tipo arriba
+    (PostsHelper::LINEAS) y el tipo como rótulo de color. %>
 <%= link_to post,
-      class: "group block bg-surface-container-lowest rounded-xl ambient-shadow border-t-[3px] #{post_kind_border(post.kind)} overflow-hidden hover:-translate-y-0.5 transition-transform duration-200" do %>
+      class: "group block bg-surface-container-lowest rounded-xl ambient-shadow border border-outline-variant/60 border-t-4 #{post_kind_border(post.kind)} overflow-hidden hover:border-outline transition-colors duration-200" do %>
   <% if thumb %>
     <div class="relative h-40 overflow-hidden">
       <%= image_tag thumb, class: "w-full h-full object-cover" %>
-      <div class="absolute top-3 left-3 bg-surface/90 glass-overlay px-3 py-1 rounded-full flex items-center gap-1 border border-outline-variant/40">
-        <span class="material-symbols-outlined icon-filled <%= post_kind_text_color(post.kind) %>" style="font-size:14px"><%= visual[:icon] %></span>
-        <span class="text-caption text-on-surface font-semibold"><%= post.kind_label_es %></span>
+      <div class="absolute top-3 left-3 px-2 py-1 rounded-md flex items-center gap-1 <%= post_kind_badge(post.kind) %>">
+        <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= visual[:icon] %></span>
+        <span class="text-rotulo" style="font-size:11px"><%= post.kind_label_es %></span>
       </div>
     </div>
   <% end %>
 
   <div class="p-4 flex flex-col gap-2">
     <% unless thumb %>
-      <div class="flex items-center justify-between">
-        <span class="inline-flex items-center gap-1 text-caption font-semibold <%= post_kind_text_color(post.kind) %>">
+      <div class="flex items-center justify-between gap-2">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md <%= post_kind_badge(post.kind) %>">
           <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= visual[:icon] %></span>
-          <%= post.kind_label_es %>
+          <span class="text-rotulo" style="font-size:11px"><%= post.kind_label_es %></span>
         </span>
         <span class="text-caption text-on-surface-variant"><%= time_ago_in_words(post.created_at) %></span>
       </div>
     <% end %>
 
     <% if post.pedido? %>
-      <span class="self-start inline-flex items-center gap-1 text-caption font-semibold px-2 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed-variant">
+      <span class="self-start inline-flex items-center gap-1 text-caption font-semibold px-2 py-0.5 rounded-md bg-secondary-fixed text-on-secondary-fixed-variant">
         <span class="material-symbols-outlined" style="font-size:12px">search</span>
         Busca
       </span>
     <% end %>
 
-    <h3 class="text-headline-md text-on-surface text-[18px] leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+    <h3 class="text-headline-md text-on-surface text-[19px] leading-snug line-clamp-2 group-hover:text-primary transition-colors">
       <%= post.title %>
     </h3>
 
     <% if post.description.present? %>
-      <p class="text-body-md text-on-surface-variant text-sm line-clamp-2"><%= post.description %></p>
+      <p class="text-body-md text-on-surface-variant text-[15px] leading-[22px] line-clamp-2"><%= post.description %></p>
     <% end %>
 
-    <div class="flex items-center justify-between pt-3 mt-1 border-t border-outline-variant/30">
+    <div class="flex items-center justify-between gap-2 pt-3 mt-1 border-t border-outline-variant/50">
       <div class="flex items-center gap-2 min-w-0">
         <% if post.user.avatar.attached? && post.user.avatar.image? %>
           <%= image_tag post.user.avatar, class: "w-8 h-8 rounded-full object-cover border border-outline-variant" %>
         <% else %>
-          <span class="w-8 h-8 rounded-full bg-secondary-container/40 text-on-secondary-container grid place-items-center text-xs font-semibold">
+          <span class="w-8 h-8 shrink-0 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center text-xs font-bold">
             <%= (post.user.username || post.user.email_address).first.upcase %>
           </span>
         <% end %>
@@ -54,8 +56,8 @@
           <span class="text-caption text-on-surface-variant truncate"><%= post.category.name %></span>
         </div>
       </div>
-      <span class="text-caption text-on-surface-variant bg-surface-container px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
-        <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+      <span class="text-caption text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-md flex items-center gap-1 shrink-0">
+        <span class="material-symbols-outlined" style="font-size:13px">schedule</span>
         <%= time_ago_in_words(post.created_at) %>
       </span>
     </div>

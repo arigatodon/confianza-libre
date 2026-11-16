@@ -2,157 +2,112 @@
 <%# Refresh broadcast: nuevas LedgerEntry o cambio de nivel → morph del DOM. %>
 <%= turbo_stream_from @user, :wallet %>
 <%
-  balance = @account.cached_balance.to_i
-  floor   = @user.credit_floor.to_i
-  ceiling = @user.credit_ceiling.to_i
-  range   = floor + ceiling
-  zero_pct    = range.positive? ? (floor.to_f / range * 100) : 0
-  balance_pct = range.positive? ? ((balance + floor).to_f / range * 100).clamp(0, 100) : 0
-  level       = @user.level
-  trust_pct   = (@user.trust_score.to_f / 5.0 * 100).round
+  saldo   = @account.cached_balance.to_i
+  fia     = @user.credit_floor.to_i
+  level   = @user.level
+  pasos   = pasos_para_subir(@progression)
 %>
 
-<article class="space-y-8">
-  <header class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-    <div>
-      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Capital comunitario</p>
-      <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Mi billetera</h1>
-      <p class="text-body-md text-on-surface-variant mt-1">Gestión de crédito mutuo y economía social</p>
-    </div>
-    <div class="flex gap-3 flex-wrap">
-      <%= link_to interactions_path,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">handshake</span>
-        Mis interacciones
-      <% end %>
-      <%= link_to posts_path,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors" do %>
-        <span class="material-symbols-outlined" style="font-size:18px">explore</span>
-        Buscar publicaciones
-      <% end %>
-    </div>
+<article class="space-y-6">
+  <header>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Mi billetera</h1>
+    <p class="text-body-md text-on-surface-variant mt-1">Aquí ves tus créditos y lo que hiciste con ellos.</p>
   </header>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <%# Balance principal %>
-    <section class="lg:col-span-2 relative overflow-hidden rounded-xl bg-surface-container-lowest ambient-shadow"
-             style="border-top: 2px solid var(--color-primary, theme('colors.primary')); border-left:1px solid theme('colors.outline-variant'); border-right:1px solid theme('colors.outline-variant'); border-bottom:1px solid theme('colors.outline-variant');">
-      <span class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-        <span class="material-symbols-outlined" style="font-size:120px">account_balance</span>
-      </span>
-
-      <div class="relative z-10 p-6 space-y-6">
-        <div>
-          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Balance actual</p>
-          <div class="flex items-baseline gap-2">
-            <span class="text-headline-lg <%= balance.negative? ? "text-error" : "text-primary" %> font-bold">
-              <%= number_with_delimiter(balance) %>
-            </span>
-            <span class="text-body-lg text-on-surface-variant">C</span>
-          </div>
-          <p class="text-caption text-on-surface-variant mt-1">
-            Disponible: <strong class="text-on-surface"><%= number_with_delimiter(@account.available_balance) %> C</strong>
-            (cached + colchón de <%= number_with_delimiter(floor) %> C del nivel <%= level %>).
-          </p>
-        </div>
-
-        <div>
-          <div class="flex justify-between items-end mb-2">
-            <p class="text-label-md text-on-surface-variant">Rango del nivel <%= level %></p>
-            <p class="text-label-md text-on-surface">
-              <span class="text-error">-<%= number_with_delimiter(floor) %></span>
-              /
-              <span class="text-primary">+<%= number_with_delimiter(ceiling) %></span>
-            </p>
-          </div>
-
-          <%# Barra: zona negativa (rojo claro) + zona positiva (gris) + fill primary %>
-          <div class="h-4 w-full rounded-full overflow-hidden flex relative">
-            <div class="h-full bg-error-container relative" style="width: <%= zero_pct %>%">
-              <div class="absolute right-0 top-0 h-full w-px bg-surface-container-lowest"></div>
-            </div>
-            <div class="h-full bg-surface-container-high relative flex-1">
-              <%# Fill desde el extremo izquierdo (más allá del cero) hasta la posición actual %>
-              <div class="absolute top-0 left-[-9999px] h-full <%= balance.negative? ? "bg-error" : "bg-primary" %>"
-                   style="right: <%= 100 - balance_pct %>%;"></div>
-            </div>
-          </div>
-
-          <div class="flex justify-between mt-2 text-caption text-on-surface-variant">
-            <span>-<%= number_with_delimiter(floor) %></span>
-            <span class="text-center flex-1">0 (nivel cero)</span>
-            <span>+<%= number_with_delimiter(ceiling) %></span>
-          </div>
-
-          <p class="text-caption text-on-surface-variant mt-3 flex items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size:14px">bolt</span>
-            Cap por transacción en este nivel:
-            <strong class="text-on-surface"><%= number_with_delimiter(@user.tx_cap) %> C</strong>
-            (se multiplica por la categoría).
-          </p>
-        </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:items-start">
+    <%# Saldo: un número, en palabras %>
+    <section class="lg:col-span-2 rounded-xl bg-surface-container-lowest border border-outline-variant/60 border-t-4 border-t-primary ambient-shadow p-5 sm:p-6 space-y-5">
+      <div>
+        <% if saldo.negative? %>
+          <p class="text-body-lg text-on-surface">Debes</p>
+          <p class="cifra text-[52px] leading-[56px] text-error"><%= creditos(saldo.abs) %></p>
+          <p class="text-body-md text-on-surface-variant mt-1">Es normal. Lo devuelves cuando alguien te pague por algo.</p>
+        <% else %>
+          <p class="text-body-lg text-on-surface">Tienes</p>
+          <p class="cifra text-[52px] leading-[56px] text-primary"><%= creditos(saldo) %></p>
+          <p class="text-body-md text-on-surface-variant mt-1">Si te falta, la comunidad te fía hasta <%= creditos(fia) %>.</p>
+        <% end %>
       </div>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= link_to new_post_path,
+              class: "inline-flex items-center justify-center gap-2 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors" do %>
+          <span class="material-symbols-outlined" style="font-size:20px">add_circle</span>
+          Ofrece algo y gana créditos
+        <% end %>
+        <%= link_to interactions_path,
+              class: "inline-flex items-center justify-center gap-2 px-6 min-h-12 rounded-full border-2 border-primary text-primary text-label-md hover:bg-primary-fixed/60 transition-colors" do %>
+          <span class="material-symbols-outlined" style="font-size:20px">handshake</span>
+          Mis intercambios
+        <% end %>
+      </div>
+
+      <details class="group rounded-lg bg-surface-container-low border border-outline-variant/60">
+        <summary class="flex items-center justify-between gap-2 px-4 min-h-12 cursor-pointer text-label-md text-on-surface list-none">
+          <span class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-size:20px">help</span>
+            ¿Cómo funciona?
+          </span>
+          <span class="material-symbols-outlined transition-transform group-open:rotate-180" style="font-size:20px">expand_more</span>
+        </summary>
+        <ul class="px-4 pb-4 space-y-3 text-body-md text-on-surface-variant">
+          <li class="flex gap-3">
+            <span class="material-symbols-outlined text-primary shrink-0" style="font-size:20px">sync_alt</span>
+            <span>Lo máximo por intercambio, en tu nivel: <strong class="text-on-surface"><%= creditos(@user.tx_cap) %></strong>.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="material-symbols-outlined text-primary shrink-0" style="font-size:20px">groups</span>
+            <span>Nadie puede juntar más de <strong class="text-on-surface"><%= creditos(@user.credit_ceiling) %></strong>. Es igual para todos.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="material-symbols-outlined text-primary shrink-0" style="font-size:20px">location_on</span>
+            <span>Cada intercambio deja un poquito para tu barrio.</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="material-symbols-outlined text-primary shrink-0" style="font-size:20px">balance</span>
+            <span>Una parte pequeña se borra, para que los créditos no pierdan valor.</span>
+          </li>
+          <li>
+            <%= link_to "Ver todas las reglas", economics_path, class: "inline-flex items-center gap-1 min-h-11 text-primary font-semibold hover:underline underline-offset-4" %>
+          </li>
+        </ul>
+      </details>
     </section>
 
-    <%# Reputación + progresión al próximo nivel %>
-    <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow space-y-4"
-             style="border-top: 2px solid theme('colors.earth-clay'); border-left:1px solid theme('colors.outline-variant'); border-right:1px solid theme('colors.outline-variant'); border-bottom:1px solid theme('colors.outline-variant');">
-      <header>
-        <h3 class="text-headline-md text-on-surface">Tu reputación</h3>
-        <p class="text-caption text-on-surface-variant">Nivel <strong>L<%= level %></strong> · trust <%= number_with_precision(@user.trust_score, precision: 2) %> / 5</p>
+    <%# Nivel y reputación: estrellas y pasos en palabras %>
+    <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/60 border-t-4 border-t-secondary ambient-shadow p-5 sm:p-6 space-y-4">
+      <header class="flex items-center justify-between gap-3">
+        <div>
+          <h2 class="text-headline-md text-on-surface">Nivel <%= level %></h2>
+          <div class="flex items-center gap-2 mt-1">
+            <%= estrellas(@user.trust_score) %>
+            <span class="text-caption text-on-surface-variant">tu reputación</span>
+          </div>
+        </div>
       </header>
 
-      <div class="flex items-center gap-4">
-        <div class="relative w-16 h-16 shrink-0">
-          <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
-            <path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none" stroke="currentColor" stroke-width="3"></path>
-            <path class="text-earth-clay" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none" stroke="currentColor" stroke-dasharray="<%= trust_pct %>, 100" stroke-width="3"></path>
-          </svg>
-          <span class="absolute inset-0 grid place-items-center text-headline-md text-earth-clay font-bold">L<%= level %></span>
+      <% if @next_level_limits %>
+        <div>
+          <p class="text-label-md text-on-surface">Para subir al Nivel <%= level + 1 %>:</p>
+          <ul class="mt-2 space-y-1">
+            <% pasos.each do |paso| %>
+              <li class="flex items-start gap-2 text-body-md <%= paso[:hecho] ? "text-on-surface-variant" : "text-on-surface" %>">
+                <span class="material-symbols-outlined shrink-0 mt-0.5 <%= paso[:hecho] ? "icon-filled text-tertiary" : "text-on-surface-variant" %>" style="font-size:20px"><%= paso[:hecho] ? "check_circle" : "radio_button_unchecked" %></span>
+                <span><%= paso[:texto] %></span>
+              </li>
+            <% end %>
+          </ul>
+          <p class="text-caption text-on-surface-variant mt-3">Al subir, la comunidad te fía más.</p>
         </div>
-        <div class="min-w-0">
-          <% if @next_level_limits %>
-            <p class="text-label-md text-on-surface">Próximo: L<%= level + 1 %></p>
-            <p class="text-caption text-on-surface-variant">
-              +<%= number_with_delimiter(@next_level_limits[:credit_ceiling] - ceiling) %> al techo,
-              +<%= number_with_delimiter(@next_level_limits[:tx_cap] - @user.tx_cap) %> al tx_cap.
-            </p>
-          <% else %>
-            <p class="text-label-md text-on-surface">Nivel máximo alcanzado</p>
-            <p class="text-caption text-on-surface-variant">No hay nivel superior — gracias por sostener la red.</p>
-          <% end %>
-        </div>
-      </div>
-
-      <% if @progression %>
-        <div class="space-y-2 pt-2 border-t border-outline-variant/30">
-          <% @progression.each do |row| %>
-            <div class="flex items-center gap-2 text-caption">
-              <span class="material-symbols-outlined <%= row[:met] ? "text-primary" : "text-on-surface-variant" %> <%= "icon-filled" if row[:met] %>" style="font-size:14px">
-                <%= row[:met] ? "check_circle" : "radio_button_unchecked" %>
-              </span>
-              <span class="text-on-surface flex-1"><%= row[:label] %></span>
-              <span class="text-on-surface-variant font-mono">
-                <% if row[:kind] == :enum %>
-                  <%= row[:current] %>
-                <% elsif row[:unit] == "★" %>
-                  <%= number_with_precision(row[:current], precision: 2) %> / <%= row[:required] %>
-                <% else %>
-                  <%= row[:current] %> / <%= row[:required] %>
-                <% end %>
-              </span>
-            </div>
-          <% end %>
-        </div>
+      <% else %>
+        <p class="text-body-md text-on-surface-variant">Llegaste al nivel más alto. Gracias por sostener la red.</p>
       <% end %>
 
       <%= link_to achievements_path,
-            class: "flex items-center justify-between gap-2 pt-3 mt-1 border-t border-outline-variant/30 text-label-md text-primary hover:text-organic-green-deep transition-colors" do %>
+            class: "flex items-center justify-between gap-2 min-h-11 pt-3 border-t border-outline-variant/60 text-label-md text-primary hover:text-primary-strong transition-colors" do %>
         <span class="flex items-center gap-2">
           <span class="material-symbols-outlined icon-filled" style="font-size:18px">emoji_events</span>
-          Ver todos mis logros
+          Ver mis logros
         </span>
         <span class="material-symbols-outlined" style="font-size:18px">chevron_right</span>
       <% end %>
@@ -160,122 +115,82 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <%# Historial de transacciones %>
-    <section class="lg:col-span-2 rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
-      <header class="flex justify-between items-center mb-4">
-        <h3 class="text-headline-md text-on-surface">Historial</h3>
-        <span class="text-caption text-on-surface-variant"><%= @ledger_entries.size %> movimiento(s)</span>
-      </header>
+    <%# Movimientos en frases %>
+    <section class="lg:col-span-2 rounded-xl bg-surface-container-lowest border border-outline-variant/60 ambient-shadow p-5 sm:p-6">
+      <h2 class="text-headline-md text-on-surface mb-4">Tus movimientos</h2>
 
       <% if @ledger_entries.any? %>
-        <div class="flex flex-col gap-3">
+        <ul class="flex flex-col gap-2">
           <% @ledger_entries.each do |entry| %>
             <%
               tx          = entry.credit_transaction
               interaction = tx&.interaction
               other       = interaction&.other_party(@user)
-              is_debit    = entry.direction == "debit"
-              icon        = is_debit ? "north_east" : "south_west"
-              icon_bg     = is_debit ? "bg-error-container/40 text-error" : "bg-primary-container/30 text-primary"
-              sign        = is_debit ? "-" : "+"
-              color       = is_debit ? "text-error" : "text-primary"
+              pagaste     = entry.direction == "debit"
             %>
-            <%= link_to (interaction ? interaction_path(interaction) : "#"),
-                  class: "flex items-center justify-between gap-3 p-3 rounded-lg bg-warm-surface hover:bg-surface-container transition-colors" do %>
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="w-10 h-10 rounded-full <%= icon_bg %> grid place-items-center shrink-0">
-                  <span class="material-symbols-outlined icon-filled" style="font-size:18px"><%= icon %></span>
+            <li>
+              <%= link_to (interaction ? interaction_path(interaction) : "#"),
+                    class: "flex items-center gap-3 p-3 rounded-lg hover:bg-surface-container-low transition-colors" do %>
+                <span class="w-10 h-10 rounded-full grid place-items-center shrink-0 <%= pagaste ? "bg-error-container text-error" : "bg-primary-fixed text-primary" %>" aria-hidden="true">
+                  <span class="material-symbols-outlined" style="font-size:20px"><%= pagaste ? "arrow_upward" : "arrow_downward" %></span>
                 </span>
-                <div class="min-w-0">
-                  <p class="text-label-md text-on-surface truncate">
+                <div class="min-w-0 flex-1">
+                  <p class="text-body-md text-on-surface">
                     <% if interaction %>
-                      <%= is_debit ? "Pagaste por" : "Te pagaron por" %>
-                      "<%= interaction.post.title %>"
+                      <%= pagaste ? "Pagaste" : "Te pagaron" %>
+                      <strong class="<%= pagaste ? "text-error" : "text-primary" %>"><%= creditos(entry.amount) %></strong>
+                      por «<%= interaction.post.title %>»
                     <% else %>
-                      Movimiento de crédito
+                      <%= pagaste ? "Salieron" : "Entraron" %> <strong><%= creditos(entry.amount) %></strong>
                     <% end %>
                   </p>
-                  <p class="text-caption text-on-surface-variant truncate">
+                  <p class="text-caption text-on-surface-variant">
                     <% if other %>
-                      <%= is_debit ? "a" : "de" %> @<%= other.username || other.email_address %>
-                      <% if tx&.territory %>
-                        · <%= tx.territory.name %>
-                      <% end %>
-                    <% else %>
-                      <%= l(entry.created_at, format: :short) rescue entry.created_at.to_s %>
+                      <%= pagaste ? "A" : "De" %> @<%= other.username || other.email_address %> ·
+                    <% end %>
+                    <%= l(entry.created_at.to_date, format: :long) rescue entry.created_at.to_date %>
+                    <% if pagaste && tx && tx.community_amount.to_i.positive? %>
+                      · <%= creditos(tx.community_amount) %> para tu barrio
                     <% end %>
                   </p>
                 </div>
-              </div>
-              <div class="text-right shrink-0">
-                <p class="text-headline-md <%= color %> font-semibold">
-                  <%= sign %><%= number_with_delimiter(entry.amount) %>
-                </p>
-                <% if is_debit && tx %>
-                  <p class="text-caption text-earth-clay flex items-center justify-end gap-1">
-                    <span class="material-symbols-outlined" style="font-size:12px">volunteer_activism</span>
-                    <%= tx.community_amount %> al fondo · <%= tx.burn_amount %> a quema
-                  </p>
-                <% end %>
-              </div>
-            <% end %>
+              <% end %>
+            </li>
           <% end %>
-        </div>
+        </ul>
       <% else %>
-        <div class="text-center py-10">
+        <div class="text-center py-8">
           <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">inbox</span>
-          <p class="text-body-md text-on-surface-variant">Todavía no hay movimientos.</p>
-          <p class="text-caption text-on-surface-variant mt-1">
-            Inicia una interacción con créditos para empezar a moverte.
-          </p>
+          <p class="text-body-md text-on-surface-variant">Todavía no tienes movimientos.</p>
+          <p class="text-caption text-on-surface-variant mt-1">Aparecen cuando cierras tu primer intercambio.</p>
         </div>
       <% end %>
     </section>
 
-    <%# Columna de info %>
-    <aside class="flex flex-col gap-4">
-      <%# Quema %>
-      <div class="rounded-xl bg-surface-container-low p-5 border border-outline-variant/30">
-        <header class="flex items-center gap-2 mb-2 text-error">
-          <span class="material-symbols-outlined icon-filled" style="font-size:18px">local_fire_department</span>
-          <h3 class="text-label-md font-semibold text-on-surface">Quema de créditos</h3>
-        </header>
-        <p class="text-body-md text-on-surface-variant">
-          Cada transacción destina <strong class="text-on-surface"><%= @burn_percent %>%</strong> a la
-          cuenta de quema global. Esto desincentiva acumular, mantiene la
-          circulación activa y le da estabilidad de largo plazo al sistema.
-        </p>
-      </div>
-
-      <%# Fondo territorial %>
+    <%# Tu barrio %>
+    <aside>
       <% if @territory %>
         <% community = @territory.community_account %>
         <%= link_to territory_path(@territory.slug),
-              class: "block rounded-xl bg-primary/5 p-5 border border-primary/20 hover:bg-primary/10 transition-colors" do %>
-          <header class="flex items-center gap-2 mb-2 text-primary">
-            <span class="material-symbols-outlined icon-filled" style="font-size:18px">volunteer_activism</span>
-            <h3 class="text-label-md font-semibold text-on-surface">Fondo de <%= @territory.name %></h3>
-            <span class="ml-auto material-symbols-outlined text-primary" style="font-size:16px">arrow_forward</span>
-          </header>
-          <div class="flex items-end gap-2 mb-2">
-            <span class="text-headline-md text-primary font-bold"><%= number_with_delimiter(community&.cached_balance.to_i) %></span>
-            <span class="text-caption text-on-surface-variant mb-0.5">C acumulados</span>
-          </div>
-          <p class="text-caption text-on-surface-variant">
-            Cada transacción aporta <strong><%= @territory_percent %>%</strong> a este fondo.
-            La comunidad decide cómo se gasta (Fase 2: propuestas).
+              class: "block rounded-xl bg-surface-container-lowest border border-outline-variant/60 border-t-[6px] border-t-signal ambient-shadow p-5 hover:border-outline transition-colors" do %>
+          <p class="text-label-md text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined icon-filled text-primary" style="font-size:20px">volunteer_activism</span>
+            Fondo de <%= @territory.name %>
           </p>
+          <p class="cifra text-[32px] leading-10 text-primary mt-2"><%= creditos(community&.cached_balance) %></p>
+          <p class="text-body-md text-on-surface-variant mt-1">Es de todo el barrio. Los vecinos votan en qué usarlo.</p>
+          <span class="inline-flex items-center gap-1 min-h-11 text-label-md text-primary">
+            Ver tu barrio
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+          </span>
         <% end %>
       <% else %>
-        <div class="rounded-xl bg-surface-container-low p-5 border border-outline-variant/30">
-          <header class="flex items-center gap-2 mb-2 text-on-surface-variant">
-            <span class="material-symbols-outlined" style="font-size:18px">location_off</span>
-            <h3 class="text-label-md font-semibold text-on-surface">Fondo territorial</h3>
-          </header>
-          <p class="text-body-md text-on-surface-variant">
-            No tenemos tu ubicación. Compártela desde el feed para ver el fondo
-            de tu comuna.
+        <div class="rounded-xl bg-surface-container-low border border-outline-variant/60 p-5">
+          <p class="text-label-md text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant" style="font-size:20px">location_off</span>
+            Fondo de tu barrio
           </p>
+          <p class="text-body-md text-on-surface-variant mt-2">Comparte tu ubicación en el inicio para verlo.</p>
         </div>
       <% end %>
     </aside>

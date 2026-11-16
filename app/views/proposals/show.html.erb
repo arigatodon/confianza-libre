@@ -8,7 +8,7 @@
   status_color  = case @proposal.status
                   when "open"     then "bg-primary-container/20 text-primary"
                   when "passed"   then "bg-primary text-on-primary"
-                  when "executed" then "bg-organic-green-deep text-on-primary"
+                  when "executed" then "bg-primary-strong text-on-primary"
                   when "failed"   then "bg-error-container text-on-error-container"
                   when "canceled" then "bg-surface-container text-on-surface-variant"
                   end
@@ -43,7 +43,7 @@
                     class: "text-primary font-semibold hover:underline" %>
         <% if @proposal.beneficiary %>
           ·
-          Beneficiario:
+          para
           <%= link_to "@#{@proposal.beneficiary.username}",
                       profile_path(@proposal.beneficiary.username || @proposal.beneficiary.id),
                       class: "text-primary font-semibold hover:underline" %>
@@ -57,11 +57,9 @@
     <div class="grid grid-cols-2 gap-4">
       <% if @proposal.fund_transfer? %>
         <div>
-          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Monto solicitado</p>
-          <div class="flex items-baseline gap-1">
-            <span class="text-headline-md text-primary font-bold"><%= number_with_delimiter(@proposal.amount) %></span>
-            <span class="text-caption text-on-surface-variant">C del fondo de <%= @territory.name %></span>
-          </div>
+          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Pide</p>
+          <p class="cifra text-2xl text-primary"><%= creditos(@proposal.amount) %></p>
+          <p class="text-caption text-on-surface-variant">del fondo de <%= @territory.name %></p>
         </div>
       <% elsif @proposal.new_category? %>
         <div>
@@ -97,53 +95,23 @@
     </div>
   </section>
 
-  <%# Estado de la votación %>
-  <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30">
-    <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Resultado de la votación</h2>
-    <%
-      yes = @proposal.yes_votes
-      no  = @proposal.no_votes
-      total = @proposal.total_votes
-      yes_pct = total.zero? ? 0 : (yes.to_f / total * 100).round
-    %>
-    <div class="flex items-end gap-4 mb-3">
-      <div>
-        <p class="text-headline-md text-primary font-bold"><%= yes %></p>
-        <p class="text-caption text-on-surface-variant">a favor</p>
-      </div>
-      <div>
-        <p class="text-headline-md text-error font-bold"><%= no %></p>
-        <p class="text-caption text-on-surface-variant">en contra</p>
-      </div>
-      <div class="ml-auto text-right">
-        <p class="text-label-md text-on-surface"><%= total %> / <%= @proposal.quorum_required %> quórum</p>
-        <p class="text-caption text-on-surface-variant">Mayoría requerida: <%= @proposal.majority_required_pct %>%</p>
-      </div>
-    </div>
-
-    <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden flex">
-      <div class="h-full bg-primary" style="width: <%= yes_pct %>%"></div>
-      <div class="h-full bg-error" style="width: <%= 100 - yes_pct %>%"></div>
-    </div>
-  </section>
-
   <%# Botones de voto / ejecutar / cancelar %>
   <% if can_vote %>
     <section class="flex flex-wrap items-center gap-3">
       <%= button_to vote_proposal_path(@proposal, position: 1), method: :patch,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full #{my_vote&.in_favor? ? "bg-primary text-on-primary" : "border border-primary text-primary hover:bg-primary-fixed/30"}" do %>
+            class: "inline-flex items-center gap-1.5 px-6 min-h-12 rounded-full text-label-md cursor-pointer #{my_vote&.in_favor? ? "bg-primary text-on-primary" : "border-2 border-primary text-primary hover:bg-primary-fixed/60"}" do %>
         <span class="material-symbols-outlined icon-filled" style="font-size:18px">thumb_up</span>
-        <%= my_vote&.in_favor? ? "Tu voto: a favor" : "A favor" %>
+        <%= my_vote&.in_favor? ? "Votaste a favor" : "Voto a favor" %>
       <% end %>
 
       <%= button_to vote_proposal_path(@proposal, position: -1), method: :patch,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full #{my_vote&.against? ? "bg-error text-on-error" : "border border-error text-error hover:bg-error-container"}" do %>
+            class: "inline-flex items-center gap-1.5 px-6 min-h-12 rounded-full text-label-md cursor-pointer #{my_vote&.against? ? "bg-error text-on-error" : "border-2 border-error text-error hover:bg-error-container"}" do %>
         <span class="material-symbols-outlined icon-filled" style="font-size:18px">thumb_down</span>
-        <%= my_vote&.against? ? "Tu voto: en contra" : "En contra" %>
+        <%= my_vote&.against? ? "Votaste en contra" : "Voto en contra" %>
       <% end %>
 
       <% if is_beneficiary %>
-        <span class="text-caption text-on-surface-variant italic">Sos el beneficiario propuesto.</span>
+        <span class="text-caption text-on-surface-variant">Tú recibirías estos créditos.</span>
       <% end %>
     </section>
   <% elsif viewer && is_proposer && @proposal.passed? %>
@@ -170,7 +138,7 @@
         </p>
       <% end %>
       <%= button_to execute_proposal_path(@proposal), method: :patch,
-            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep #{"opacity-50 cursor-not-allowed" if execute_blocked}",
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong #{"opacity-50 cursor-not-allowed" if execute_blocked}",
             disabled: execute_blocked,
             form: { data: { turbo_confirm: execute_copy[3] } } do %>
         <span class="material-symbols-outlined icon-filled" style="font-size:18px"><%= execute_copy[1] %></span>
@@ -187,6 +155,35 @@
       <% end %>
     </section>
   <% end %>
+
+  <%# Estado de la votación, en palabras %>
+  <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/60 space-y-3">
+    <h2 class="text-label-md text-on-surface">Cómo va la votación</h2>
+    <%
+      yes = @proposal.yes_votes
+      no  = @proposal.no_votes
+      total = @proposal.total_votes
+      yes_pct = total.zero? ? 0 : (yes.to_f / total * 100).round
+      faltan_votos = [ @proposal.quorum_required.to_i - total, 0 ].max
+      de_cada_10 = (@proposal.majority_required_pct.to_f / 10).ceil
+    %>
+    <p class="text-body-lg text-on-surface">
+      <strong class="text-primary"><%= yes %> a favor</strong> · <strong class="text-error"><%= no %> en contra</strong>
+    </p>
+    <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden flex" aria-hidden="true">
+      <% if total.positive? %>
+        <div class="h-full bg-primary" style="width: <%= yes_pct %>%"></div>
+        <div class="h-full bg-error" style="width: <%= 100 - yes_pct %>%"></div>
+      <% end %>
+    </div>
+    <ul class="text-body-md text-on-surface-variant space-y-1">
+      <% if @proposal.open? %>
+        <li><%= faltan_votos.positive? ? "#{faltan_votos == 1 ? 'Falta' : 'Faltan'} #{contar(faltan_votos, 'voto')} para que la votación cuente." : "Ya votó suficiente gente para que cuente." %></li>
+      <% end %>
+      <li>Se aprueba si al menos <%= de_cada_10 %> de cada 10 votos son a favor.</li>
+    </ul>
+  </section>
+
 
   <% if @proposal.executed? %>
     <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30">

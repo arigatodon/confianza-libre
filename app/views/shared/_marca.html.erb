@@ -1,0 +1,15 @@
+<%# Marca de Confianza: dos mitades iguales frente a frente (las dos partes de
+    cada intercambio) y al centro lo común (el punto amarillo). Ver
+    docs/identidad-visual.md. Mismo dibujo que app/assets/images/confianza-marca.svg.
+    Locals:
+      clase: tamaño del <svg> (default "w-9 h-9")
+      placa: true dibuja la placa azul (default); false para usar sobre la franja azul %>
+<% placa = local_assigns.fetch(:placa, true) %>
+<svg viewBox="0 0 512 512" class="shrink-0 <%= local_assigns[:clase] || "w-9 h-9" %>" aria-hidden="true" focusable="false">
+  <% if placa %><rect width="512" height="512" rx="112" class="fill-primary"/><% end %>
+  <g fill="none" stroke="#fff" stroke-width="72">
+    <path d="M212.7 114.5A148 148 0 0 0 212.7 397.5"/>
+    <path d="M299.3 397.5A148 148 0 0 0 299.3 114.5"/>
+  </g>
+  <circle cx="256" cy="256" r="52" class="fill-signal"/>
+</svg>

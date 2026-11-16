@@ -1,20 +1,27 @@
-<% content_for :title, "Mis interacciones" %>
+<% content_for :title, "Mis intercambios" %>
 
 <section class="space-y-6">
   <header class="space-y-1">
-    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Tu actividad</p>
-    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Interacciones</h1>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Mis intercambios</h1>
+    <p class="text-body-md text-on-surface-variant">Lo que pediste y lo que te pidieron. Entra para ver qué sigue.</p>
   </header>
 
   <% statuses = Interaction::STATUSES.keys.map(&:to_s) %>
-  <nav class="flex flex-wrap gap-2">
-    <%= link_to "Todas", interactions_path,
-          class: "px-3 py-1.5 rounded-full text-label-md transition-colors #{@filter.nil? ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
-    <% statuses.each do |s| %>
-      <%= link_to Interaction::STATUS_LABELS_ES[s], interactions_path(status: s),
-            class: "px-3 py-1.5 rounded-full text-label-md transition-colors #{@filter == s ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
-    <% end %>
-  </nav>
+  <details class="group" <%= "open" if @filter %>>
+    <summary class="inline-flex items-center gap-1.5 min-h-11 cursor-pointer text-label-md text-on-surface">
+      <span class="material-symbols-outlined" style="font-size:20px">filter_list</span>
+      <%= @filter ? "Mostrando: #{Interaction::STATUS_LABELS_ES[@filter]}" : "Filtrar" %>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180" style="font-size:18px">expand_more</span>
+    </summary>
+    <nav class="flex flex-wrap gap-2 pt-2">
+      <%= link_to "Todos", interactions_path,
+            class: "px-4 min-h-11 inline-flex items-center rounded-full text-label-md transition-colors #{@filter.nil? ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
+      <% statuses.each do |s| %>
+        <%= link_to Interaction::STATUS_LABELS_ES[s], interactions_path(status: s),
+              class: "px-4 min-h-11 inline-flex items-center rounded-full text-label-md transition-colors #{@filter == s ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
+      <% end %>
+    </nav>
+  </details>
 
   <% viewer = Current.session.user %>
 
@@ -22,7 +29,7 @@
     <section class="space-y-3">
       <h2 class="text-headline-md text-on-surface flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">north_east</span>
-        Enviadas
+        Lo que pediste
         <span class="text-caption text-on-surface-variant font-normal">(<%= @sent.size %>)</span>
       </h2>
       <% if @sent.any? %>
@@ -30,14 +37,14 @@
           <%= render "card", interaction: i, viewer: viewer %>
         <% end %>
       <% else %>
-        <p class="text-body-md text-on-surface-variant italic">Sin interacciones enviadas.</p>
+        <p class="text-body-md text-on-surface-variant">Todavía no pides nada. <%= link_to "Busca en el mapa", explore_path, class: "text-primary font-semibold hover:underline" %>.</p>
       <% end %>
     </section>
 
     <section class="space-y-3">
       <h2 class="text-headline-md text-on-surface flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">south_west</span>
-        Recibidas
+        Lo que te pidieron
         <span class="text-caption text-on-surface-variant font-normal">(<%= @received.size %>)</span>
       </h2>
       <% if @received.any? %>
@@ -45,7 +52,7 @@
           <%= render "card", interaction: i, viewer: viewer %>
         <% end %>
       <% else %>
-        <p class="text-body-md text-on-surface-variant italic">Sin interacciones recibidas.</p>
+        <p class="text-body-md text-on-surface-variant">Nadie te ha pedido nada todavía. <%= link_to "Publica lo que ofreces", new_post_path, class: "text-primary font-semibold hover:underline" %>.</p>
       <% end %>
     </section>
   </div>

@@ -2,7 +2,7 @@
 
 Documento de diseño del sistema económico. Es la **constitución** del sistema: cualquier cambio acá rompe expectativas de usuarios reales. Tocar con cuidado.
 
-Estado: **v0.2** — parámetros confirmados con Igor el 2026-05-17. Pendiente: implementación.
+Estado: **v0.3** — 2026-11-16: techo común y niveles acotados (ver § 4 y § 9). v0.2 confirmada con Igor el 2026-05-17.
 
 ---
 
@@ -25,7 +25,7 @@ Existen 4 tipos (`account_type`):
 
 | Tipo        | Propietario           | Puede ir negativo | Propósito |
 |-------------|-----------------------|-------------------|-----------|
-| `user`      | un `User`             | Sí (hasta `-credit_floor`, techo en `credit_ceiling`) | Saldo individual. Una por usuario. |
+| `user`      | un `User`             | Sí (hasta `-credit_floor`; techo común `credit_ceiling`) | Saldo individual. Una por usuario. |
 | `community` | un `Territory`        | No                | Fondo territorial. Acumula impuestos del territorio. Se gasta vía gobernanza. |
 | `burn`      | global (1 sola)       | No (sólo crece)   | Lleva contabilidad de lo destruido. Nunca se gasta. |
 | `system`    | global                | -                 | Reservado para ajustes administrativos (refunds, correcciones). |
@@ -76,22 +76,30 @@ Estos porcentajes son **globales y configurables** (tabla `economic_parameters`)
 
 ## 4. Capacidad crediticia (gamificación)
 
+**Principio (v0.3): la confianza te da crédito, no riqueza.**
+
 El sistema **no** maneja un solo "límite". Maneja **dos**:
 
-- `credit_floor` = límite negativo (cuánto puedo "deber" al sistema). Habilita dar antes de tener.
-- `credit_ceiling` = límite positivo (cuánto puedo acumular). Soft cap anti-acumulación.
+- `credit_floor` = límite negativo (cuánto puedo "deber" al sistema). Habilita dar antes de tener. **Depende del nivel**: es cuánto me fía la comunidad, y crece con mi trayectoria.
+- `credit_ceiling` = límite positivo (cuánto puedo acumular). **Es el mismo para todas las personas** (parámetro global `credit_ceiling`, 5.000 C) y solo cambia por una propuesta global votada por la red. Ningún nivel, reputación ni antigüedad permite acumular más que otra persona.
+
+> **Por qué cambió en v0.3.** En v0.2 el techo subía 10× por nivel (1.000 → 10.000.000 C): quien tenía más reputación podía acumular 10.000 veces más. Eso convertía la reputación en riqueza y contradecía el manifiesto («todos parten de cero», anti-acumulación, «la confianza no se compra»). Un puntaje que decide cuánto puedes tener es justo el mecanismo de control que Confianza quiere evitar. El piso y el tope sí siguen dependiendo del nivel porque son defensas contra el impago y las cuentas falsas, pero en un rango acotado (20×, no 10.000×).
 
 Y un tercer concepto crítico: **Trust Capacity** = el monto máximo permitido **por una sola transacción**, que no es lo mismo que el saldo. Aunque tenga 5.000 C disponibles, si soy nivel 1 no puedo mover 5.000 C en una sola interacción — el sistema limita la *velocidad* de movimiento, no sólo el *stock*.
 
 ### 4.1 Niveles base
 
-| Nivel | `credit_floor` | `credit_ceiling` | Max por transacción (`tx_cap`) |
-|-------|---------------:|-----------------:|-------------------------------:|
-| **1** |          −100 |            1.000 |                            50 |
-| **2** |        −1.000 |           10.000 |                           250 |
-| **3** |       −10.000 |          100.000 |                         1.000 |
-| **4** |      −100.000 |        1.000.000 |                        10.000 |
-| **5** |    −1.000.000 |       10.000.000 |                       100.000 |
+| Nivel | `credit_floor` | Max por transacción (`tx_cap`) |
+|-------|---------------:|-------------------------------:|
+| **1** |          −100 |                            50 |
+| **2** |          −250 |                           100 |
+| **3** |          −500 |                           200 |
+| **4** |        −1.000 |                           350 |
+| **5** |        −2.000 |                           500 |
+
+Techo (`credit_ceiling`): **5.000 C para todos los niveles** (gobernable, rango seguro 1.000–50.000, solo global). El piso máximo (−2.000) queda siempre por debajo del techo común: nadie puede deber más de lo que cualquiera puede acumular.
+
+Implementación: `CreditLimitCalculator::LEVELS` (piso y tope) y `CreditLimitCalculator.common_ceiling`; `User#credit_ceiling` lee el parámetro en vivo. La columna `users.credit_ceiling` quedó obsoleta (ignorada; se elimina en una migración posterior).
 
 Todos los usuarios nuevos arrancan en **Nivel 1** tras verificar email (antes, Nivel 0 = sólo recibir, sin capacidad de iniciar transacciones).
 
@@ -120,7 +128,7 @@ Los umbrales exactos los calibra `CreditLimitCalculator` y se ajustan con datos 
 
 El nivel **puede bajar** si el `trust_score` cae o el % de cumplimiento se deteriora.
 
-> **Por qué el Nivel 5 exige 180 días.** La antigüedad crece con el cupo (7 → 30 → 90 → 180) porque cada nivel aumenta el pasivo que la comunidad absorbe ante un impago, y porque `level ≥ 3` otorga moderación. Sin un piso temporal en el tope, una granja de cuentas podría inflar 200 interacciones entre 100 cuentas cómplices y saltar al piso −1.000.000 en días. El tiempo es la defensa más barata contra ataques sibilas.
+> **Por qué el Nivel 5 exige 180 días.** La antigüedad crece con el cupo (7 → 30 → 90 → 180) porque cada nivel aumenta el pasivo que la comunidad absorbe ante un impago. Sin un piso temporal en el tope, una granja de cuentas podría inflar 200 interacciones entre 100 cuentas cómplices y saltar al piso máximo en días. (Desde 2026-07 la moderación ya no depende del nivel; desde v0.3 el piso máximo es −2.000.) El tiempo es la defensa más barata contra ataques sibilas.
 
 ### 4.3 Multiplicadores por categoría
 
@@ -148,7 +156,7 @@ receiver.account.cached_balance + receiver_amount ≤ user.credit_ceiling
 
 ### 4.4 ¿Qué pasa en los límites?
 
-- **Si una transacción haría que el receptor supere su `credit_ceiling`**: el excedente se redirige al fondo territorial. Razón: filosofía anti-acumulación. El receptor no pierde la transacción, pero el "premio" por estar topado lo paga la comunidad.
+- **Si una transacción haría que el receptor supere el techo común**: el excedente se redirige al fondo territorial. Razón: filosofía anti-acumulación. El receptor no pierde la transacción, pero lo que pasa del techo vuelve a lo común.
 - **Si el sender intenta superar `tx_cap` para esa categoría**: el sistema rechaza con mensaje claro ("máximo permitido para tu nivel en esta categoría: X C").
 - **Si el sender no tiene capacidad**: rechazo.
 
@@ -285,7 +293,16 @@ Hoy el modelo `Account`, `Transaction`, `LedgerEntry` ya existen pero les faltan
 | % quema / territorial | 2 % quema + 3 % territorial (receptor 95 %).                            |
 | Quién decide el monto | Creador sugiere → participante negocia → sistema valida (ver § 4.5).    |
 | Territorios MVP       | Divisiones administrativas vía geocodificación. Sin polígonos custom.   |
-| Tabla de niveles      | Nueva tabla §4.1 con piso/techo/tx_cap por nivel (rango 100 → 10 M C).  |
+| Tabla de niveles      | Nueva tabla §4.1 con piso/techo/tx_cap por nivel (rango 100 → 10 M C). **Reemplazada en v0.3.** |
+
+## 9b. Decisiones v0.3 (2026-11-16, Igor)
+
+| Pregunta | Decisión |
+|----------|----------|
+| ¿El nivel da más capacidad de acumular? | **No.** Techo común `credit_ceiling` = 5.000 C para todos, gobernable solo por propuesta global. |
+| Rango de piso y tope por nivel | Acotado a 20×: piso −100 → −2.000, tope 50 → 500. |
+| ¿Quién puede proponer cambios de reglas? | Cualquiera desde nivel 1 (`proposal_rules_min_level` = 1, ahora gobernable). El quórum y la mayoría filtran. |
+| Migración | `20261116120000_techo_comun_y_niveles_acotados` recalcula piso y tope de todos los usuarios según su nivel (incluye bonus de padrinazgo). |
 
 ## 10. Ideas para Fase 2 / 3
 

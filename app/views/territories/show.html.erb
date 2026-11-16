@@ -12,7 +12,7 @@
 <article class="space-y-8">
   <header class="space-y-2">
     <div class="flex items-center gap-2 text-caption text-on-surface-variant">
-      <%= link_to "Territorios", territories_path, class: "hover:text-primary" %>
+      <%= link_to "Territorios", territories_path, class: "hover:text-primary inline-flex items-center min-h-11" %>
       <span>/</span>
       <span>#<%= @territory.id %></span>
     </div>
@@ -20,63 +20,63 @@
     <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
       <%= @territory.name %>
     </h1>
-    <p class="text-body-md text-on-surface-variant flex items-center gap-2">
+    <p class="text-body-md text-on-surface-variant flex flex-wrap items-center gap-x-2 gap-y-1">
       <span class="material-symbols-outlined" style="font-size:16px">location_on</span>
       <%= [ @territory.admin1, @territory.country_code ].compact.join(" · ") %>
       <% if @territory.source == "admin" %>
-        <span class="text-caption px-2 py-0.5 rounded-full bg-surface-container">División administrativa</span>
+        <span class="text-caption px-2 py-0.5 rounded-md bg-surface-container whitespace-nowrap">División administrativa</span>
       <% end %>
     </p>
   </header>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <%# Fondo principal %>
-    <section class="lg:col-span-2 relative overflow-hidden rounded-xl bg-primary/5 p-6 ambient-shadow"
-             style="border-top: 2px solid theme('colors.primary'); border-left:1px solid theme('colors.primary'); border-right:1px solid theme('colors.primary'); border-bottom:1px solid theme('colors.primary'); border-style: solid; border-width: 1px;">
-      <span class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+    <%# El fondo es "lo común": lleva el amarillo del punto de la marca. %>
+    <section class="lg:col-span-2 relative overflow-hidden rounded-xl bg-surface-container-lowest border border-outline-variant/60 border-t-[6px] border-t-signal p-5 sm:p-6 ambient-shadow">
+      <span class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none text-primary" aria-hidden="true">
         <span class="material-symbols-outlined icon-filled" style="font-size:120px">volunteer_activism</span>
       </span>
 
       <div class="relative z-10 space-y-4">
         <div>
-          <p class="text-label-md text-primary uppercase tracking-wider mb-1">Fondo comunitario</p>
+          <p class="text-label-md text-primary uppercase tracking-wider mb-1 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-signal ring-2 ring-primary" aria-hidden="true"></span>Fondo comunitario</p>
           <div class="flex items-baseline gap-2">
-            <span class="text-headline-lg text-primary font-bold"><%= number_with_delimiter(fund_balance) %></span>
-            <span class="text-body-lg text-on-surface-variant">C acumulados</span>
+            <span class="cifra text-[44px] leading-[48px] text-primary"><%= creditos(fund_balance) %></span>
           </div>
         </div>
 
         <p class="text-body-md text-on-surface-variant max-w-prose">
-          Cada transacción en este territorio aporta un porcentaje al fondo
-          (hoy <strong class="text-on-surface"><%= EconomicParameter.get_decimal("territory_percent", 3.0) %>%</strong>).
-          Cuando se habilite gobernanza, la comunidad votará propuestas para
-          destinar estos créditos a proyectos locales.
+          Cada intercambio aquí deja un poquito para este fondo. Los vecinos votan en qué usarlo.
         </p>
+        <% if authenticated? && @new_proposal %>
+          <a href="#proponer" onclick="document.getElementById('proponer').open = true" class="inline-flex items-center gap-2 px-6 min-h-12 rounded-full bg-primary text-on-primary text-label-md hover:bg-primary-strong transition-colors">
+            <span class="material-symbols-outlined" style="font-size:20px">add</span>
+            Proponer en qué usarlo
+          </a>
+        <% end %>
       </div>
     </section>
 
-    <%# Stats column %>
-    <aside class="grid grid-cols-3 lg:grid-cols-1 gap-3">
-      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
-        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Transacciones</p>
-        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:transactions]) %></p>
-      </div>
-      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
-        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Personas activas</p>
-        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:distinct_users]) %></p>
-      </div>
-      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
-        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Publicaciones con economía</p>
-        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:distinct_posts]) %></p>
-      </div>
+    <%# Lo que pasa en el barrio, en palabras %>
+    <aside class="rounded-xl bg-surface-container-lowest border border-outline-variant/60 ambient-shadow p-5 space-y-3">
+      <p class="text-label-md text-on-surface">En este barrio</p>
+      <ul class="space-y-2 text-body-md text-on-surface">
+        <li class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary" style="font-size:20px">groups</span>
+          <%= contar(@stats[:distinct_users], "vecino activo", "vecinos activos") %>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary" style="font-size:20px">handshake</span>
+          <%= contar(@stats[:transactions], "intercambio cerrado", "intercambios cerrados") %>
+        </li>
+      </ul>
     </aside>
   </div>
 
   <%# Historial de aportes %>
   <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
     <header class="flex justify-between items-center mb-4">
-      <h2 class="text-headline-md text-on-surface">Aportes recientes al fondo</h2>
-      <span class="text-caption text-on-surface-variant"><%= @recent_transactions.size %> de <%= @stats[:transactions] %></span>
+      <h2 class="text-headline-md text-on-surface">Lo último que entró al fondo</h2>
     </header>
 
     <% if @recent_transactions.any? %>
@@ -84,14 +84,14 @@
         <% @recent_transactions.each do |tx| %>
           <% i = tx.interaction %>
           <%= link_to (i&.post ? post_path(i.post) : "#"),
-                class: "flex items-center justify-between gap-3 p-3 rounded-lg bg-warm-surface hover:bg-surface-container transition-colors" do %>
+                class: "flex items-center justify-between gap-3 p-3 rounded-lg bg-surface-container-lowest hover:bg-surface-container transition-colors" do %>
             <div class="flex items-center gap-3 min-w-0">
               <span class="w-10 h-10 rounded-full bg-primary-container/30 text-primary grid place-items-center shrink-0">
                 <span class="material-symbols-outlined icon-filled" style="font-size:18px">volunteer_activism</span>
               </span>
               <div class="min-w-0">
                 <p class="text-label-md text-on-surface truncate">
-                  <%= i&.post&.title || "Transacción ##{tx.id}" %>
+                  <%= i&.post&.title || "Intercambio" %>
                 </p>
                 <p class="text-caption text-on-surface-variant truncate">
                   <% if i %>
@@ -101,35 +101,31 @@
                 </p>
               </div>
             </div>
-            <div class="text-right shrink-0">
-              <p class="text-headline-md text-primary font-semibold">
-                +<%= number_with_delimiter(tx.community_amount) %>
-              </p>
-              <p class="text-caption text-on-surface-variant">de <%= tx.total_amount %> C</p>
-            </div>
+            <p class="cifra text-lg text-primary shrink-0">+<%= creditos(tx.community_amount) %></p>
           <% end %>
         <% end %>
       </div>
     <% else %>
       <div class="text-center py-10">
         <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">savings</span>
-        <p class="text-body-md text-on-surface-variant">Todavía no hubo aportes al fondo.</p>
-        <p class="text-caption text-on-surface-variant mt-1">
-          La primera transacción en este territorio va a aparecer aquí.
-        </p>
+        <p class="text-body-md text-on-surface-variant">Todavía no entra nada al fondo.</p>
+        <p class="text-caption text-on-surface-variant mt-1">Aparece aquí con el primer intercambio del barrio.</p>
       </div>
     <% end %>
   </section>
 
   <%# Reglas locales vs heredadas (Fase 3.1) %>
-  <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
-    <header class="flex items-center gap-2 mb-4">
-      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">balance</span>
-      <h2 class="text-headline-md text-on-surface flex-1">Reglas de la comuna</h2>
-    </header>
+  <details class="group rounded-xl bg-surface-container-lowest ambient-shadow border border-outline-variant/60">
+    <summary class="flex items-center justify-between gap-2 px-5 min-h-14 cursor-pointer">
+      <span class="flex items-center gap-2 text-label-md text-on-surface">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">balance</span>
+        Ver las reglas de este barrio
+      </span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180" style="font-size:22px">expand_more</span>
+    </summary>
+    <div class="px-5 pb-5">
     <p class="text-caption text-on-surface-variant mb-3">
-      Cada regla rige con el valor global de la red salvo que esta comuna la haya
-      cambiado por votación (marcada como <strong>local</strong>).
+      Son las mismas de toda la red, salvo las que este barrio cambió votando (dicen <strong>Local</strong>).
     </p>
     <dl class="divide-y divide-outline-variant/30">
       <% @rules.each do |r| %>
@@ -146,23 +142,22 @@
         </div>
       <% end %>
     </dl>
-  </section>
+    </div>
+  </details>
 
   <%# Propuestas %>
   <section class="space-y-4">
     <header class="flex items-center gap-2">
       <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">how_to_vote</span>
       <h2 class="text-headline-md text-on-surface flex-1">Propuestas</h2>
-      <span class="text-caption text-on-surface-variant">
-        <%= @proposals.size %> activa(s)
-      </span>
     </header>
+    <p class="text-body-md text-on-surface-variant -mt-2">Ideas de los vecinos para el barrio. Entra y vota.</p>
 
     <% if authenticated? && @new_proposal %>
-      <details <%= "open" if @new_proposal.errors.any? %> class="rounded-xl border border-outline-variant/30 bg-surface-container-low/30 p-1">
-        <summary class="cursor-pointer px-4 py-3 text-label-md text-primary flex items-center gap-2">
-          <span class="material-symbols-outlined" style="font-size:18px">add</span>
-          Proponer un gasto del fondo
+      <details id="proponer" <%= "open" if @new_proposal.errors.any? %> class="rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-1 scroll-mt-20">
+        <summary class="cursor-pointer px-4 min-h-12 text-label-md text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:20px">add</span>
+          Hacer una propuesta
         </summary>
         <div class="p-2">
           <%= render "proposals/form", territory: @territory, proposal: @new_proposal %>
@@ -179,9 +174,9 @@
     <% else %>
       <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-6 text-center">
         <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:32px">how_to_vote</span>
-        <p class="text-body-md text-on-surface-variant">Todavía nadie propuso cómo usar este fondo.</p>
+        <p class="text-body-md text-on-surface-variant">Todavía no hay propuestas.</p>
         <% if authenticated? %>
-          <p class="text-caption text-on-surface-variant mt-1">Anímate a ser la primera persona.</p>
+          <p class="text-caption text-on-surface-variant mt-1">Puedes hacer la primera.</p>
         <% end %>
       </div>
     <% end %>

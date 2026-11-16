@@ -24,7 +24,7 @@
   </header>
 
   <div id="messages-conv-<%= @conversation.id %>"
-       class="space-y-2 max-h-[60vh] overflow-y-auto rounded-xl bg-warm-surface p-3 min-h-44 border border-outline-variant/30"
+       class="space-y-2 max-h-[60vh] overflow-y-auto rounded-xl bg-surface-container-lowest p-3 min-h-44 border border-outline-variant/30"
        data-chat-target="list">
     <% if @messages.any? %>
       <%= render @messages %>

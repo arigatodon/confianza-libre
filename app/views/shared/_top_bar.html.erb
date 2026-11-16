@@ -1,41 +1,44 @@
-<%# Top App Bar — sólo móvil (en desktop se usa la side nav) %>
-<header class="md:hidden fixed top-0 inset-x-0 z-30 bg-surface/90 backdrop-blur border-b border-outline-variant/40">
-  <div class="h-14 px-margin-mobile flex items-center justify-between">
-    <%= link_to root_path, class: "flex items-center gap-2" do %>
-      <span class="w-8 h-8 rounded-md bg-primary text-on-primary grid place-items-center">
-        <span class="material-symbols-outlined icon-filled" style="font-size:18px">handshake</span>
-      </span>
-      <span class="text-headline-md text-primary font-bold leading-none">Confianza</span>
-    <% end %>
+<%# Top App Bar — sólo móvil (en desktop se usa la side nav).
+    Franja azul de señalética: mismo color que theme-color, así la barra de
+    estado de Android y la del sitio se leen como una sola pieza. %>
+<header class="md:hidden fixed top-0 inset-x-0 z-30 franja">
+  <div class="h-14 pl-margin-mobile pr-2 flex items-center justify-between gap-2">
+    <%= render "shared/logo", tono: :blanco, tamano: :sm %>
 
-    <div class="flex items-center gap-1 text-on-surface-variant">
+    <div class="flex items-center">
       <% if authenticated? && (u = Current.session.user) %>
+        <%# En celular el botón flotante de opinión no se muestra: este es su lugar. %>
+        <%= link_to new_feedback_path,
+              class: "w-11 h-11 grid place-items-center rounded-full hover:bg-primary-strong transition-colors",
+              title: "Mándanos tu opinión", aria: { label: "Mándanos tu opinión" } do %>
+          <span class="material-symbols-outlined" style="font-size:24px">campaign</span>
+        <% end %>
         <%= link_to notifications_path,
-              class: "relative p-2 rounded-full hover:bg-surface-container-low transition-colors",
+              class: "relative w-11 h-11 grid place-items-center rounded-full hover:bg-primary-strong transition-colors",
               title: "Notificaciones" do %>
-          <span class="material-symbols-outlined <%= 'icon-filled' if unread_notifications_count.positive? %>" style="font-size:22px">notifications</span>
+          <span class="material-symbols-outlined <%= 'icon-filled' if unread_notifications_count.positive? %>" style="font-size:24px">notifications</span>
           <%= render "shared/bell_badge_top", count: unread_notifications_count %>
         <% end %>
         <%= link_to settings_path,
-              class: "p-2 rounded-full hover:bg-surface-container-low transition-colors",
+              class: "w-11 h-11 grid place-items-center rounded-full hover:bg-primary-strong transition-colors",
               title: "Ajustes" do %>
-          <span class="material-symbols-outlined" style="font-size:22px">settings</span>
+          <span class="material-symbols-outlined" style="font-size:24px">settings</span>
         <% end %>
         <%= link_to profile_path(u.username || u.id),
-              class: "ml-1 flex items-center" do %>
+              class: "w-11 h-11 grid place-items-center rounded-full" do %>
           <% if u.avatar.attached? && u.avatar.image? %>
-            <%= image_tag u.avatar, class: "w-9 h-9 rounded-full object-cover border border-outline-variant" %>
+            <%= image_tag u.avatar, class: "w-9 h-9 rounded-full object-cover ring-2 ring-on-primary/70" %>
           <% else %>
-            <span class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-sm font-semibold">
+            <span class="w-9 h-9 rounded-full bg-on-primary text-primary grid place-items-center text-sm font-bold">
               <%= (u.username || u.email_address).first.upcase %>
             </span>
           <% end %>
         <% end %>
       <% else %>
         <%= link_to "Entrar", new_session_path,
-              class: "text-label-md text-primary px-3 py-1.5 rounded-full hover:bg-surface-container-low" %>
+              class: "text-label-md text-on-primary px-3 min-h-11 inline-flex items-center rounded-full hover:bg-primary-strong" %>
         <%= link_to "Regístrate", signup_path,
-              class: "text-label-md bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-organic-green-deep transition-colors" %>
+              class: "text-label-md bg-signal text-ink px-4 min-h-10 inline-flex items-center rounded-full hover:bg-secondary-fixed transition-colors" %>
       <% end %>
     </div>
   </div>
