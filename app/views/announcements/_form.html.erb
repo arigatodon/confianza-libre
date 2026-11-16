@@ -1,0 +1,38 @@
+<%# locals: announcement %>
+<%= form_with model: announcement, class: "space-y-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-5 ambient-shadow" do |f| %>
+  <% if announcement.errors.any? %>
+    <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-3 py-2 text-sm">
+      <%= announcement.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :kind, "Tipo", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.select :kind,
+          Announcement::KIND_LABELS_ES.map { |value, label| [ label, value ] },
+          {}, { class: "w-48" } %>
+    <p class="text-caption text-on-surface-variant mt-1">
+      "En consulta" habilita el bloque de apoyos para que la comunidad marque el rumbo.
+    </p>
+  </div>
+
+  <div>
+    <%= f.label :title, "Título", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_field :title, required: true, maxlength: 120,
+          placeholder: "Ej: Ahora la comunidad puede cambiar las reglas" %>
+  </div>
+
+  <div>
+    <%= f.label :body, "Contenido", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_area :body, rows: 14, required: true,
+          placeholder: "Contalo en simple: qué cambió, por qué, y qué significa para la gente de la red. Los párrafos se separan con línea en blanco." %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit "Publicar", name: "publish", value: "1",
+          class: "inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" %>
+    <%= f.submit "Guardar borrador",
+          class: "inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container cursor-pointer" %>
+    <%= link_to "Cancelar", announcements_path, class: "text-caption text-on-surface-variant hover:text-primary" %>
+  </div>
+<% end %>

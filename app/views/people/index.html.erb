@@ -1,0 +1,98 @@
+<% content_for :title, "Vecinos" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Vecinos",
+        description: "Las personas de la red Confianza: perfiles públicos con reputación verificable, avales de la comunidad y mensaje directo.",
+        canonical:   people_url) %>
+<% end %>
+
+<section class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Comunidad</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Vecinos</h1>
+    <p class="text-body-md text-on-surface-variant max-w-2xl">
+      Las personas que hacen la red. Entra a un perfil para ver su reputación,
+      avalarlo o mandarle un mensaje.
+    </p>
+  </header>
+
+  <% unless authenticated? %>
+    <div class="rounded-xl bg-primary-fixed/20 border border-primary/20 p-4 flex flex-wrap items-center gap-3">
+      <p class="text-body-md text-on-surface flex-1 min-w-48">
+        Estás viendo las vitrinas públicas. El directorio completo de vecinos
+        es para la comunidad.
+      </p>
+      <%= link_to "Únete a Confianza", new_user_path,
+            class: "inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors shrink-0" %>
+    </div>
+  <% end %>
+
+  <%= form_with url: people_path, method: :get, scope: nil, class: "flex items-stretch gap-2 max-w-md",
+        data: { controller: "auto-submit" } do %>
+    <%= text_field_tag :q, @query, placeholder: "Buscar por usuario o bio…",
+          autocomplete: "off", class: "flex-1" %>
+    <button type="submit" class="inline-flex items-center px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer">
+      <span class="material-symbols-outlined" style="font-size:18px">search</span>
+    </button>
+  <% end %>
+
+  <% if @people.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <% @people.each do |person| %>
+        <article class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-4 flex flex-col gap-3">
+          <%= link_to profile_path(person.username), class: "flex items-center gap-3 min-w-0" do %>
+            <span class="w-12 h-12 shrink-0 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center overflow-hidden">
+              <% if person.avatar.attached? %>
+                <%= image_tag person.avatar.variant(resize_to_fill: [ 96, 96 ]), class: "w-full h-full object-cover" %>
+              <% else %>
+                <span class="font-bold text-lg"><%= person.username.first.upcase %></span>
+              <% end %>
+            </span>
+            <span class="min-w-0">
+              <span class="block text-label-md text-on-surface font-semibold truncate">
+                @<%= person.username %>
+                <% if person.showcase? %>
+                  <span class="material-symbols-outlined text-primary align-middle" style="font-size:14px" title="Vitrina">storefront</span>
+                <% end %>
+              </span>
+              <% if person.headline.present? %>
+                <span class="block text-caption text-on-surface truncate"><%= person.headline %></span>
+              <% end %>
+              <span class="block text-caption text-primary flex items-center gap-1">
+                <span class="material-symbols-outlined icon-filled" style="font-size:12px">verified</span>
+                <%= verification_level_label_es(person) %>
+              </span>
+            </span>
+            <span class="ml-auto text-caption text-on-surface-variant shrink-0 flex items-center gap-1">
+              <span class="material-symbols-outlined icon-filled text-earth-clay" style="font-size:14px">star</span>
+              <%= number_with_precision(person.trust_score, precision: 1) %>
+            </span>
+          <% end %>
+
+          <% if (authenticated? || person.showcase?) && person.bio.present? %>
+            <p class="text-caption text-on-surface-variant line-clamp-2"><%= person.bio %></p>
+          <% end %>
+
+          <div class="flex items-center gap-2 mt-auto">
+            <%= link_to profile_path(person.username),
+                  class: "inline-flex items-center gap-1 text-label-md text-primary border border-primary px-3 py-1.5 rounded-full hover:bg-primary-fixed/40 transition-colors" do %>
+              <span class="material-symbols-outlined" style="font-size:14px">person</span>
+              Perfil
+            <% end %>
+            <% if authenticated? && Current.session.user_id != person.id %>
+              <%= button_to conversations_path, params: { user_id: person.id }, method: :post,
+                    class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-3 py-1.5 rounded-full hover:bg-organic-green-deep transition-colors cursor-pointer" do %>
+                <span class="material-symbols-outlined" style="font-size:14px">forum</span>
+                Mensaje
+              <% end %>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-body-md text-on-surface-variant py-10 text-center">
+      <%= @query.present? ? "Nadie coincide con \"#{@query}\" — prueba con otro nombre." : "Todavía no hay vecinos en el directorio." %>
+    </p>
+  <% end %>
+</section>

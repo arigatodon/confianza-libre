@@ -1,0 +1,231 @@
+<% content_for :title, @post.title %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       @post.title,
+        description: (@post.description.presence || "#{@post.kind_label_es} de @#{@post.user.username || @post.user.email_address} en Confianza."),
+        og_type:     "article",
+        canonical:   post_url(@post),
+        image_url:   tarjeta_post_url(@post)
+      ) %>
+  <%# Datos estructurados de la publicación (Product/Service/Event/Article según
+      el kind), con autor y reputación agregada de la propia publicación. %>
+  <%
+    post_desc     = (@post.description.presence || "#{@post.kind_label_es} de @#{@post.user.username || @post.user.email_address} en Confianza.")
+    reviews_count = @post.reviews.count
+    avg_score     = reviews_count.positive? ? @post.reviews.average(:score).to_f.round(2) : nil
+    post_ld = {
+      "@context"      => "https://schema.org",
+      "@type"         => post_schema_type(@post),
+      "name"          => @post.title,
+      "description"   => post_desc.to_s.gsub(/\s+/, " ").strip,
+      "url"           => post_url(@post),
+      "category"      => @post.category&.name,
+      "datePublished" => @post.created_at.iso8601,
+      "author"        => {
+        "@type" => "Person",
+        "name"  => "@#{@post.user.username || @post.user.email_address}",
+        "url"   => profile_url(@post.user.username || @post.user.id)
+      }
+    }
+    if @post.media.attached?
+      images = @post.media.select { |m| m.image? }.map { |m| absolute_url(url_for(m)) }
+      post_ld["image"] = images if images.any?
+    end
+    if avg_score
+      post_ld["aggregateRating"] = {
+        "@type"       => "AggregateRating",
+        "ratingValue" => avg_score,
+        "reviewCount" => reviews_count,
+        "bestRating"  => 5,
+        "worstRating" => 1
+      }
+    end
+  %>
+  <%= json_ld_tag(post_ld) %>
+<% end %>
+<%# Refresh broadcast: nuevas reviews del post → morph del DOM para todos los viewers. %>
+<%= turbo_stream_from @post %>
+<% visual = post_kind_visual(@post.kind) %>
+
+<article class="space-y-8">
+  <header class="space-y-4">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center gap-1.5 text-caption font-semibold <%= post_kind_text_color(@post.kind) %> bg-surface-container-low px-3 py-1 rounded-full">
+        <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= visual[:icon] %></span>
+        <%= @post.kind_label_es %>
+      </span>
+      <span class="text-caption text-on-surface-variant">·</span>
+      <span class="text-caption text-on-surface-variant"><%= @post.category.name %></span>
+    </div>
+
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+      <%= @post.title %>
+    </h1>
+
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <%= link_to profile_path(@post.user.username || @post.user.id),
+            class: "flex items-center gap-3 group" do %>
+        <% if @post.user.avatar.attached? && @post.user.avatar.image? %>
+          <%= image_tag @post.user.avatar, class: "w-10 h-10 rounded-full object-cover border border-outline-variant" %>
+        <% else %>
+          <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-sm font-semibold">
+            <%= (@post.user.username || @post.user.email_address).first.upcase %>
+          </span>
+        <% end %>
+        <div class="flex flex-col leading-tight">
+          <span class="text-label-md text-on-surface group-hover:text-primary">@<%= @post.user.username || @post.user.email_address %></span>
+          <span class="text-caption text-on-surface-variant">
+            <%= l(@post.created_at, format: :long) rescue @post.created_at.to_s %>
+          </span>
+        </div>
+      <% end %>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <% if @post.suggested_credits.to_i > 0 %>
+          <span class="text-caption font-semibold bg-primary-container/30 text-on-surface px-3 py-1.5 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:14px">payments</span>
+            <%= @post.suggested_credits %> C sugeridos
+          </span>
+        <% end %>
+        <% if @post.latitude && @post.longitude %>
+          <span class="text-caption text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined icon-filled" style="font-size:14px">location_on</span>
+            <%= number_with_precision(@post.latitude, precision: 4) %>, <%= number_with_precision(@post.longitude, precision: 4) %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+
+    <%= render "shared/share_button",
+          url:   post_url(@post),
+          title: @post.title,
+          text:  "Mira \"#{@post.title}\" en Confianza" %>
+  </header>
+
+  <% if @post.media.attached? %>
+    <div class="grid grid-cols-2 gap-3">
+      <% @post.media.each_with_index do |m, i| %>
+        <% wide = (i == 0 && @post.media.size.odd?) %>
+        <% if m.image? %>
+          <%= image_tag m,
+                class: "rounded-xl w-full h-56 object-cover #{'col-span-2 h-72' if wide}" %>
+        <% elsif m.video? %>
+          <video controls preload="metadata"
+                 class="rounded-xl w-full h-56 bg-black object-cover <%= 'col-span-2 h-72' if wide %>">
+            <source src="<%= url_for(m) %>" type="<%= m.content_type %>">
+          </video>
+        <% elsif m.audio? %>
+          <div class="rounded-xl border border-outline-variant/40 bg-surface-container-low p-4 col-span-2 flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary" style="font-size:32px">graphic_eq</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-label-md text-on-surface truncate"><%= m.filename %></p>
+              <audio controls preload="metadata" class="w-full mt-2">
+                <source src="<%= url_for(m) %>" type="<%= m.content_type %>">
+              </audio>
+            </div>
+          </div>
+        <% else %>
+          <%= link_to url_for(m),
+                class: "rounded-xl border border-outline-variant/40 bg-surface-container-low p-4 text-body-md text-primary hover:bg-surface-container truncate block col-span-2" do %>
+            <span class="material-symbols-outlined align-middle mr-1" style="font-size:18px">description</span>
+            <%= m.filename %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @post.description.present? %>
+    <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow">
+      <div class="prose prose-neutral max-w-none text-body-lg text-on-surface">
+        <%= simple_format @post.description %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if authenticated? && Current.session.user_id == @post.user_id %>
+    <div class="flex gap-3">
+      <%= link_to edit_post_path(@post),
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container transition-colors" do %>
+        <span class="material-symbols-outlined" style="font-size:16px">edit</span>
+        Editar
+      <% end %>
+      <%= button_to @post, method: :delete,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-error/40 text-error text-label-md hover:bg-error-container transition-colors",
+            form: { data: { turbo_confirm: "¿Eliminar publicación?" } } do %>
+        <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+        Eliminar
+      <% end %>
+    </div>
+  <% elsif authenticated? %>
+    <div class="flex justify-end -mt-2">
+      <%= report_link(@post) %>
+    </div>
+    <%= form_with url: post_interactions_path(@post), method: :post, local: true,
+          class: "rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow flex flex-wrap items-end gap-3" do |f| %>
+      <% if @post.category&.allows_credit %>
+        <div class="flex flex-col">
+          <%= label_tag "interaction[agreed_credits]", "Créditos a ofrecer (C)",
+                class: "text-label-md text-on-surface mb-1" %>
+          <%= number_field_tag "interaction[agreed_credits]",
+                @post.suggested_credits || 0,
+                min: 0, step: 1, class: "w-32" %>
+          <% if @post.suggested_credits.to_i > 0 %>
+            <p class="text-caption text-on-surface-variant mt-1">
+              Sugerido: <%= @post.suggested_credits %> C — puedes contraproponer.
+            </p>
+          <% end %>
+        </div>
+      <% else %>
+        <%= hidden_field_tag "interaction[agreed_credits]", 0 %>
+      <% end %>
+      <%= f.submit "Iniciar interacción",
+            class: "inline-flex items-center gap-2 px-5 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+    <% end %>
+  <% end %>
+
+  <section class="space-y-4 pt-6 border-t border-outline-variant/40">
+    <%= turbo_stream_from @post, :comments %>
+    <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary">forum</span>
+      Comentarios
+      <span class="text-caption text-on-surface-variant font-normal">(<%= @comments.size %>)</span>
+    </h2>
+    <%= render "comments/form", post: @post, comment: @new_comment %>
+    <div id="comments" class="space-y-3">
+      <%= render @comments %>
+    </div>
+  </section>
+
+  <% if @pending_review_interactions.any? %>
+    <section class="space-y-4 pt-6 border-t border-outline-variant/40">
+      <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-earth-clay">star</span>
+        Evalúa <%= @pending_review_interactions.size == 1 ? "esta interacción" : "tus interacciones pendientes" %>
+      </h2>
+      <% @pending_review_interactions.each do |interaction| %>
+        <% reviewed_user = interaction.other_party(Current.session.user) %>
+        <% new_review = @post.reviews.build(
+             reviewer:      Current.session.user,
+             reviewed_user: reviewed_user,
+             interaction:   interaction,
+             score:         5
+           ) %>
+        <%= render "reviews/form",
+                   post: @post,
+                   interaction: interaction,
+                   reviewed_user: reviewed_user,
+                   review: new_review %>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @review_pairs.any? %>
+    <section class="space-y-3 pt-6 border-t border-outline-variant/40">
+      <h2 class="text-headline-md text-on-surface">Evaluaciones</h2>
+      <% @review_pairs.each do |pair| %>
+        <%= render "reviews/review_pair", pair: pair %>
+      <% end %>
+    </section>
+  <% end %>
+</article>

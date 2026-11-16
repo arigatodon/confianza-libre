@@ -1,0 +1,104 @@
+<% content_for :title, @announcement.title %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       @announcement.title,
+        description: @announcement.excerpt(300),
+        og_type:     "article",
+        canonical:   announcement_url(@announcement)) %>
+  <%= json_ld_tag(
+        "@context"      => "https://schema.org",
+        "@type"         => "BlogPosting",
+        "headline"      => @announcement.title,
+        "description"   => @announcement.excerpt(300),
+        "url"           => announcement_url(@announcement),
+        "datePublished" => @announcement.published_at&.iso8601,
+        "dateModified"  => @announcement.updated_at.iso8601,
+        "inLanguage"    => "es",
+        "author"        => {
+          "@type" => "Person",
+          "name"  => "@#{@announcement.user.username}",
+          "url"   => profile_url(@announcement.user.username || @announcement.user.id)
+        },
+        "publisher"     => { "@type" => "Organization", "name" => "Confianza", "url" => root_url }
+      ) %>
+<% end %>
+
+<article class="max-w-2xl mx-auto space-y-6">
+  <header class="space-y-3">
+    <div class="flex items-center gap-2 text-caption text-on-surface-variant">
+      <%= link_to "Novedades", announcements_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <span><%= @announcement.kind_label_es %></span>
+    </div>
+
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+      <%= @announcement.title %>
+    </h1>
+
+    <div class="flex flex-wrap items-center gap-3 text-caption text-on-surface-variant">
+      <span class="px-2.5 py-0.5 rounded-full font-semibold
+                   <%= @announcement.consulta? ? "bg-secondary-container text-on-secondary-container" : "bg-primary-fixed/40 text-on-primary-fixed-variant" %>">
+        <%= @announcement.kind_label_es %>
+      </span>
+      <% if @announcement.published? %>
+        <time datetime="<%= @announcement.published_at.iso8601 %>">
+          <%= l(@announcement.published_at, format: :long) rescue @announcement.published_at.to_date %>
+        </time>
+      <% else %>
+        <span class="text-error font-semibold">Borrador — no publicado</span>
+      <% end %>
+      <span>
+        por <%= link_to "@#{@announcement.user.username}",
+                        profile_path(@announcement.user.username || @announcement.user.id),
+                        class: "text-primary hover:underline" %>
+      </span>
+      <% if admin? %>
+        <%= link_to "Editar", edit_announcement_path(@announcement), class: "text-primary hover:underline" %>
+      <% end %>
+    </div>
+  </header>
+
+  <div class="text-body-lg text-on-surface leading-relaxed">
+    <%= simple_format @announcement.body %>
+  </div>
+
+  <footer class="space-y-4 pt-2 border-t border-outline-variant/30">
+    <% if @announcement.consulta? %>
+      <div class="rounded-xl bg-secondary-container/40 border border-secondary/20 p-4 space-y-2">
+        <p class="text-label-md text-on-surface flex items-center gap-1.5">
+          <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">how_to_vote</span>
+          Esto está en consulta
+        </p>
+        <p class="text-caption text-on-surface-variant">
+          Tu apoyo marca si avanzamos por aquí. Es una señal, no un contrato:
+          las decisiones vinculantes viven en las <%= link_to "propuestas", territories_path, class: "text-primary hover:underline" %>.
+        </p>
+      </div>
+    <% end %>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <% if authenticated? %>
+        <% supported = @announcement.supported_by?(Current.session.user) %>
+        <%= button_to support_announcement_path(@announcement), method: :post,
+              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-label-md transition-colors cursor-pointer
+                      #{supported ? "bg-primary text-on-primary" : "border border-primary text-primary hover:bg-primary-fixed/30"}" do %>
+          <span class="material-symbols-outlined icon-filled" style="font-size:16px">favorite</span>
+          <%= supported ? "Apoyas esto" : "Apoyar" %>
+          <% if @announcement.supports_count.positive? %>
+            · <%= @announcement.supports_count %>
+          <% end %>
+        <% end %>
+      <% elsif @announcement.supports_count.positive? %>
+        <span class="inline-flex items-center gap-1.5 text-label-md text-on-surface-variant">
+          <span class="material-symbols-outlined icon-filled text-primary" style="font-size:16px">favorite</span>
+          <%= @announcement.supports_count %> apoyos
+        </span>
+      <% end %>
+
+      <%= render "shared/share_button",
+            url:   announcement_url(@announcement),
+            title: @announcement.title,
+            text:  "#{@announcement.title} — novedades de Confianza" %>
+    </div>
+  </footer>
+</article>

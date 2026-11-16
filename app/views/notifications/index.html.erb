@@ -1,0 +1,34 @@
+<% content_for :title, "Notificaciones" %>
+
+<section class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Avisos</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Notificaciones</h1>
+  </header>
+
+  <% if ENV["VAPID_PUBLIC_KEY"].present? %>
+    <div data-controller="push" data-push-vapid-key-value="<%= ENV["VAPID_PUBLIC_KEY"] %>"
+         class="rounded-xl bg-surface-container-low/40 border border-outline-variant/30 p-4 space-y-2">
+      <button type="button" data-push-target="button" data-action="push#enable"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary text-primary text-label-md hover:bg-primary-fixed/30 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-default">
+        <span class="material-symbols-outlined" style="font-size:16px">notifications_active</span>
+        <span data-label>Recibir avisos en este dispositivo</span>
+      </button>
+      <p data-push-target="hint" class="hidden text-caption text-on-surface-variant">
+        Tu navegador tiene las notificaciones bloqueadas para confianza.world —
+        habilítalas desde la configuración del sitio si quieres recibir avisos.
+      </p>
+    </div>
+  <% end %>
+
+  <div id="notifications-list" class="space-y-2">
+    <% if @notifications.any? %>
+      <%= render @notifications %>
+    <% else %>
+      <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-10 text-center">
+        <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">notifications_off</span>
+        <p class="text-body-md text-on-surface-variant">Sin notificaciones por ahora.</p>
+      </div>
+    <% end %>
+  </div>
+</section>

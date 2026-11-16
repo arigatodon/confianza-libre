@@ -1,0 +1,39 @@
+<%# locals: report %>
+<%
+  target  = report.reportable
+  preview =
+    case target
+    when Post    then target.title.to_s
+    when Comment then target.body.to_s.truncate(140)
+    when Message then target.body.to_s.truncate(140)
+    when User    then "@#{target.username || target.email_address}"
+    else "—"
+    end
+  kind_es = { "Post" => "Publicación", "Comment" => "Comentario", "Message" => "Mensaje", "User" => "Usuario" }[report.reportable_type] || report.reportable_type
+%>
+<%= link_to moderation_report_path(report),
+      class: "block rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 ambient-shadow hover:border-primary/40 transition-colors" do %>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0 space-y-1">
+      <div class="flex flex-wrap items-center gap-2 text-caption text-on-surface-variant">
+        <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface"><%= kind_es %></span>
+        <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-on-error-container"><%= report.reason_label_es %></span>
+        <% unless report.open? %>
+          <span class="px-2 py-0.5 rounded-full bg-primary-container/40 text-on-primary-container"><%= report.status_label_es %></span>
+          <% if report.reward_credits.to_i.positive? %>
+            <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary">+<%= report.reward_credits %> C</span>
+          <% end %>
+        <% end %>
+        <span>· <%= time_ago_in_words(report.created_at) %></span>
+      </div>
+      <p class="text-body-md text-on-surface truncate"><%= preview %></p>
+      <p class="text-caption text-on-surface-variant">
+        Reporta <strong>@<%= report.reporter.username %></strong>
+        <% if report.resolved_by %>
+          · Resolvió <strong>@<%= report.resolved_by.username %></strong>
+        <% end %>
+      </p>
+    </div>
+    <span class="material-symbols-outlined text-on-surface-variant shrink-0" style="font-size:20px">chevron_right</span>
+  </div>
+<% end %>

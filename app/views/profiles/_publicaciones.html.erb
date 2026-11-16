@@ -1,0 +1,18 @@
+<%# Publicaciones del usuario. El título de la sección viene de la plantilla
+    de la vitrina: "Catálogo" para tiendas, "Menú" para comida, etc. %>
+<h2 class="text-headline-md text-on-surface pt-2 flex items-center gap-2">
+  <% if @user.vitrina_plantilla.present? %>
+    <span class="material-symbols-outlined text-on-surface-variant" style="font-size:22px"><%= @user.plantilla[:icono] %></span>
+  <% end %>
+  <%= @user.plantilla[:seccion_posts] %>
+</h2>
+<% if @posts.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <%= render @posts %>
+  </div>
+<% else %>
+  <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-10 text-center">
+    <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">inbox</span>
+    <p class="text-body-md text-on-surface-variant">Aún no publicó nada.</p>
+  </div>
+<% end %>

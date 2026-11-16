@@ -1,0 +1,52 @@
+<% content_for :title, "Mis interacciones" %>
+
+<section class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Tu actividad</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Interacciones</h1>
+  </header>
+
+  <% statuses = Interaction::STATUSES.keys.map(&:to_s) %>
+  <nav class="flex flex-wrap gap-2">
+    <%= link_to "Todas", interactions_path,
+          class: "px-3 py-1.5 rounded-full text-label-md transition-colors #{@filter.nil? ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
+    <% statuses.each do |s| %>
+      <%= link_to Interaction::STATUS_LABELS_ES[s], interactions_path(status: s),
+            class: "px-3 py-1.5 rounded-full text-label-md transition-colors #{@filter == s ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'}" %>
+    <% end %>
+  </nav>
+
+  <% viewer = Current.session.user %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">north_east</span>
+        Enviadas
+        <span class="text-caption text-on-surface-variant font-normal">(<%= @sent.size %>)</span>
+      </h2>
+      <% if @sent.any? %>
+        <% @sent.each do |i| %>
+          <%= render "card", interaction: i, viewer: viewer %>
+        <% end %>
+      <% else %>
+        <p class="text-body-md text-on-surface-variant italic">Sin interacciones enviadas.</p>
+      <% end %>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">south_west</span>
+        Recibidas
+        <span class="text-caption text-on-surface-variant font-normal">(<%= @received.size %>)</span>
+      </h2>
+      <% if @received.any? %>
+        <% @received.each do |i| %>
+          <%= render "card", interaction: i, viewer: viewer %>
+        <% end %>
+      <% else %>
+        <p class="text-body-md text-on-surface-variant italic">Sin interacciones recibidas.</p>
+      <% end %>
+    </section>
+  </div>
+</section>

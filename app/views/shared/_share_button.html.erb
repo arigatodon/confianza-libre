@@ -1,0 +1,33 @@
+<%# Botón único de compartir: despliega un menú con WhatsApp (el canal
+    dominante en la región) y copiar el link. Un solo botón para no competir
+    con los CTA de contacto de la vitrina.
+    Locals: url (absoluta), title, text (mensaje sugerido, opcional). %>
+<% text = local_assigns[:text].presence || title %>
+<div class="relative inline-block"
+     data-controller="share"
+     data-share-url-value="<%= url %>"
+     data-action="click@window->share#cerrarFuera keydown.esc@window->share#cerrar">
+  <button type="button"
+          data-action="share#alternar"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container transition-colors cursor-pointer">
+    <span class="material-symbols-outlined" style="font-size:16px">share</span>
+    <span data-share-target="label">Compartir</span>
+  </button>
+
+  <div data-share-target="menu" hidden
+       class="absolute left-0 z-20 mt-2 w-48 rounded-lg bg-surface-container-lowest border border-outline-variant/40 ambient-shadow overflow-hidden">
+    <a href="https://wa.me/?text=<%= u("#{text} #{url}") %>"
+       target="_blank" rel="noopener"
+       data-action="share#cerrar"
+       class="flex items-center gap-2 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined" style="font-size:16px">forum</span>
+      WhatsApp
+    </a>
+    <button type="button"
+            data-action="share#copiar"
+            class="w-full flex items-center gap-2 px-4 py-2.5 text-body-md text-on-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+      <span class="material-symbols-outlined" style="font-size:16px">content_copy</span>
+      Copiar enlace
+    </button>
+  </div>
+</div>

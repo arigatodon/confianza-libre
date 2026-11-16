@@ -1,0 +1,7 @@
+Restablecer tu contraseña
+
+Recibimos un pedido para restablecer la contraseña de tu cuenta en Confianza. Entrá a este enlace para elegir una nueva:
+
+<%= edit_password_url(@user.password_reset_token) %>
+
+El enlace vence en <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>. Si no pediste esto, ignorá este correo: tu contraseña no se modificó.

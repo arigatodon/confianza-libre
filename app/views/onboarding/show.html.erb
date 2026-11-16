@@ -1,0 +1,99 @@
+<% content_for :title, "Bienvenida a Confianza" %>
+
+<%
+  steps = [
+    { icon: "diversity_3", title: "Bienvenida a Confianza",
+      body: "Una red de barrio para intercambiar servicios, productos y ayuda con tu comunidad. " \
+            "No es cripto, no es e-commerce. Es economía mutua geolocalizada." },
+
+    { icon: "savings", title: "Créditos comunitarios",
+      body: "Cada interacción mueve <strong>créditos (C)</strong>. No son tokens ni dinero — son " \
+            "una unidad interna de la red que solo vive aquí. Empiezas con 0 C." },
+
+    { icon: "moving", title: "Puedes \"deber\" hasta tu floor",
+      body: "Tu cuenta puede ir a <strong>negativo</strong> hasta tu <em>credit floor</em> " \
+            "(arrancas en −100 C). Es lo que la comunidad confía en ti para gastar antes de devolver." },
+
+    { icon: "local_fire_department", title: "Burn 2%",
+      body: "De cada transacción se <strong>quema un 2 %</strong>. Sale de circulación para siempre. " \
+            "Es lo que evita inflación y desincentiva mover créditos sin sentido." },
+
+    { icon: "volunteer_activism", title: "Fondo territorial 3%",
+      body: "Otro <strong>3 %</strong> de cada transacción va al <strong>fondo de tu comuna</strong>. " \
+            "Esos créditos los gasta la comunidad votando propuestas (eventos, ayuda, proyectos)." },
+
+    { icon: "verified", title: "Reputación y trust score",
+      body: "Después de cada interacción, ambos se evalúan (1–5). Tu " \
+            "<strong>trust score</strong> es el promedio ponderado. Empiezas en 3.0 (neutral) " \
+            "hasta tener al menos 3 personas distintas que te evaluaron." },
+
+    { icon: "stairs", title: "Niveles L1 → L5",
+      body: "A medida que sumas interacciones completadas, trust y verificaciones, subes de nivel. " \
+            "Cada nivel sube tu floor (más \"crédito de confianza\") y tu tope por transacción." }
+  ]
+  current  = (@step || 1).to_i
+  step     = steps[current - 1]
+  total    = steps.size
+  is_last  = current == total
+%>
+
+<article class="max-w-2xl mx-auto">
+  <div class="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-8 ambient-shadow space-y-6">
+    <%# Header con progreso %>
+    <header class="space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-caption text-on-surface-variant uppercase tracking-wider">
+          Paso <%= current %> de <%= total %>
+        </span>
+        <%= button_to "Saltar tour", skip_onboarding_path,
+              method: :post,
+              class: "text-caption text-on-surface-variant hover:text-on-surface" %>
+      </div>
+      <div class="grid gap-1" style="grid-template-columns: repeat(<%= total %>, minmax(0, 1fr))">
+        <% (1..total).each do |n| %>
+          <span class="h-1 rounded-full <%= n <= current ? "bg-primary" : "bg-outline-variant/30" %>"></span>
+        <% end %>
+      </div>
+    </header>
+
+    <%# Contenido del paso %>
+    <div class="text-center space-y-4 py-4">
+      <div class="w-20 h-20 mx-auto rounded-full bg-primary-container/30 grid place-items-center">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:42px"><%= step[:icon] %></span>
+      </div>
+      <h1 class="text-headline-md md:text-headline-lg text-on-surface"><%= step[:title] %></h1>
+      <p class="text-body-lg text-on-surface-variant max-w-prose mx-auto"><%= step[:body].html_safe %></p>
+    </div>
+
+    <%# Footer de navegación %>
+    <footer class="flex items-center justify-between pt-4 border-t border-outline-variant/30">
+      <% if current > 1 %>
+        <%= link_to onboarding_path(step: current - 1),
+              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-on-surface-variant hover:bg-surface-container text-label-md" do %>
+          <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span>
+          Anterior
+        <% end %>
+      <% else %>
+        <span></span>
+      <% end %>
+
+      <% if is_last %>
+        <%= button_to complete_onboarding_path, method: :post,
+              class: "inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" do %>
+          <span class="material-symbols-outlined" style="font-size:18px">check</span>
+          Entendido, empezar
+        <% end %>
+      <% else %>
+        <%= link_to onboarding_path(step: current + 1),
+              class: "inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep" do %>
+          Siguiente
+          <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+        <% end %>
+      <% end %>
+    </footer>
+  </div>
+
+  <p class="text-caption text-on-surface-variant text-center mt-6">
+    Puedes volver a este tour cuando quieras desde <%= link_to "Ajustes", settings_path, class: "text-primary hover:underline" %>.
+  </p>
+</article>

@@ -1,0 +1,23 @@
+Hola @<%= @user.username %>:
+
+Soy Igor, el que está detrás de Confianza. Te escribo porque te registraste hace un tiempo y quería contarte qué cambió.
+
+<% if @publico -%>
+Ya tienes publicaciones en la red. Ahora cada perfil puede ser una vitrina: una página con tu WhatsApp, tu horario, lo que ofreces y las reseñas de tus clientes, con un QR para imprimir. Sirve como link para la bio de tu Instagram o tu estado de WhatsApp.
+
+Actívala aquí (dos minutos): <%= onboarding_vitrina_url %>
+<% else -%>
+Si ofreces algo —un oficio, productos, comida, clases—, ahora puedes tener tu vitrina gratis: una página con tu WhatsApp, tu horario, tus servicios y las reseñas de tus clientes, con un QR para imprimir. Sirve como link para la bio de tu Instagram o tu estado de WhatsApp.
+
+Créala aquí (dos minutos): <%= onboarding_vitrina_url %>
+<% end -%>
+
+Y si prefieres, respóndeme este correo con lo que haces y un par de fotos, y te la armo yo.
+
+Estamos partiendo barrio por barrio, así que cada persona que se suma cuenta. Si conoces a alguien que trabaje bien —tu gásfiter, tu almacén, la vecina que cose—, este es tu link para invitarlo: <%= invite_url(code: @user.username) %>
+
+Gracias por estar desde el principio.
+Igor
+
+—
+Si no quieres que te vuelva a escribir, respóndeme "no" y listo.

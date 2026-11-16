@@ -1,0 +1,29 @@
+<%# Datos estructurados base del sitio (Organization + WebSite con caja de
+    búsqueda). Se renderiza en application.html.erb y marketing.html.erb. Las
+    views específicas añaden Person/Product/etc vía content_for :head. %>
+<%= json_ld_tag(
+      "@context" => "https://schema.org",
+      "@graph"   => [
+        {
+          "@type"       => "Organization",
+          "@id"         => "#{root_url}#organization",
+          "name"        => ApplicationHelper::SITE_NAME,
+          "url"         => root_url,
+          "logo"        => URI.join(request.base_url, "/icon.png").to_s,
+          "description" => ApplicationHelper::SITE_DESCRIPTION
+        },
+        {
+          "@type"           => "WebSite",
+          "@id"             => "#{root_url}#website",
+          "name"            => ApplicationHelper::SITE_NAME,
+          "url"             => root_url,
+          "inLanguage"      => "es",
+          "publisher"       => { "@id" => "#{root_url}#organization" },
+          "potentialAction" => {
+            "@type"       => "SearchAction",
+            "target"      => { "@type" => "EntryPoint", "urlTemplate" => "#{explore_url}?q={search_term_string}" },
+            "query-input" => "required name=search_term_string"
+          }
+        }
+      ]
+    ) %>

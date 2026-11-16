@@ -1,0 +1,51 @@
+<% content_for :title, "Mensajes" %>
+
+<section class="space-y-6 max-w-2xl mx-auto">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Conversaciones</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Mensajes</h1>
+  </header>
+
+  <% if @conversations.any? %>
+    <div class="space-y-2">
+      <% me = Current.session.user %>
+      <% @conversations.each do |conversation| %>
+        <% other = conversation.other_party(me) %>
+        <% last  = conversation.last_message %>
+        <%= link_to conversation_path(conversation),
+              class: "flex items-center gap-3 rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-4 hover:bg-surface-container transition-colors" do %>
+          <span class="w-11 h-11 shrink-0 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center overflow-hidden">
+            <% if other.avatar.attached? %>
+              <%= image_tag other.avatar.variant(resize_to_fill: [ 88, 88 ]), class: "w-full h-full object-cover" %>
+            <% else %>
+              <span class="font-bold"><%= (other.username || other.email_address).first.upcase %></span>
+            <% end %>
+          </span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-label-md text-on-surface font-semibold">@<%= other.username || other.email_address %></span>
+            <% if last %>
+              <span class="block text-caption text-on-surface-variant truncate">
+                <%= last.user_id == me.id ? "Tú: " : "" %><%= last.body.truncate(80) %>
+              </span>
+            <% end %>
+          </span>
+          <% if conversation.last_message_at %>
+            <span class="text-caption text-on-surface-variant shrink-0">
+              <%= time_ago_in_words(conversation.last_message_at) %>
+            </span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-14 space-y-3">
+      <span class="material-symbols-outlined text-on-surface-variant" style="font-size:42px">forum</span>
+      <p class="text-body-md text-on-surface-variant">
+        Todavía no tienes conversaciones. Busca a alguien en el directorio y toca
+        <strong>Mensaje</strong> para arrancar una.
+      </p>
+      <%= link_to "Ver el directorio de vecinos", people_path,
+            class: "inline-flex items-center gap-1.5 text-label-md text-primary hover:underline" %>
+    </div>
+  <% end %>
+</section>

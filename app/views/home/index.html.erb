@@ -1,0 +1,125 @@
+<% content_for :title, "Confianza — Cerca de ti" %>
+
+<section class="space-y-8">
+  <div class="flex flex-col gap-2">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">
+      <%= @feed_mode == :nearby ? "Tu zona" : "Comunidad" %>
+    </p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">
+      <% if authenticated? %>
+        Hola, <span class="text-primary">@<%= Current.session.user.username %></span>
+      <% else %>
+        Cerca de ti
+      <% end %>
+    </h1>
+    <p class="text-body-md text-on-surface-variant">
+      Descubre oportunidades, servicios y ayuda en tu comunidad.
+    </p>
+  </div>
+
+  <% unless @coords %>
+    <div data-controller="geolocation"
+         class="rounded-lg bg-soft-sky/40 border border-tertiary-fixed-dim/40 p-4 flex items-center justify-between gap-3">
+      <div class="flex items-start gap-3 min-w-0">
+        <span class="material-symbols-outlined icon-filled text-tertiary shrink-0">my_location</span>
+        <div class="min-w-0">
+          <p class="text-label-md text-on-surface">Activa tu ubicación</p>
+          <p class="text-caption text-on-surface-variant mt-0.5" data-geolocation-target="status">
+            Para mostrarte lo que pasa cerca de ti.
+          </p>
+        </div>
+      </div>
+      <button type="button" data-geolocation-target="button" data-action="geolocation#request"
+              class="shrink-0 px-4 py-2 rounded-full bg-tertiary text-on-tertiary text-label-md hover:bg-tertiary-container transition-colors">
+        Usar ubicación
+      </button>
+    </div>
+  <% end %>
+
+  <%= render "empujones" if authenticated? %>
+
+  <%# Filtros (chips) — abren /explore con el kind preseleccionado. %>
+  <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0">
+    <%= link_to "Todos", explore_path,
+          class: "whitespace-nowrap px-4 py-2 rounded-full bg-primary text-on-primary text-label-md shadow-sm" %>
+    <%= link_to explore_path(kind: "venta"),
+          class: "whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md flex items-center gap-2" do %>
+      <span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+      Compra/Venta
+    <% end %>
+    <%= link_to explore_path(kind: "servicio"),
+          class: "whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md flex items-center gap-2" do %>
+      <span class="w-2 h-2 rounded-full bg-primary-container"></span>
+      Servicios
+    <% end %>
+    <%= link_to explore_path(kind: "evento"),
+          class: "whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md flex items-center gap-2" do %>
+      <span class="w-2 h-2 rounded-full bg-tertiary"></span>
+      Eventos
+    <% end %>
+    <%= link_to explore_path(kind: "ayuda"),
+          class: "whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface hover:bg-surface-container transition-colors text-label-md flex items-center gap-2" do %>
+      <span class="w-2 h-2 rounded-full bg-earth-clay"></span>
+      Ayuda
+    <% end %>
+  </div>
+
+  <div class="flex items-end justify-between">
+    <h2 class="text-headline-md text-on-surface">
+      <%= @feed_mode == :nearby ? "Cerca de ti" : "Recientes" %>
+    </h2>
+    <%= link_to explore_path,
+          class: "text-label-md text-primary hover:underline flex items-center gap-1" do %>
+      Ver mapa
+      <span class="material-symbols-outlined" style="font-size:16px">arrow_forward</span>
+    <% end %>
+  </div>
+
+  <%# Filtro rápido ofertas/pedidos del feed. %>
+  <div class="flex gap-1.5 text-label-md">
+    <% [ [ "Todo", nil ], [ "Ofertas", "ofertas" ], [ "Pedidos", "pedidos" ] ].each do |label, value| %>
+      <%= link_to label, root_path(market: value),
+            class: "px-3 py-1 rounded-full border transition-colors #{@market == value ? "bg-primary text-on-primary border-primary" : "border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-high/60"}" %>
+    <% end %>
+  </div>
+
+  <% if @recent_posts.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <%= render @recent_posts %>
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-10 text-center">
+      <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">explore_off</span>
+      <p class="text-body-md text-on-surface-variant">
+        <% if @feed_mode == :nearby %>
+          Aún no hay publicaciones cerca de ti.
+          <%= link_to "Sé el primero en tu barrio", new_post_path, class: "text-primary font-semibold hover:underline" %>.
+        <% else %>
+          Todavía no hay publicaciones.
+          <% if authenticated? %>
+            <%= link_to "Crear la primera", new_post_path, class: "text-primary font-semibold hover:underline" %>.
+          <% else %>
+            <%= link_to "Entra", new_session_path, class: "text-primary font-semibold hover:underline" %> y publica la primera.
+          <% end %>
+        <% end %>
+      </p>
+    </div>
+  <% end %>
+
+  <% if @more_posts.present? %>
+    <div class="space-y-4">
+      <div class="flex items-end justify-between gap-3">
+        <div>
+          <h2 class="text-headline-md text-on-surface">Más en Confianza</h2>
+          <p class="text-caption text-on-surface-variant">
+            Tu zona todavía tiene poco. Esto es lo último del resto de la red —
+            y si ofreces algo, <%= link_to "publícalo", new_post_path, class: "text-primary hover:underline" %> para ser de los primeros cerca de ti.
+          </p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <%= render @more_posts %>
+      </div>
+    </div>
+  <% end %>
+</section>

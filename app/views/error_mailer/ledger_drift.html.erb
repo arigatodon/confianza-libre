@@ -1,0 +1,30 @@
+<h1 style="margin:0 0 16px; font-size:20px; color:#b3261e;">Drift en el ledger</h1>
+
+<p style="margin:0 0 12px;">
+  La reconciliación semanal encontró <strong><%= @drifted.size %></strong> cuenta(s) cuyo
+  <code>cached_balance</code> no calzaba con el ledger. Ya se corrigieron desde el ledger
+  (la fuente de verdad), pero conviene mirar qué las escribió mal.
+</p>
+
+<% if @drifted.any? %>
+  <table cellpadding="6" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+    <tr style="background:#f4f7f5;">
+      <th align="left">Cuenta</th><th align="left">Tipo</th><th align="left">Owner</th>
+      <th align="right">Cacheado</th><th align="right">Ledger</th>
+    </tr>
+    <% @drifted.each do |d| %>
+      <tr>
+        <td>#<%= d[:account_id] %></td>
+        <td><%= d[:account_type] %></td>
+        <td><%= d[:owner] %></td>
+        <td align="right"><%= d[:cached] %></td>
+        <td align="right"><strong><%= d[:expected] %></strong></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
+
+<p style="margin:16px 0 0;">
+  Σ cached_balance tras reconciliar: <strong><%= @total_after %></strong>
+  <%= @total_after.zero? ? "(partida doble sana)" : "— ¡debería ser 0! Revisar a mano." %>
+</p>

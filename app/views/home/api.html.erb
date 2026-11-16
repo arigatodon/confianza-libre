@@ -1,0 +1,186 @@
+<% content_for :title, "API — Publica desde tu web · Confianza" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "API para publicar desde tu web",
+        description: "Conecta tu sitio con Confianza: con una API key, cada publicación de tu web aparece en confianza.world para tus vecinos y se difunde en las redes de Confianza.",
+        canonical:   api_docs_url) %>
+<% end %>
+
+<%# Hero %>
+<section class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="max-w-3xl mx-auto text-center space-y-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+      <span class="material-symbols-outlined text-primary" style="font-size:18px">webhook</span>
+      <span class="text-label-md text-on-surface-variant text-sm">Para desarrolladores</span>
+    </div>
+    <h1 class="text-headline-lg-mobile md:text-headline-xl text-primary-container">
+      Publica en Confianza desde tu propia web
+    </h1>
+    <p class="text-body-lg text-on-surface-variant">
+      Una API key, una llamada HTTP. Cada publicación que crees desde tu sitio aparece
+      en confianza.world para tus vecinos, con tu reputación al lado, y si quieres se
+      difunde también en las redes de Confianza (Instagram, Facebook, Telegram).
+    </p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <% if authenticated? %>
+        <%= link_to "Crear mi API key", settings_path(anchor: "api"),
+              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+      <% else %>
+        <%= link_to "Crear cuenta", signup_path,
+              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-6 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# Pasos %>
+<section class="bg-surface-container-low py-16 px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[960px] mx-auto space-y-10">
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-surface rounded-xl p-6 ambient-shadow border-t-2 border-secondary space-y-3">
+        <span class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center font-bold">1</span>
+        <h3 class="text-headline-md text-on-surface">Crea tu clave</h3>
+        <p class="text-body-md text-on-surface-variant">
+          En <strong class="text-on-surface">Ajustes → Publicar desde tu web</strong>. Necesitas el email verificado.
+          La clave empieza con <code class="font-mono">cw_</code> y se muestra una sola vez: guárdala como variable de entorno.
+        </p>
+      </div>
+      <div class="bg-surface rounded-xl p-6 ambient-shadow border-t-2 border-secondary space-y-3">
+        <span class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center font-bold">2</span>
+        <h3 class="text-headline-md text-on-surface">Llama a la API</h3>
+        <p class="text-body-md text-on-surface-variant">
+          <code class="font-mono">POST https://confianza.world/api/v1/posts</code> con el header
+          <code class="font-mono">Authorization: Bearer cw_…</code> y un JSON con el título y la descripción.
+        </p>
+      </div>
+      <div class="bg-surface rounded-xl p-6 ambient-shadow border-t-2 border-secondary space-y-3">
+        <span class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center font-bold">3</span>
+        <h3 class="text-headline-md text-on-surface">Listo</h3>
+        <p class="text-body-md text-on-surface-variant">
+          La publicación queda en tu vitrina, la ven los vecinos cercanos y, con
+          <code class="font-mono">difundir: true</code> (el valor por defecto), sale en las redes de Confianza
+          con una tarjeta generada automáticamente.
+        </p>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-error-container/40 border border-error/30 p-4 text-body-md text-on-error-container flex gap-3">
+      <span class="material-symbols-outlined shrink-0" style="font-size:20px">lock</span>
+      <p>
+        <strong>La clave es como tu contraseña.</strong> Úsala solo desde un servidor (una función de Netlify,
+        tu backend, un script): nunca la pongas en el JavaScript de tu página, porque cualquiera podría copiarla
+        y publicar en tu nombre. Si se filtra, revócala en Ajustes y crea otra.
+      </p>
+    </div>
+  </div>
+</section>
+
+<%# Ejemplos %>
+<section class="py-16 px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[960px] mx-auto space-y-12">
+
+    <div class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Ejemplo con curl</h2>
+<pre class="overflow-x-auto rounded-xl bg-surface-container-highest text-on-surface p-5 text-sm font-mono leading-relaxed"><code>curl -X POST https://confianza.world/api/v1/posts \
+  -H "Authorization: Bearer cw_TU_CLAVE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Pan amasado de campo, todos los sábados",
+    "description": "Horneado en la mañana. Retiro en Villa Alemana o delivery en la comuna.",
+    "category": "productos",
+    "suggested_credits": 20,
+    "image_url": "https://misitio.cl/fotos/pan.jpg",
+    "difundir": true
+  }'</code></pre>
+      <p class="text-body-md text-on-surface-variant">
+        Respuesta <code class="font-mono">201 Created</code> con la publicación, su <code class="font-mono">url</code>
+        y el estado de la difusión por red.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Ejemplo: función serverless en Netlify</h2>
+      <p class="text-body-md text-on-surface-variant">
+        Guarda la clave como variable de entorno <code class="font-mono">CONFIANZA_API_KEY</code> en tu sitio
+        de Netlify y crea <code class="font-mono">netlify/functions/publicar.js</code>. Tu página llama a
+        <code class="font-mono">/.netlify/functions/publicar</code>; la clave nunca sale del servidor.
+      </p>
+<pre class="overflow-x-auto rounded-xl bg-surface-container-highest text-on-surface p-5 text-sm font-mono leading-relaxed"><code>// netlify/functions/publicar.js
+export default async (request) => {
+  const { title, description, image_url } = await request.json();
+
+  const respuesta = await fetch("https://confianza.world/api/v1/posts", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.CONFIANZA_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ title, description, image_url, category: "servicios" })
+  });
+
+  return new Response(await respuesta.text(), {
+    status: respuesta.status,
+    headers: { "Content-Type": "application/json" }
+  });
+};</code></pre>
+      <p class="text-body-md text-on-surface-variant">
+        Lo mismo sirve en Vercel, Cloudflare Workers, WordPress (con <code class="font-mono">wp_remote_post</code>)
+        o cualquier backend: es un POST con JSON.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Campos de una publicación</h2>
+      <div class="overflow-x-auto rounded-xl border border-outline-variant/30">
+        <table class="w-full text-body-md text-left">
+          <thead class="bg-surface-container-low text-label-md text-on-surface-variant">
+            <tr><th class="px-4 py-3">Campo</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Qué es</th></tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/30 text-on-surface">
+            <tr><td class="px-4 py-3 font-mono">title</td><td class="px-4 py-3">texto</td><td class="px-4 py-3"><strong>Obligatorio.</strong> Hasta 140 caracteres.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">description</td><td class="px-4 py-3">texto</td><td class="px-4 py-3">Detalle, precio en pesos si aplica, cómo contactarte. Puede incluir el link a tu web.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">category</td><td class="px-4 py-3">texto</td><td class="px-4 py-3">
+              Una de:
+              <% Category.publishable.order(:name).each do |c| %><code class="font-mono"><%= c.slug %></code> <% end %>.
+              Por defecto <code class="font-mono">servicios</code>.
+            </td></tr>
+            <tr><td class="px-4 py-3 font-mono">pedido</td><td class="px-4 py-3">booleano</td><td class="px-4 py-3"><code class="font-mono">true</code> si buscas algo en vez de ofrecerlo. Por defecto <code class="font-mono">false</code>.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">suggested_credits</td><td class="px-4 py-3">entero</td><td class="px-4 py-3">Créditos C sugeridos para el intercambio. Opcional.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">latitude, longitude</td><td class="px-4 py-3">decimal</td><td class="px-4 py-3">Dónde se ofrece. Si no los mandas, se usa la ubicación de tu perfil.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">visibility_radius_km</td><td class="px-4 py-3">decimal</td><td class="px-4 py-3">Radio en km en que aparece a los vecinos. Por defecto 5.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">image_url</td><td class="px-4 py-3">URL</td><td class="px-4 py-3">Imagen pública (jpg, png, webp o gif, hasta 8 MB). La descargamos y queda en la publicación y en la tarjeta de redes.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">difundir</td><td class="px-4 py-3">booleano</td><td class="px-4 py-3">Publicar también en las redes de Confianza. Por defecto <code class="font-mono">true</code> al crear.</td></tr>
+            <tr><td class="px-4 py-3 font-mono">status</td><td class="px-4 py-3">texto</td><td class="px-4 py-3"><code class="font-mono">published</code> (por defecto), <code class="font-mono">draft</code>, <code class="font-mono">paused</code>, <code class="font-mono">closed</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Todos los endpoints</h2>
+      <div class="overflow-x-auto rounded-xl border border-outline-variant/30">
+        <table class="w-full text-body-md text-left">
+          <tbody class="divide-y divide-outline-variant/30 text-on-surface">
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">GET /api/v1/me</td><td class="px-4 py-3">Quién eres para la API. Sirve para probar la clave.</td></tr>
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">GET /api/v1/posts</td><td class="px-4 py-3">Tus publicaciones (las últimas 100), con el estado de difusión de cada una.</td></tr>
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">POST /api/v1/posts</td><td class="px-4 py-3">Crea una publicación.</td></tr>
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">GET /api/v1/posts/:id</td><td class="px-4 py-3">Una publicación tuya (acepta id o slug).</td></tr>
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">PATCH /api/v1/posts/:id</td><td class="px-4 py-3">Edita campos, o cambia <code class="font-mono">status</code> a <code class="font-mono">paused</code> / <code class="font-mono">closed</code> cuando ya no esté disponible.</td></tr>
+            <tr><td class="px-4 py-3 font-mono whitespace-nowrap">DELETE /api/v1/posts/:id</td><td class="px-4 py-3">Elimina la publicación.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="text-body-md text-on-surface-variant space-y-1 list-disc ml-5">
+        <li>Errores en JSON: <code class="font-mono">{ "error": "…", "detalles": [ … ] }</code> con códigos 401 (clave inválida), 403 (email sin verificar), 422 (datos inválidos), 429 (demasiadas solicitudes).</li>
+        <li>Límites: 300 solicitudes por hora por clave, y 30 publicaciones nuevas por hora.</li>
+        <li>Las publicaciones creadas por API siguen las mismas reglas de la comunidad que las demás: se pueden reportar y moderar igual.</li>
+      </ul>
+    </div>
+
+    <div class="text-center pt-4">
+      <%= link_to how_it_works_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors" do %>
+        <span class="material-symbols-outlined" style="font-size:18px">menu_book</span> Cómo funciona Confianza
+      <% end %>
+    </div>
+  </div>
+</section>

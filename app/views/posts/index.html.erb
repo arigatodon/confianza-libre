@@ -1,0 +1,34 @@
+<% content_for :title, "Publicaciones" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Publicaciones",
+        description: "Últimas publicaciones de la comunidad: ventas, servicios, delivery, eventos y ayuda mutua entre vecinos.",
+        canonical:   posts_url) %>
+<% end %>
+
+<section class="space-y-6">
+  <header class="flex items-end justify-between">
+    <div>
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Comunidad</p>
+      <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Publicaciones</h1>
+    </div>
+    <% if authenticated? %>
+      <%= link_to new_post_path,
+            class: "hidden md:inline-flex items-center gap-2 bg-primary text-on-primary text-label-md px-4 py-2.5 rounded-full hover:bg-organic-green-deep transition-colors" do %>
+        <span class="material-symbols-outlined" style="font-size:18px">add</span>
+        Nueva
+      <% end %>
+    <% end %>
+  </header>
+
+  <% if @posts.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <%= render @posts %>
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-10 text-center">
+      <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">inbox</span>
+      <p class="text-body-md text-on-surface-variant">Sin publicaciones aún.</p>
+    </div>
+  <% end %>
+</section>

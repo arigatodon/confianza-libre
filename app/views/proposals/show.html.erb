@@ -1,0 +1,209 @@
+<% content_for :title, @proposal.title %>
+<%
+  viewer        = Current.session&.user
+  my_vote       = viewer ? @proposal.vote_of(viewer) : nil
+  is_proposer   = viewer && viewer.id == @proposal.proposer_id
+  is_beneficiary = viewer && viewer.id == @proposal.beneficiary_id
+  can_vote      = viewer && @proposal.open? && !@proposal.voting_closed? && !is_proposer
+  status_color  = case @proposal.status
+                  when "open"     then "bg-primary-container/20 text-primary"
+                  when "passed"   then "bg-primary text-on-primary"
+                  when "executed" then "bg-organic-green-deep text-on-primary"
+                  when "failed"   then "bg-error-container text-on-error-container"
+                  when "canceled" then "bg-surface-container text-on-surface-variant"
+                  end
+%>
+
+<article class="space-y-8">
+  <header class="space-y-2">
+    <div class="flex items-center gap-2 text-caption text-on-surface-variant">
+      <%= link_to "Comunidad", territories_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <%= link_to @territory.name, territory_path(@territory.slug), class: "hover:text-primary" %>
+      <span>/</span>
+      <span>Propuesta #<%= @proposal.id %></span>
+    </div>
+
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+      <%= @proposal.title %>
+    </h1>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="inline-flex items-center gap-1.5 text-label-md font-semibold px-3 py-1 rounded-full <%= status_color %>">
+        <%= @proposal.status_label_es %>
+      </span>
+      <span class="inline-flex items-center gap-1 text-caption px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined" style="font-size:14px"><%= { "fund_transfer" => "payments", "new_category" => "category", "rule_change" => "balance" }[@proposal.kind] %></span>
+        <%= @proposal.kind_label_es %>
+      </span>
+      <span class="text-caption text-on-surface-variant">
+        Propuesta por
+        <%= link_to "@#{@proposal.proposer.username}",
+                    profile_path(@proposal.proposer.username || @proposal.proposer.id),
+                    class: "text-primary font-semibold hover:underline" %>
+        <% if @proposal.beneficiary %>
+          ·
+          Beneficiario:
+          <%= link_to "@#{@proposal.beneficiary.username}",
+                      profile_path(@proposal.beneficiary.username || @proposal.beneficiary.id),
+                      class: "text-primary font-semibold hover:underline" %>
+        <% end %>
+      </span>
+    </div>
+  </header>
+
+  <%# Card de detalle (qué cambia si se aprueba) y deadline %>
+  <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30">
+    <div class="grid grid-cols-2 gap-4">
+      <% if @proposal.fund_transfer? %>
+        <div>
+          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Monto solicitado</p>
+          <div class="flex items-baseline gap-1">
+            <span class="text-headline-md text-primary font-bold"><%= number_with_delimiter(@proposal.amount) %></span>
+            <span class="text-caption text-on-surface-variant">C del fondo de <%= @territory.name %></span>
+          </div>
+        </div>
+      <% elsif @proposal.new_category? %>
+        <div>
+          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Categoría propuesta</p>
+          <p class="text-headline-md text-primary font-bold"><%= @proposal.category_name %></p>
+        </div>
+      <% else %>
+        <div>
+          <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
+            <%= @proposal.governable_parameter&.dig(:label) || @proposal.parameter_key %>
+          </p>
+          <div class="flex items-baseline gap-2">
+            <% unless @proposal.executed? %>
+              <span class="text-headline-md text-on-surface-variant font-bold"><%= @proposal.current_parameter_value || "—" %></span>
+              <span class="material-symbols-outlined text-on-surface-variant self-center" style="font-size:20px">arrow_forward</span>
+            <% end %>
+            <span class="text-headline-md text-primary font-bold"><%= @proposal.parameter_value %></span>
+          </div>
+        </div>
+      <% end %>
+      <div>
+        <p class="text-label-md text-on-surface-variant uppercase tracking-wider mb-1">
+          <%= @proposal.voting_closed? ? "Cerró" : "Cierra" %>
+        </p>
+        <p class="text-body-md text-on-surface">
+          <%= time_ago_in_words(@proposal.voting_closes_at) %><%= " (#{l(@proposal.voting_closes_at, format: :short)})" rescue "" %>
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-outline-variant/30">
+      <p class="text-body-md text-on-surface whitespace-pre-wrap"><%= @proposal.body %></p>
+    </div>
+  </section>
+
+  <%# Estado de la votación %>
+  <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30">
+    <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Resultado de la votación</h2>
+    <%
+      yes = @proposal.yes_votes
+      no  = @proposal.no_votes
+      total = @proposal.total_votes
+      yes_pct = total.zero? ? 0 : (yes.to_f / total * 100).round
+    %>
+    <div class="flex items-end gap-4 mb-3">
+      <div>
+        <p class="text-headline-md text-primary font-bold"><%= yes %></p>
+        <p class="text-caption text-on-surface-variant">a favor</p>
+      </div>
+      <div>
+        <p class="text-headline-md text-error font-bold"><%= no %></p>
+        <p class="text-caption text-on-surface-variant">en contra</p>
+      </div>
+      <div class="ml-auto text-right">
+        <p class="text-label-md text-on-surface"><%= total %> / <%= @proposal.quorum_required %> quórum</p>
+        <p class="text-caption text-on-surface-variant">Mayoría requerida: <%= @proposal.majority_required_pct %>%</p>
+      </div>
+    </div>
+
+    <div class="h-3 w-full bg-surface-container rounded-full overflow-hidden flex">
+      <div class="h-full bg-primary" style="width: <%= yes_pct %>%"></div>
+      <div class="h-full bg-error" style="width: <%= 100 - yes_pct %>%"></div>
+    </div>
+  </section>
+
+  <%# Botones de voto / ejecutar / cancelar %>
+  <% if can_vote %>
+    <section class="flex flex-wrap items-center gap-3">
+      <%= button_to vote_proposal_path(@proposal, position: 1), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full #{my_vote&.in_favor? ? "bg-primary text-on-primary" : "border border-primary text-primary hover:bg-primary-fixed/30"}" do %>
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px">thumb_up</span>
+        <%= my_vote&.in_favor? ? "Tu voto: a favor" : "A favor" %>
+      <% end %>
+
+      <%= button_to vote_proposal_path(@proposal, position: -1), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full #{my_vote&.against? ? "bg-error text-on-error" : "border border-error text-error hover:bg-error-container"}" do %>
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px">thumb_down</span>
+        <%= my_vote&.against? ? "Tu voto: en contra" : "En contra" %>
+      <% end %>
+
+      <% if is_beneficiary %>
+        <span class="text-caption text-on-surface-variant italic">Sos el beneficiario propuesto.</span>
+      <% end %>
+    </section>
+  <% elsif viewer && is_proposer && @proposal.passed? %>
+    <%
+      execute_blocked = @proposal.fund_transfer? && !@proposal.fund_has_enough?
+      execute_copy =
+        case @proposal.kind
+        when "new_category"
+          [ "Tu propuesta pasó. Cuando ejecutes, la categoría <strong class=\"text-primary\">#{ERB::Util.h(@proposal.category_name)}</strong> quedará disponible para publicar.".html_safe,
+            "category", "Crear la categoría", "Vas a crear la categoría votada. ¿Seguir?" ]
+        when "rule_change"
+          [ "Tu propuesta pasó. Cuando ejecutes, <strong class=\"text-primary\">#{ERB::Util.h(@proposal.governable_parameter&.dig(:label) || @proposal.parameter_key)}</strong> pasará de #{ERB::Util.h(@proposal.current_parameter_value || "—")} a <strong class=\"text-primary\">#{ERB::Util.h(@proposal.parameter_value)}</strong> para toda la red.".html_safe,
+            "balance", "Aplicar la regla", "Vas a cambiar una regla de la red. ¿Seguir?" ]
+        else
+          [ "Tu propuesta pasó. Cuando ejecutes, se transferirán <strong class=\"text-primary\">#{@proposal.amount} C</strong> desde el fondo de #{ERB::Util.h(@territory.name)} a @#{ERB::Util.h(@proposal.beneficiary.username)}.".html_safe,
+            "payments", "Ejecutar transferencia", "Vas a transferir #{@proposal.amount} C del fondo. ¿Seguir?" ]
+        end
+    %>
+    <section class="rounded-xl bg-primary/5 border border-primary/30 p-5 space-y-3">
+      <p class="text-body-md text-on-surface"><%= execute_copy[0] %></p>
+      <% if execute_blocked %>
+        <p class="text-caption text-error">
+          ⚠ El fondo no tiene saldo suficiente (disponible: <%= @proposal.fund_account&.cached_balance.to_i %> C).
+        </p>
+      <% end %>
+      <%= button_to execute_proposal_path(@proposal), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep #{"opacity-50 cursor-not-allowed" if execute_blocked}",
+            disabled: execute_blocked,
+            form: { data: { turbo_confirm: execute_copy[3] } } do %>
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px"><%= execute_copy[1] %></span>
+        <%= execute_copy[2] %>
+      <% end %>
+    </section>
+  <% elsif viewer && is_proposer && @proposal.open? %>
+    <section class="flex">
+      <%= button_to cancel_proposal_path(@proposal), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container",
+            form: { data: { turbo_confirm: "¿Cancelar tu propuesta?" } } do %>
+        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+        Cancelar mi propuesta
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @proposal.executed? %>
+    <section class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30">
+      <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider mb-2">Ejecución</h2>
+      <p class="text-body-md text-on-surface">
+        <% if @proposal.execution_credit_transaction %>
+          El <%= l(@proposal.execution_credit_transaction.created_at, format: :long) rescue @proposal.execution_credit_transaction.created_at.to_s %>
+          se transfirieron <strong><%= @proposal.amount %> C</strong> desde el fondo a
+          @<%= @proposal.beneficiary.username %>.
+        <% elsif @proposal.new_category? %>
+          La comunidad creó la categoría <strong><%= @proposal.category_name %></strong>:
+          ya se puede publicar en ella.
+        <% elsif @proposal.rule_change? %>
+          La regla <strong><%= @proposal.governable_parameter&.dig(:label) || @proposal.parameter_key %></strong>
+          quedó fijada en <strong><%= @proposal.parameter_value %></strong> por decisión comunitaria.
+        <% end %>
+      </p>
+    </section>
+  <% end %>
+</article>

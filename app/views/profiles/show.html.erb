@@ -1,0 +1,320 @@
+<% content_for :title, "@#{@user.username || @user.email_address}" %>
+<% content_for :head do %>
+  <%# La bio solo va en metadatos si el perfil es vitrina (lo que ve un crawler
+      es la vista anónima). Sin vitrina el perfil además no se indexa. %>
+  <%= seo_meta_tags(
+        title:       "@#{@user.username || @user.email_address}",
+        description: ((@user.showcase? && (@user.headline.presence || @user.bio.presence)) || "Perfil de @#{@user.username} en Confianza · #{verification_level_label_es(@user)} · Trust score #{@user.trust_score}."),
+        og_type:     "profile",
+        canonical:   profile_url(@user.username || @user.id),
+        image_url:   (@user.avatar.attached? && @user.avatar.image? ? url_for(@user.avatar) : nil)
+      ) %>
+  <% unless @user.showcase? %>
+    <meta name="robots" content="noindex,follow">
+  <% end %>
+  <%# Datos estructurados Person: nombre, perfil, foto y reputación agregada. %>
+  <%
+    reviews_count = @user.reviews_received.count
+    avg_score     = reviews_count.positive? ? @user.reviews_received.average(:score).to_f.round(2) : nil
+    person_ld = {
+      "@context"    => "https://schema.org",
+      "@type"       => "Person",
+      "name"        => "@#{@user.username || @user.email_address}",
+      "url"         => profile_url(@user.username || @user.id),
+      "description" => ((@user.showcase? && @user.bio.presence) || "Perfil de @#{@user.username} en Confianza."),
+      "memberOf"    => { "@type" => "Organization", "@id" => "#{root_url}#organization" }
+    }
+    person_ld["image"] = absolute_url(url_for(@user.avatar)) if @user.avatar.attached? && @user.avatar.image?
+    if avg_score
+      person_ld["aggregateRating"] = {
+        "@type"       => "AggregateRating",
+        "ratingValue" => avg_score,
+        "reviewCount" => reviews_count,
+        "bestRating"  => 5,
+        "worstRating" => 1
+      }
+    end
+  %>
+  <%= json_ld_tag(person_ld) %>
+<% end %>
+<%# Refresh broadcast: reviews nuevas hacia este user → morph del trust ring + breakdowns. %>
+<%= turbo_stream_from @user %>
+<%
+  trust = (@user.trust_score.to_f * 20).clamp(0, 100) # 0..5 → 0..100%
+%>
+
+<section class="space-y-6">
+  <% if params[:vitrina_nueva].present? && authenticated? && Current.session.user_id == @user.id %>
+    <%# Recién salido del paso "Crea tu vitrina": los tres pasos que hacen que
+        la vitrina traiga clientes de verdad. %>
+    <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-5 space-y-3">
+      <p class="text-label-md text-on-surface flex items-center gap-1.5">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:20px">celebration</span>
+        <%= @user.showcase? ? "Tu vitrina ya está en internet" : "Tu perfil está listo" %>
+      </p>
+      <ol class="list-decimal ml-5 space-y-1.5 text-body-md text-on-surface-variant">
+        <li>
+          <%= link_to "Publica lo que ofreces", new_post_path, class: "text-primary font-semibold hover:underline" %>:
+          cada servicio o producto aparece en tu vitrina y en el mapa del barrio.
+        </li>
+        <% if @user.showcase? %>
+          <li>
+            Pon <span class="font-mono text-on-surface break-all"><%= profile_url(@user.username).sub(%r{\Ahttps?://}, "") %></span>
+            como link en la bio de tu Instagram y en tu estado de WhatsApp.
+          </li>
+          <li>Descarga tu QR (más abajo) y pégalo en tu local, tu puesto o tu camioneta.</li>
+        <% else %>
+          <li>Cuando quieras que te encuentren desde afuera, activa la vitrina pública en <%= link_to "Ajustes", settings_path, class: "text-primary hover:underline" %>.</li>
+        <% end %>
+      </ol>
+    </div>
+  <% end %>
+
+  <header class="rounded-xl bg-surface-container-lowest border-t-[3px] border-primary ambient-shadow overflow-hidden"
+          style="border-top-color: <%= @user.acento %>">
+    <% if @full_view && @user.portada.attached? && @user.portada.image? %>
+      <%= image_tag @user.portada, class: "w-full h-40 md:h-52 object-cover", alt: "Portada de @#{@user.username}" %>
+    <% end %>
+    <div class="p-6 space-y-5">
+    <div class="flex items-start gap-4">
+      <div class="trust-ring shrink-0" style="--trust: <%= trust %>">
+        <% if @user.avatar.attached? && @user.avatar.image? %>
+          <%= image_tag @user.avatar, class: "w-20 h-20 rounded-full object-cover border-4 border-surface-container-lowest" %>
+        <% else %>
+          <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-2xl font-semibold border-4 border-surface-container-lowest">
+            <%= (@user.username || @user.email_address).first.upcase %>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-headline-md text-on-surface truncate">@<%= @user.username || @user.email_address %></h1>
+        <% if @user.headline.present? %>
+          <p class="text-body-md text-on-surface font-medium mt-0.5"><%= @user.headline %></p>
+        <% end %>
+        <p class="text-caption text-primary flex items-center gap-1 mt-1">
+          <span class="material-symbols-outlined icon-filled" style="font-size:14px">verified</span>
+          <%= verification_level_label_es(@user) %>
+          <% if @user.showcase? %>
+            <span class="ml-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant flex items-center gap-1">
+              <span class="material-symbols-outlined" style="font-size:12px">storefront</span>
+              Vitrina
+            </span>
+          <% end %>
+        </p>
+        <% if @sponsor %>
+          <p class="text-caption text-on-surface-variant flex items-center gap-1 mt-1">
+            <span class="material-symbols-outlined" style="font-size:14px">handshake</span>
+            Invitado por <%= link_to "@#{@sponsor.username}", profile_path(@sponsor), class: "text-primary hover:underline" %>
+          </p>
+        <% end %>
+        <% if @full_view && @endorsements_count.to_i.positive? %>
+          <p class="text-caption text-on-surface-variant flex items-center gap-1 mt-1">
+            <span class="material-symbols-outlined icon-filled text-primary" style="font-size:14px">verified_user</span>
+            Avalado por <%= @endorsements_count %> <%= @endorsements_count == 1 ? "vecino" : "vecinos" %>
+            <span class="text-on-surface-variant">
+              (<%= @recent_endorsers.map { |e| link_to "@#{e.username}", profile_path(e), class: "text-primary hover:underline" }.to_sentence(two_words_connector: " y ", last_word_connector: " y ").html_safe %>)
+            </span>
+          </p>
+        <% end %>
+        <% if @full_view && @user.bio.present? %>
+          <p class="text-body-md text-on-surface-variant mt-3"><%= simple_format @user.bio %></p>
+        <% end %>
+      </div>
+      <% if authenticated? && Current.session.user_id == @user.id %>
+        <%= link_to settings_path,
+              class: "shrink-0 inline-flex items-center gap-1 text-label-md text-primary border border-primary px-4 py-2 rounded-full hover:bg-primary-fixed/40 transition-colors" do %>
+          <span class="material-symbols-outlined" style="font-size:16px">edit</span>
+          Editar
+        <% end %>
+      <% elsif authenticated? %>
+        <div class="shrink-0 flex flex-col items-end gap-2">
+          <%= button_to conversations_path, params: { user_id: @user.id }, method: :post,
+                class: "inline-flex items-center gap-1 text-label-md bg-primary text-on-primary px-4 py-2 rounded-full hover:bg-organic-green-deep transition-colors cursor-pointer" do %>
+            <span class="material-symbols-outlined" style="font-size:16px">forum</span>
+            Mensaje
+          <% end %>
+          <% if @can_endorse %>
+            <%= button_to endorsements_path(endorsed_id: @user.id), method: :post,
+                  class: "inline-flex items-center gap-1 text-label-md text-primary border border-primary px-4 py-2 rounded-full hover:bg-primary-fixed/40 transition-colors cursor-pointer",
+                  form: { data: { turbo_confirm: "Avalar significa dar fe de que @#{@user.username} es una persona real y de fiar. ¿Confirmas?" } } do %>
+              <span class="material-symbols-outlined" style="font-size:16px">verified_user</span>
+              Avalar
+            <% end %>
+          <% elsif @already_endorsed %>
+            <span class="inline-flex items-center gap-1 text-label-md text-primary px-4 py-2">
+              <span class="material-symbols-outlined icon-filled" style="font-size:16px">verified_user</span>
+              Lo avalaste
+            </span>
+          <% end %>
+          <%= report_link(@user, label: "Reportar perfil",
+                classes: "inline-flex items-center gap-1 text-label-md text-on-surface-variant hover:text-error border border-outline-variant px-4 py-2 rounded-full hover:border-error/40 transition-colors") %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @full_view %>
+    <dl class="grid grid-cols-3 gap-3 pt-2">
+      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
+        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Publicaciones</dt>
+        <dd class="text-headline-md text-on-surface mt-1"><%= @stats[:posts_count] %></dd>
+      </div>
+      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
+        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Interacciones</dt>
+        <dd class="text-headline-md text-on-surface mt-1"><%= @stats[:interactions_completed] %></dd>
+      </div>
+      <div class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4 text-center">
+        <dt class="text-caption text-on-surface-variant uppercase tracking-wider">Reseñas</dt>
+        <dd class="text-headline-md text-on-surface mt-1 flex items-center justify-center gap-1">
+          <%= @stats[:reviews_received_count] %>
+          <% if @stats[:avg_score] %>
+            <span class="text-caption text-earth-clay font-normal flex items-center">
+              <span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span>
+              <%= @stats[:avg_score] %>
+            </span>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+    <% end %>
+
+    <div class="flex flex-wrap gap-2 text-caption text-on-surface-variant">
+      <span class="px-3 py-1 rounded-full bg-primary-fixed/40 text-on-primary-fixed-variant flex items-center gap-1">
+        Confianza · <strong class="text-on-surface"><%= @user.trust_score %></strong>
+      </span>
+      <span class="px-3 py-1 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant flex items-center gap-1">
+        Territorio · <strong class="text-on-surface"><%= @user.territory_score %></strong>
+      </span>
+    </div>
+
+    <%# Contacto directo de la vitrina: WhatsApp con CTA según plantilla,
+        horario y links externos. Solo en vista completa. %>
+    <% if @full_view && (@user.whatsapp_url || @user.horario.present? || [ @user.link_instagram, @user.link_facebook, @user.link_web ].any?(&:present?)) %>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-3 pt-1">
+        <% if @user.whatsapp_url %>
+          <a href="<%= @user.whatsapp_url %>" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-on-primary text-label-md hover:opacity-90 transition-opacity"
+             style="background-color: <%= @user.acento %>">
+            <span class="material-symbols-outlined icon-filled" style="font-size:18px">chat</span>
+            <%= @user.plantilla[:cta] %>
+          </a>
+        <% end %>
+        <% if @user.horario.present? %>
+          <span class="inline-flex items-center gap-1 text-caption text-on-surface-variant">
+            <span class="material-symbols-outlined" style="font-size:16px">schedule</span>
+            <%= @user.horario %>
+          </span>
+        <% end %>
+        <% { "Instagram" => @user.link_instagram, "Facebook" => @user.link_facebook, "Web" => @user.link_web }.each do |nombre, link| %>
+          <% next if link.blank? %>
+          <a href="<%= link %>" target="_blank" rel="noopener nofollow"
+             class="inline-flex items-center gap-1 text-caption text-primary hover:underline">
+            <span class="material-symbols-outlined" style="font-size:14px">open_in_new</span>
+            <%= nombre %>
+          </a>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% unless @full_view %>
+      <div class="rounded-xl bg-primary-fixed/20 border border-primary/20 p-4 space-y-2">
+        <p class="text-body-md text-on-surface">
+          @<%= @user.username %> participa en privado: su perfil completo es
+          visible para la comunidad de Confianza.
+        </p>
+        <%= link_to new_user_path,
+              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors" do %>
+          <span class="material-symbols-outlined" style="font-size:16px">person_add</span>
+          Únete para ver el perfil completo
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if authenticated? && Current.session.user_id == @user.id %>
+      <%# Link de invitación del propio usuario: quien se registre con él
+          queda apadrinado automáticamente (sponsor_code prellenado). %>
+      <div class="rounded-xl bg-primary-fixed/30 border border-primary/20 p-4 space-y-2">
+        <p class="text-label-md text-on-surface flex items-center gap-1.5">
+          <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">handshake</span>
+          Invita a tus vecinos
+        </p>
+        <p class="text-caption text-on-surface-variant">
+          Comparte tu link: quien se registre con él arranca apadrinado por ti,
+          con un colchón extra de crédito.
+        </p>
+        <p class="text-caption font-mono text-on-surface break-all"><%= invite_url(code: @user.username) %></p>
+        <%= render "shared/share_button",
+              url:   invite_url(code: @user.username),
+              title: "Únete a Confianza",
+              text:  "Únete a Confianza, la red de tu comunidad. Regístrate con mi link y arrancas con crédito extra:" %>
+      </div>
+
+      <% if @user.showcase? %>
+        <%# QR imprimible de la vitrina: para el local, el puesto o la feria. %>
+        <div class="rounded-xl bg-secondary-fixed/20 border border-secondary/20 p-4 space-y-2">
+          <p class="text-label-md text-on-surface flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-secondary" style="font-size:18px">qr_code_2</span>
+            El QR de tu vitrina
+          </p>
+          <p class="text-caption text-on-surface-variant">
+            Imprímelo y pégalo donde te vean — el local, tu puesto, la feria.
+            Quien lo escanee cae directo en tu vitrina, con tu WhatsApp y tu
+            reputación a la vista.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <a href="<%= profile_qr_path(@user.username) %>" download="confianza-<%= @user.username %>-qr.png"
+               class="inline-flex items-center gap-1.5 text-label-md text-primary border border-primary px-4 py-2 rounded-full hover:bg-primary-fixed/40 transition-colors">
+              <span class="material-symbols-outlined" style="font-size:16px">download</span>
+              Descargar QR imprimible
+            </a>
+            <%= render "shared/share_button",
+                  url:   profile_url(@user.username),
+                  title: "Mi vitrina en Confianza",
+                  text:  "Esta es mi vitrina en Confianza — catálogo, contacto y reputación en un solo link:" %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <%= render "shared/share_button",
+            url:   profile_url(@user.username || @user.id),
+            title: "@#{@user.username} en Confianza",
+            text:  "Mira el perfil de @#{@user.username} en Confianza" %>
+    <% end %>
+    </div>
+  </header>
+
+  <%# La plantilla de la vitrina decide el orden: una tienda muestra primero
+      su catálogo; un oficio, primero su reputación. %>
+  <%= render "profiles/publicaciones" if @user.plantilla[:posts_primero] %>
+  <%= render "profiles/reputacion" %>
+
+  <% if @sponsored&.any? %>
+    <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 space-y-3">
+      <h2 class="text-label-md text-on-surface uppercase tracking-wider flex items-center gap-1">
+        <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:16px">handshake</span>
+        Mis ahijados · <%= @sponsored.size %>
+      </h2>
+      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <% @sponsored.each do |ahijado| %>
+          <li>
+            <%= link_to profile_path(ahijado),
+                  class: "flex items-center gap-3 p-2 rounded-lg hover:bg-warm-surface transition-colors" do %>
+              <% if ahijado.avatar.attached? && ahijado.avatar.image? %>
+                <%= image_tag ahijado.avatar, class: "w-9 h-9 rounded-full object-cover" %>
+              <% else %>
+                <div class="w-9 h-9 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-label-md font-semibold shrink-0">
+                  <%= ahijado.username.first.upcase %>
+                </div>
+              <% end %>
+              <div class="min-w-0">
+                <p class="text-body-md text-on-surface truncate">@<%= ahijado.username %></p>
+                <p class="text-caption text-on-surface-variant"><%= l(ahijado.created_at.to_date, format: :long) rescue ahijado.created_at.to_date.to_s %></p>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+  <%= render "profiles/publicaciones" unless @user.plantilla[:posts_primero] %>
+</section>

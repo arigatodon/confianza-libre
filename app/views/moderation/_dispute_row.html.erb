@@ -1,0 +1,25 @@
+<%# locals: dispute %>
+<% i = dispute.interaction %>
+<%= link_to moderation_dispute_path(dispute),
+      class: "block rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 ambient-shadow hover:border-primary/40 transition-colors #{'border-error/50' if dispute.stale?}" do %>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0 space-y-1">
+      <div class="flex flex-wrap items-center gap-2 text-caption text-on-surface-variant">
+        <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface"><%= dispute.status_label_es %></span>
+        <% if dispute.stale? %>
+          <span class="px-2 py-0.5 rounded-full bg-error-container/40 text-on-error-container">
+            Abierta hace <%= dispute.days_open %> días
+          </span>
+        <% end %>
+        <span>· <%= time_ago_in_words(dispute.created_at) %></span>
+      </div>
+      <p class="text-body-md text-on-surface truncate"><%= dispute.argument %></p>
+      <p class="text-caption text-on-surface-variant">
+        <strong>@<%= i.sender.username %></strong> ↔ <strong>@<%= i.receiver.username %></strong>
+        · interacción #<%= i.id %>
+        <% if i.agreed_credits.to_i.positive? %>· <%= i.agreed_credits %> C<% end %>
+      </p>
+    </div>
+    <span class="material-symbols-outlined text-on-surface-variant shrink-0" style="font-size:20px">chevron_right</span>
+  </div>
+<% end %>

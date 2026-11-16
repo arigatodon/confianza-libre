@@ -1,0 +1,15 @@
+<%# Render neutral. La alineación "míos a la derecha" la aplica chat_controller.js en el cliente. %>
+<div id="<%= dom_id(message) %>"
+     class="flex justify-start"
+     data-msg-user-id="<%= message.user_id %>">
+  <div class="bubble max-w-xs md:max-w-md rounded-2xl px-3 py-2 bg-surface-container text-on-surface">
+    <p class="username text-caption font-semibold text-primary mb-0.5">
+      @<%= message.user.username || message.user.email_address %>
+    </p>
+    <p class="text-body-md whitespace-pre-wrap"><%= message.body %></p>
+    <p class="text-[10px] mt-0.5 opacity-70 flex items-center gap-2">
+      <%= l(message.created_at, format: :short) rescue message.created_at.strftime("%H:%M") %>
+      <%= report_link(message, label: "", classes: "opacity-60 hover:opacity-100 hover:text-error") %>
+    </p>
+  </div>
+</div>

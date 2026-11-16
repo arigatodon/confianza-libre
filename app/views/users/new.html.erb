@@ -1,0 +1,78 @@
+<% content_for :title, "Crear cuenta" %>
+
+<section class="max-w-md mx-auto space-y-6 pt-6">
+  <header class="space-y-2 text-center">
+    <span class="inline-flex w-14 h-14 rounded-2xl bg-secondary-container text-on-secondary-container items-center justify-center mx-auto">
+      <span class="material-symbols-outlined icon-filled" style="font-size:28px">person_add</span>
+    </span>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Crear cuenta</h1>
+    <p class="text-body-md text-on-surface-variant">Únete a tu comunidad cercana.</p>
+  </header>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-6 space-y-5">
+    <%= render "shared/login_social", separador: "o crea tu cuenta con email", separador_abajo: true %>
+
+    <%= form_with model: @user, url: users_path, multipart: true, class: "space-y-4" do |f| %>
+      <% if @user.errors.any? %>
+        <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-4 py-3 text-sm">
+          <p class="font-semibold mb-1 flex items-center gap-2">
+            <span class="material-symbols-outlined icon-filled" style="font-size:18px">error</span>
+            <%= pluralize(@user.errors.count, "error", plural: "errores") %>
+          </p>
+          <ul class="list-disc ml-7">
+            <% @user.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= render "users/avatar_picker", f: f, user: @user %>
+
+      <div>
+        <%= f.label :username, "Nombre de usuario", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_field :username, required: true, autofocus: true, autocomplete: "username",
+              placeholder: "igor", pattern: "[a-zA-Z0-9_]+" %>
+        <p class="text-caption text-on-surface-variant mt-1">
+          Tu URL pública: <span class="font-mono text-on-surface">confianza.app/tu-usuario</span>
+        </p>
+      </div>
+
+      <div>
+        <%= f.label :email_address, "Email", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.email_field :email_address, required: true, autocomplete: "email" %>
+      </div>
+
+      <div>
+        <%= f.label :password, "Contraseña", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.password_field :password, required: true, autocomplete: "new-password", minlength: 8, maxlength: 72 %>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, "Confirma tu contraseña", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.password_field :password_confirmation, required: true, autocomplete: "new-password", minlength: 8, maxlength: 72 %>
+      </div>
+
+      <div>
+        <%= f.label :bio, "Sobre ti (opcional)", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_area :bio, rows: 3, maxlength: 280, placeholder: "Una breve presentación…" %>
+      </div>
+
+      <div>
+        <%= f.label :sponsor_code, "¿Te invitó alguien? (opcional)", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_field :sponsor_code, value: @sponsor_code, autocomplete: "off",
+              placeholder: "@usuario", pattern: "@?[a-zA-Z0-9_]+", maxlength: 31 %>
+        <p class="text-caption text-on-surface-variant mt-1">
+          Si te invitó alguien en Confianza, indica su usuario para arrancar con un colchón extra de crédito.
+        </p>
+      </div>
+
+      <div class="pt-2 flex items-center justify-between gap-3 flex-wrap">
+        <%= f.submit "Crear cuenta",
+              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+        <%= link_to "Ya tengo cuenta", new_session_path,
+              class: "text-caption text-primary hover:underline" %>
+      </div>
+    <% end %>
+  </div>
+</section>

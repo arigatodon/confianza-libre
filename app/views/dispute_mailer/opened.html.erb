@@ -1,0 +1,22 @@
+<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">Abrieron una disputa en una interacción tuya</h1>
+
+<p style="margin:0 0 16px;">
+  <strong>@<%= @opener.username %></strong> abrió una disputa sobre la interacción
+  de <strong>“<%= @interaction.post.title %>”</strong>. Esto es lo que planteó:
+</p>
+
+<blockquote style="margin:0 0 16px; padding:12px 16px; border-left:3px solid #0f5238; background:#f4f7f5; color:#333;">
+  <%= @dispute.argument %>
+</blockquote>
+
+<p style="margin:0 0 8px;">
+  Puedes responder con tu versión de los hechos una sola vez. Después, un
+  moderador que no es parte de la interacción revisará ambos lados y decidirá.
+</p>
+
+<%= render "shared/email_cta", url: interaction_url(@interaction), label: "Responder la disputa" %>
+
+<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+  Mientras la disputa esté abierta, los créditos de esta interacción quedan congelados.
+  El chat sigue disponible por si quieren resolverlo conversando.
+</p>

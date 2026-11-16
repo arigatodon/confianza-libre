@@ -1,0 +1,106 @@
+<% content_for :title, "Disputa ##{@dispute.id}" %>
+
+<% i = @dispute.interaction %>
+<% is_open = !@dispute.resolved? %>
+
+<article class="max-w-2xl mx-auto space-y-6">
+  <header class="space-y-1">
+    <div class="text-caption text-on-surface-variant flex items-center gap-2">
+      <%= link_to "Moderación", moderation_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <span>Disputa #<%= @dispute.id %></span>
+    </div>
+    <h1 class="text-headline-md text-on-surface">
+      Interacción <%= link_to "##{i.id}", interaction_path(i), class: "text-primary hover:underline" %>
+      <span class="ml-2 text-caption px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface align-middle">
+        <%= @dispute.status_label_es %>
+      </span>
+    </h1>
+    <p class="text-body-md text-on-surface-variant">
+      <strong>@<%= i.sender.username %></strong> ↔ <strong>@<%= i.receiver.username %></strong>
+      <% if i.agreed_credits.to_i.positive? %>· <%= i.agreed_credits %> C acordados<% end %>
+    </p>
+  </header>
+
+  <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow space-y-4">
+    <div>
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Argumento de @<%= @dispute.opener.username %></p>
+      <p class="text-body-md text-on-surface whitespace-pre-line mt-1"><%= @dispute.argument %></p>
+    </div>
+    <% if @dispute.response.present? %>
+      <div class="pt-3 border-t border-outline-variant/30">
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Respuesta de @<%= @dispute.counterpart&.username %></p>
+        <p class="text-body-md text-on-surface whitespace-pre-line mt-1"><%= @dispute.response %></p>
+      </div>
+    <% else %>
+      <p class="text-caption text-on-surface-variant italic">La contraparte todavía no respondió.</p>
+    <% end %>
+  </section>
+
+  <% if i.messages.visible.any? %>
+    <section class="rounded-xl bg-surface-container-low/40 border border-outline-variant/30 p-5 space-y-2">
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Chat de la interacción</p>
+      <div class="space-y-1 max-h-64 overflow-y-auto">
+        <% i.messages.visible.ordered.each do |m| %>
+          <p class="text-body-md text-on-surface"><strong>@<%= m.user.username %>:</strong> <%= m.body %></p>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if is_open %>
+    <% can_resolve = Current.session.user.moderator? && ![ i.sender_id, i.receiver_id ].include?(Current.session.user.id) %>
+    <% if can_resolve %>
+      <section class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-5 ambient-shadow space-y-3">
+        <p class="text-label-md text-on-surface">Resolver</p>
+        <%= form_with url: resolve_moderation_dispute_path(@dispute), method: :patch, scope: nil, class: "space-y-3" do %>
+          <%= text_area_tag :note, nil, rows: 2,
+                placeholder: "Nota de resolución (se muestra a ambas partes)",
+                class: "w-full px-3 py-2 rounded-lg bg-warm-surface border border-outline-variant/30 text-on-surface" %>
+
+          <div class="flex items-center gap-2">
+            <label class="text-caption text-on-surface-variant" for="amount">Monto para veredicto parcial</label>
+            <%= number_field_tag :amount, nil, min: 0, max: i.agreed_credits, class: "w-24" %>
+            <span class="text-caption text-on-surface-variant">/ <%= i.agreed_credits %> C</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="submit" name="verdict" value="complete"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer">
+              <span class="material-symbols-outlined" style="font-size:16px">task_alt</span>
+              Completar (<%= i.agreed_credits %> C)
+            </button>
+            <button type="submit" name="verdict" value="partial"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-600 text-white text-label-md hover:bg-amber-700 cursor-pointer">
+              <span class="material-symbols-outlined" style="font-size:16px">percent</span>
+              Completar parcial
+            </button>
+            <button type="submit" name="verdict" value="cancel"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high cursor-pointer ml-auto">
+              <span class="material-symbols-outlined" style="font-size:16px">block</span>
+              Cancelar (sin mover créditos)
+            </button>
+          </div>
+        <% end %>
+      </section>
+    <% else %>
+      <section class="rounded-xl bg-surface-container-low/40 border border-outline-variant/30 p-5">
+        <p class="text-body-md text-on-surface-variant italic">
+          No puedes resolver esta disputa (eres parte de la interacción o no eres moderador).
+        </p>
+      </section>
+    <% end %>
+  <% else %>
+    <section class="rounded-xl bg-primary/5 border border-primary/20 p-5 space-y-1">
+      <p class="text-caption text-primary uppercase tracking-wider">Resolución</p>
+      <p class="text-body-md text-on-surface">
+        <strong><%= @dispute.verdict_label_es %></strong>
+        <% if @dispute.resolved_by %>· por <strong>@<%= @dispute.resolved_by.username %></strong><% end %>
+        <% if @dispute.resolved_at %>· <%= l(@dispute.resolved_at, format: :short) rescue @dispute.resolved_at %><% end %>
+      </p>
+      <% if @dispute.resolution_note.present? %>
+        <p class="text-body-md text-on-surface-variant whitespace-pre-line mt-1"><%= @dispute.resolution_note %></p>
+      <% end %>
+    </section>
+  <% end %>
+</article>

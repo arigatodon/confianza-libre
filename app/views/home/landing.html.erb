@@ -1,0 +1,237 @@
+<% content_for :title, "Confianza — La red de confianza que fortalece tu comunidad" %>
+
+<%# Hero %>
+<section class="py-16 md:py-28 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="grid md:grid-cols-2 gap-12 items-center">
+    <div class="space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+        <span class="material-symbols-outlined text-primary" style="font-size:18px">location_on</span>
+        <span class="text-label-md text-on-surface-variant text-sm">Red social geolocalizada</span>
+      </div>
+      <h1 class="text-headline-lg-mobile md:text-headline-xl text-primary-container">
+        La red de confianza que fortalece tu comunidad
+      </h1>
+      <p class="text-body-lg text-on-surface-variant max-w-xl">
+        Reputación basada en hechos, créditos comunitarios y vecinos reales cerca de ti.
+        Una plataforma para intercambiar, ayudar y construir capital social en tu territorio,
+        sin depender del sistema financiero tradicional.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <%= link_to signup_path,
+              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-7 py-3 rounded-full text-label-md transition-colors shadow-sm flex justify-center items-center gap-2" do %>
+          Unirse a la red
+          <span class="material-symbols-outlined" style="font-size:20px">arrow_forward</span>
+        <% end %>
+        <%= link_to "Cómo funciona", how_it_works_path,
+              class: "border-2 border-primary text-primary px-7 py-3 rounded-full text-label-md hover:bg-surface-container-low transition-colors flex justify-center items-center" %>
+      </div>
+    </div>
+
+    <div class="relative h-[400px] md:h-[500px] rounded-xl overflow-hidden ambient-shadow">
+      <%= image_tag "huertawor.png",
+            alt: "Vecinos colaborando en un proyecto comunitario",
+            class: "w-full h-full object-cover rounded-xl" %>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+      <div class="absolute bottom-6 left-6 right-6 bg-surface/90 backdrop-blur-md p-4 rounded-lg flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+          <span class="material-symbols-outlined icon-filled">handshake</span>
+        </div>
+        <div>
+          <p class="text-label-md text-on-surface">Intercambio exitoso</p>
+          <p class="text-caption text-on-surface-variant">María y Juan acaban de colaborar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# Cómo funciona — resumen 3 pasos %>
+<section class="py-20 bg-surface-container-low px-margin-mobile md:px-margin-desktop" id="como-funciona">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-headline-lg-mobile md:text-headline-lg text-primary-container mb-4">
+        Cómo funciona Confianza
+      </h2>
+      <p class="text-body-md text-on-surface-variant max-w-2xl mx-auto">
+        Participar es simple. Tu valor en la red se basa en tus acciones reales,
+        no en tu cuenta bancaria.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <%# Paso 1 %>
+      <div class="bg-surface rounded-xl p-8 ambient-shadow flex flex-col items-start border-t-2 border-secondary group">
+        <div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-primary mb-6 transition-transform group-hover:scale-110">
+          <span class="material-symbols-outlined" style="font-size:28px">add_circle</span>
+        </div>
+        <h3 class="text-headline-md text-on-surface mb-3">Publica</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">
+          Ofrece tus habilidades, herramientas o tiempo. También puedes publicar
+          lo que necesitas de la comunidad.
+        </p>
+        <div class="mt-6 inline-flex items-center text-secondary text-label-md">
+          Paso 1 <span class="material-symbols-outlined ml-1" style="font-size:16px">arrow_right_alt</span>
+        </div>
+      </div>
+
+      <%# Paso 2 %>
+      <div class="bg-surface rounded-xl p-8 ambient-shadow flex flex-col items-start border-t-2 border-primary group">
+        <div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-primary mb-6 transition-transform group-hover:scale-110">
+          <span class="material-symbols-outlined" style="font-size:28px">sync_alt</span>
+        </div>
+        <h3 class="text-headline-md text-on-surface mb-3">Interactúa</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">
+          Conecta con tus vecinos. Realiza intercambios justos usando los
+          créditos mutuos del sistema en lugar de dinero fiduciario.
+        </p>
+        <div class="mt-6 inline-flex items-center text-primary text-label-md">
+          Paso 2 <span class="material-symbols-outlined ml-1" style="font-size:16px">arrow_right_alt</span>
+        </div>
+      </div>
+
+      <%# Paso 3 %>
+      <div class="bg-surface rounded-xl p-8 ambient-shadow flex flex-col items-start border-t-2 border-earth-clay group">
+        <div class="w-14 h-14 rounded-full bg-surface-container flex items-center justify-center text-primary mb-6 transition-transform group-hover:scale-110">
+          <span class="material-symbols-outlined" style="font-size:28px">verified</span>
+        </div>
+        <h3 class="text-headline-md text-on-surface mb-3">Evalúa</h3>
+        <p class="text-body-md text-on-surface-variant flex-grow">
+          Confirma el intercambio y deja una reseña. Cada interacción exitosa
+          fortalece tu nivel de confianza en la red.
+        </p>
+        <div class="mt-6 inline-flex items-center text-earth-clay text-label-md">
+          Paso 3 <span class="material-symbols-outlined ml-1" style="font-size:16px">arrow_right_alt</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-12">
+      <%= link_to how_it_works_path,
+            class: "inline-flex items-center gap-2 text-primary text-label-md hover:underline" do %>
+        Ver explicación completa
+        <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# Reputación %>
+<section class="py-20 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto" id="reputacion">
+  <div class="grid md:grid-cols-2 gap-16 items-center">
+    <div class="order-2 md:order-1 relative">
+      <div class="bg-surface rounded-xl p-6 ambient-shadow-lg border border-outline-variant/20 max-w-sm mx-auto relative z-10">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="relative">
+            <img alt="Avatar de Elena García"
+                 class="w-16 h-16 rounded-full object-cover border-2 border-surface"
+                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCckTtkuHStFGZ3Zeu2Ul-_uTiG9_M68C0fjp23u7zTaWHHXg7xiYzF254di2-qYHk1YZ449Awmo6PEQtDbWS17iJqMbaiQcnerIxJCawKLEo12dmQXjqnU5jnU3uOmQ3lpXjQQ5VGejijflCfhLX9tbXe5RA1X_KBsxR-sKM8mHYjIXRJIv1EFKNmRK0QoXatCTI4sEP5TiErEXZmmquLAqgYQUgMnpZAXQEXMIFmOW2oYFytEkYS3nV781OI3w13XK2DvP5fBmqk">
+            <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-earth-clay flex items-center justify-center border-2 border-surface">
+              <span class="material-symbols-outlined icon-filled text-on-secondary" style="font-size:12px">check</span>
+            </div>
+          </div>
+          <div>
+            <h4 class="text-headline-md text-on-surface text-lg">Elena García</h4>
+            <p class="text-caption text-on-surface-variant">Vecina Verificada</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-label-md text-on-surface">Nivel de Confianza</span>
+              <span class="text-label-md text-primary">Nivel 4</span>
+            </div>
+            <div class="flex gap-1 h-2">
+              <div class="flex-1 bg-primary rounded-l-full"></div>
+              <div class="flex-1 bg-primary"></div>
+              <div class="flex-1 bg-primary"></div>
+              <div class="flex-1 bg-primary"></div>
+              <div class="flex-1 bg-surface-variant rounded-r-full"></div>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-outline-variant/30 flex justify-between">
+            <div class="text-center">
+              <p class="text-headline-md text-on-surface text-xl">42</p>
+              <p class="text-caption text-on-surface-variant">Intercambios</p>
+            </div>
+            <div class="text-center">
+              <p class="text-headline-md text-on-surface text-xl">4.9</p>
+              <p class="text-caption text-on-surface-variant">Valoración</p>
+            </div>
+            <div class="text-center">
+              <p class="text-headline-md text-on-surface text-xl">150</p>
+              <p class="text-caption text-on-surface-variant">Créditos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-soft-sky/30 rounded-full blur-3xl -z-10"></div>
+    </div>
+
+    <div class="order-1 md:order-2 space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+        <span class="material-symbols-outlined text-primary" style="font-size:18px">shield_person</span>
+        <span class="text-label-md text-on-surface-variant text-sm">Tu historial es tu aval</span>
+      </div>
+      <h2 class="text-headline-lg-mobile md:text-headline-lg text-primary-container">
+        Reputación basada en acciones reales
+      </h2>
+      <p class="text-body-lg text-on-surface-variant">
+        En Confianza, tu capacidad crediticia no la define un banco, sino tu historial de
+        participación comunitaria. Cada vez que cumples un compromiso o ayudas a un vecino,
+        tu "Nivel de Confianza" aumenta.
+      </p>
+      <ul class="space-y-4 pt-2">
+        <li class="flex items-start gap-3">
+          <span class="material-symbols-outlined icon-filled text-primary mt-1">star</span>
+          <div>
+            <h4 class="text-label-md text-on-surface">Reseñas transparentes</h4>
+            <p class="text-body-md text-on-surface-variant text-sm">
+              Feedback bidireccional tras cada intercambio para mantener la calidad de la red.
+            </p>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="material-symbols-outlined icon-filled text-earth-clay mt-1">trending_up</span>
+          <div>
+            <h4 class="text-label-md text-on-surface">Acceso progresivo</h4>
+            <p class="text-body-md text-on-surface-variant text-sm">
+              A mayor nivel, puedes solicitar préstamos de herramientas más valiosas
+              o créditos mayores.
+            </p>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="material-symbols-outlined icon-filled text-tertiary mt-1">location_on</span>
+          <div>
+            <h4 class="text-label-md text-on-surface">Reputación territorial</h4>
+            <p class="text-body-md text-on-surface-variant text-sm">
+              Tu confianza se construye en el barrio donde realmente estás. Lo local
+              tiene más peso.
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<%# CTA final %>
+<section class="px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto pb-20">
+  <div class="bg-primary-container text-on-primary rounded-xl px-8 py-12 md:px-16 md:py-16 text-center md:text-left md:flex md:items-center md:justify-between gap-8 ambient-shadow-lg">
+    <div class="max-w-2xl">
+      <h2 class="text-headline-lg-mobile md:text-headline-lg text-on-primary mb-3">
+        Empieza a construir capital comunitario
+      </h2>
+      <p class="text-body-md text-on-primary-container">
+        Únete gratis, descubre lo que tu zona tiene para ofrecer y empieza a construir
+        tu reputación desde tu primer intercambio.
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6 md:mt-0 shrink-0">
+      <%= link_to "Crear cuenta", signup_path,
+            class: "bg-on-primary text-primary hover:bg-surface-container-low px-7 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+      <%= link_to "Ingresar", new_session_path,
+            class: "border-2 border-on-primary text-on-primary px-7 py-3 rounded-full text-label-md hover:bg-primary transition-colors" %>
+    </div>
+  </div>
+</section>

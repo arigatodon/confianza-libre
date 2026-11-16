@@ -1,0 +1,28 @@
+<%# locals: interaction, viewer %>
+<% other = interaction.other_party(viewer) %>
+<% role  = interaction.sender_id == viewer.id ? "Enviada" : "Recibida" %>
+<%= link_to interaction_path(interaction),
+      class: "block rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow hover:bg-surface-container transition-colors" do %>
+  <header class="flex items-center justify-between gap-2 mb-2">
+    <span class="text-caption text-on-surface-variant"><%= role %></span>
+    <span class="inline-flex items-center gap-1.5 text-caption font-semibold px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface">
+      <span class="material-symbols-outlined icon-filled" style="font-size:14px"><%= interaction.status_icon %></span>
+      <%= interaction.status_label_es %>
+    </span>
+  </header>
+
+  <p class="text-body-md text-on-surface font-medium truncate"><%= interaction.post.title %></p>
+
+  <div class="mt-2 flex items-center justify-between text-caption text-on-surface-variant">
+    <span class="flex items-center gap-1 min-w-0 truncate">
+      <span class="material-symbols-outlined" style="font-size:14px">person</span>
+      con <strong class="text-primary truncate">@<%= other.username || other.email_address %></strong>
+    </span>
+    <% if interaction.agreed_credits.to_i > 0 %>
+      <span class="flex items-center gap-1 text-on-surface">
+        <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:14px">payments</span>
+        <%= interaction.agreed_credits %> C
+      </span>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,14 @@
+<%# locals: interaction %>
+<%= form_with model: [ interaction, Message.new ],
+      id: "message-form-#{interaction.id}",
+      class: "flex items-stretch gap-2",
+      data: { controller: "auto-focus", action: "submit->typing#submit" } do |f| %>
+  <%= f.text_field :body,
+        required: true,
+        autocomplete: "off",
+        placeholder: "Escribe un mensaje…",
+        class: "flex-1",
+        data: { auto_focus_target: "field", typing_target: "input" } %>
+  <%= f.submit "Enviar",
+        class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+<% end %>

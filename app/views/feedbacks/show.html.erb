@@ -1,0 +1,43 @@
+<% content_for :title, "Feedback ##{@feedback.id}" %>
+
+<article class="max-w-2xl mx-auto space-y-6">
+  <header class="space-y-1">
+    <%= link_to "← Volver al panel", feedbacks_path, class: "text-caption text-on-surface-variant hover:text-primary" %>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">
+      <%= @feedback.kind_label_es %>
+    </h1>
+    <p class="text-caption text-on-surface-variant">
+      <% if @feedback.user %>
+        <%= link_to "@#{@feedback.user.username || @feedback.user.email_address}", profile_path(@feedback.user.username || @feedback.user.id), class: "text-primary hover:underline" %>
+      <% else %>
+        <em>anónimo</em>
+      <% end %>
+      · <%= l(@feedback.created_at, format: :long) rescue @feedback.created_at.to_s %>
+      · <%= @feedback.status_label_es %>
+    </p>
+  </header>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow">
+    <p class="text-body-md text-on-surface whitespace-pre-line"><%= @feedback.body %></p>
+  </div>
+
+  <% if @feedback.url.present? || @feedback.user_agent.present? %>
+    <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 text-caption text-on-surface-variant space-y-1">
+      <% if @feedback.url.present? %>
+        <div><strong>URL:</strong> <%= @feedback.url %></div>
+      <% end %>
+      <% if @feedback.user_agent.present? %>
+        <div><strong>User-Agent:</strong> <%= @feedback.user_agent %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <% Feedback::STATUSES.keys.each do |s| %>
+      <% next if @feedback.status == s.to_s %>
+      <%= button_to "Marcar #{Feedback::STATUS_LABELS_ES[s.to_s].downcase}",
+            feedback_path(@feedback, status: s), method: :patch,
+            class: "text-label-md px-3 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high" %>
+    <% end %>
+  </div>
+</article>

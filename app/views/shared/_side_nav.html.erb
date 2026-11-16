@@ -1,0 +1,172 @@
+<%# Side Navigation — sólo en desktop (md+) %>
+<%
+  nav_link = ->(path, icon, label, active) {
+    base = "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-body-md"
+    if active
+      "#{base} bg-primary-container/15 text-primary font-semibold"
+    else
+      "#{base} text-on-surface-variant hover:bg-surface-container-high/60 hover:text-on-surface"
+    end
+  }
+  current = request.path
+%>
+<nav class="hidden md:flex fixed left-0 top-0 z-30 h-screen w-64 bg-surface-container-low/70 border-r border-outline-variant/30 flex-col p-gutter">
+  <%= link_to root_path, class: "flex items-center gap-3 mb-1" do %>
+    <span class="w-10 h-10 rounded-lg bg-primary text-on-primary grid place-items-center">
+      <span class="material-symbols-outlined icon-filled">handshake</span>
+    </span>
+    <div class="flex flex-col leading-tight">
+      <span class="text-headline-md text-primary font-bold">Confianza</span>
+      <span class="text-caption text-on-surface-variant">Capital Comunitario</span>
+    </div>
+  <% end %>
+
+  <ul class="flex flex-col gap-1 mt-8 flex-grow">
+    <li>
+      <%= link_to root_path, class: nav_link.call(root_path, "dynamic_feed", "Inicio", current == "/") do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current == '/' %>">dynamic_feed</span>
+        Inicio
+      <% end %>
+    </li>
+    <li>
+      <%= link_to explore_path, class: nav_link.call(explore_path, "map", "Explorar", current.start_with?("/explore")) do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/explore') %>">map</span>
+        Explorar
+      <% end %>
+    </li>
+    <li>
+      <%= link_to posts_path, class: nav_link.call(posts_path, "grid_view", "Publicaciones", current.start_with?("/posts")) do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/posts') %>">grid_view</span>
+        Publicaciones
+      <% end %>
+    </li>
+    <li>
+      <%= link_to people_path, class: nav_link.call(people_path, "group", "Vecinos", current.start_with?("/vecinos")) do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/vecinos') %>">group</span>
+        Vecinos
+      <% end %>
+    </li>
+    <li>
+      <%= link_to territories_path, class: nav_link.call(territories_path, "groups", "Comunidad", current.start_with?("/territorios")) do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/territorios') %>">groups</span>
+        Comunidad
+      <% end %>
+    </li>
+    <li>
+      <%= link_to economics_path, class: nav_link.call(economics_path, "balance", "Economía", current.start_with?("/economia")) do %>
+        <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/economia') %>">balance</span>
+        Economía
+      <% end %>
+    </li>
+    <% if authenticated? && (u = Current.session.user) %>
+      <% my_profile = profile_path(u.username || u.id) %>
+      <li>
+        <%= link_to wallet_path,
+              class: nav_link.call(wallet_path, "account_balance_wallet", "Billetera", current.start_with?("/billetera")) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/billetera') %>">account_balance_wallet</span>
+          Billetera
+        <% end %>
+      </li>
+      <li>
+        <%= link_to achievements_path,
+              class: nav_link.call(achievements_path, "emoji_events", "Logros", current.start_with?("/logros")) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/logros') %>">emoji_events</span>
+          Logros
+        <% end %>
+      </li>
+      <li>
+        <%= link_to interactions_path,
+              class: nav_link.call(interactions_path, "handshake", "Interacciones", current.start_with?("/interactions")) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/interactions') %>">handshake</span>
+          Interacciones
+        <% end %>
+      </li>
+      <li>
+        <%= link_to conversations_path,
+              class: nav_link.call(conversations_path, "forum", "Mensajes", current.start_with?("/mensajes")) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/mensajes') %>">forum</span>
+          Mensajes
+        <% end %>
+      </li>
+      <li>
+        <%= link_to notifications_path,
+              class: nav_link.call(notifications_path, "notifications", "Notificaciones", current.start_with?("/notifications")) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/notifications') %>">notifications</span>
+          <span class="flex-1">Notificaciones</span>
+          <%= render "shared/bell_badge_side", count: unread_notifications_count %>
+        <% end %>
+      </li>
+      <li>
+        <%= link_to my_profile,
+              class: nav_link.call(my_profile, "account_circle", "Mi perfil", current == my_profile) do %>
+          <span class="material-symbols-outlined <%= 'icon-filled' if current == my_profile %>">account_circle</span>
+          Mi perfil
+        <% end %>
+      </li>
+      <% if u.moderator? %>
+        <li>
+          <%= link_to moderation_path,
+                class: nav_link.call(moderation_path, "gavel", "Moderación", current.start_with?("/moderacion")) do %>
+            <span class="material-symbols-outlined <%= 'icon-filled' if current.start_with?('/moderacion') %>">gavel</span>
+            Moderación
+          <% end %>
+        </li>
+        <li>
+          <%= link_to feedbacks_path,
+                class: nav_link.call(feedbacks_path, "inbox", "Feedback", current == feedbacks_path) do %>
+            <span class="material-symbols-outlined <%= 'icon-filled' if current == feedbacks_path %>">inbox</span>
+            Feedback
+          <% end %>
+        </li>
+      <% end %>
+    <% end %>
+  </ul>
+
+  <div class="mt-auto flex flex-col gap-3">
+    <% if authenticated? %>
+      <%= link_to new_post_path,
+            class: "w-full bg-primary text-on-primary text-label-md py-3 rounded-full flex items-center justify-center gap-2 hover:bg-organic-green-deep transition-colors shadow-sm" do %>
+        <span class="material-symbols-outlined" style="font-size:20px">add</span>
+        Nueva publicación
+      <% end %>
+    <% end %>
+
+    <div class="h-px bg-outline-variant/40 w-full"></div>
+
+    <% if authenticated? && (u = Current.session.user) %>
+      <div class="flex items-center gap-3 px-1">
+        <% if u.avatar.attached? && u.avatar.image? %>
+          <%= image_tag u.avatar, class: "w-10 h-10 rounded-full object-cover border border-outline-variant" %>
+        <% else %>
+          <span class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-sm font-semibold">
+            <%= (u.username || u.email_address).first.upcase %>
+          </span>
+        <% end %>
+        <div class="flex flex-col min-w-0">
+          <span class="text-label-md text-on-surface truncate">@<%= u.username || u.email_address %></span>
+          <span class="text-caption text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined icon-filled" style="font-size:14px">verified</span>
+            <%= verification_level_label_es(u) %>
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center justify-between text-on-surface-variant">
+        <%= link_to settings_path, class: "flex items-center gap-2 text-caption hover:text-on-surface px-1 py-1.5" do %>
+          <span class="material-symbols-outlined" style="font-size:16px">settings</span>
+          Ajustes
+        <% end %>
+        <%= button_to session_path, method: :delete,
+              class: "flex items-center gap-2 text-caption hover:text-on-surface px-1 py-1.5",
+              form: { data: { turbo_confirm: "¿Cerrar sesión?" } } do %>
+          <span class="material-symbols-outlined" style="font-size:16px">logout</span>
+          Salir
+        <% end %>
+      </div>
+    <% else %>
+      <%= link_to "Entrar", new_session_path,
+            class: "block text-center text-label-md text-primary border border-primary py-2.5 rounded-full hover:bg-primary-fixed/40 transition-colors" %>
+      <%= link_to "Crear cuenta", signup_path,
+            class: "block text-center text-label-md bg-primary text-on-primary py-2.5 rounded-full hover:bg-organic-green-deep transition-colors" %>
+    <% end %>
+  </div>
+</nav>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title><%= content_for(:title) || "Confianza" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Confianza">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f5238">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%# Turbo 8 morphing refresh: cuando un broadcast manda "refresh" la
+        página hace un GET y morphea el HTML en vez de un full reload.
+        Preserva inputs activos, scroll y estado de Stimulus controllers. %>
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+
+    <%# SEO: las views de detalle (posts/show, profiles/show) emiten sus propios
+        tags via content_for :head; el resto usa los defaults del sitio. Se
+        emite uno u otro (nunca ambos) para no duplicar og:/twitter:. %>
+    <% if content_for?(:head) %>
+      <%= yield :head %>
+    <% else %>
+      <%= seo_meta_tags(title: content_for(:title).presence, description: ApplicationHelper::SITE_DESCRIPTION, canonical: request.original_url) %>
+    <% end %>
+
+    <%= render "shared/site_json_ld" %>
+
+    <link rel="manifest" href="/manifest">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-background text-on-background font-body antialiased min-h-screen overflow-x-hidden">
+    <% if authenticated? %>
+      <%= turbo_stream_from Current.session.user, :notifications %>
+    <% end %>
+
+    <%# En la app nativa (Hotwire Native) el chrome lo pone Android:
+        top bar nativa con título y back. Aquí sólo ocultamos la web. %>
+    <% unless hotwire_native_app? %>
+      <%= render "shared/top_bar" %>
+      <%= render "shared/side_nav" %>
+    <% end %>
+
+    <main class="<%= hotwire_native_app? ? "pt-4 pb-24" : "md:ml-64 pt-16 md:pt-6 pb-24 md:pb-10" %> px-margin-mobile md:px-margin-desktop">
+      <div class="max-w-3xl mx-auto">
+        <% if authenticated? && !Current.session.user.email_verified? %>
+          <div class="mb-4 rounded-lg bg-earth-clay/10 border border-earth-clay/40 text-on-surface px-4 py-3 text-sm flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-earth-clay shrink-0" style="font-size:18px">mark_email_unread</span>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium">Tu email no está verificado.</p>
+              <p class="text-caption text-on-surface-variant mt-0.5">
+                Sin verificar puedes explorar y publicar, pero no puedes iniciar interacciones ni subir al nivel 2.
+              </p>
+            </div>
+            <%= button_to resend_email_verification_path, method: :post,
+                  class: "shrink-0 px-3 py-1.5 rounded-full bg-earth-clay text-on-secondary text-caption font-semibold hover:opacity-90 cursor-pointer" do %>
+              Reenviar email
+            <% end %>
+          </div>
+        <% end %>
+        <% if notice %>
+          <div class="mb-4 rounded-lg bg-primary-fixed/40 border border-primary-fixed-dim/60 text-on-primary-fixed px-4 py-3 text-sm flex items-start gap-2">
+            <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">check_circle</span>
+            <span><%= notice %></span>
+          </div>
+        <% end %>
+        <% if alert %>
+          <div class="mb-4 rounded-lg bg-error-container border border-error/30 text-on-error-container px-4 py-3 text-sm flex items-start gap-2">
+            <span class="material-symbols-outlined icon-filled text-error" style="font-size:18px">error</span>
+            <span><%= alert %></span>
+          </div>
+        <% end %>
+
+        <%= yield %>
+      </div>
+    </main>
+
+    <%# En la app nativa, las pantallas /new y /edit se presentan como modal:
+        ahí el bottom nav web no tiene sentido (y el feedback button es desktop-only). %>
+    <% unless hotwire_native_app? && request.path.match?(%r{/(new|edit)$}) %>
+      <%= render "shared/bottom_nav" %>
+    <% end %>
+    <%= render "shared/beta_feedback_button" unless hotwire_native_app? %>
+  </body>
+</html>

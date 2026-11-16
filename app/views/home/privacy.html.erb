@@ -1,0 +1,71 @@
+<% content_for :title, "Privacidad" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Privacidad",
+        description: "Qué datos guarda Confianza, para qué se usan y qué es público. En simple: tus datos no se venden, no hay publicidad y lo público lo decides tú.",
+        canonical:   privacy_url) %>
+<% end %>
+
+<article class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="max-w-2xl mx-auto space-y-10">
+    <header class="space-y-4">
+      <h1 class="text-headline-lg-mobile md:text-headline-xl text-primary-container">Privacidad</h1>
+      <p class="text-body-lg text-on-surface-variant">
+        En simple: <strong class="text-on-surface">tus datos no se venden, no hay
+        publicidad, y lo que es público lo decides tú al publicarlo.</strong>
+        Última actualización: septiembre de 2026.
+      </p>
+    </header>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface">Qué guardamos</h2>
+      <ul class="space-y-2 text-body-lg text-on-surface-variant list-disc pl-5">
+        <li><strong class="text-on-surface">Tu cuenta</strong>: nombre de usuario, email, contraseña (cifrada, nadie puede leerla) y la foto y bio que elijas.</li>
+        <li><strong class="text-on-surface">Tus publicaciones</strong>: el contenido, las fotos y la ubicación que les pongas. La ubicación sirve para que te encuentren los vecinos cercanos.</li>
+        <li><strong class="text-on-surface">Tu actividad en la red</strong>: interacciones, evaluaciones, créditos (registro contable), votos y mensajes.</li>
+        <li><strong class="text-on-surface">Tu ubicación aproximada</strong> cuando usas el feed cercano o el mapa — se usa para mostrarte lo que tienes cerca, no se historiza tu recorrido.</li>
+        <li><strong class="text-on-surface">Estadísticas de visitas</strong>, medidas por nosotros mismos: qué páginas se ven y desde qué sitio llega la gente. Sin cookies y sin guardar tu IP ni quién eres — solo un código anónimo que cambia cada día, para contar visitantes. Se borran a los 13 meses.</li>
+      </ul>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface">Qué es público</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        Tu perfil (usuario, foto, bio, reputación, avales, quién te invitó) y tus
+        publicaciones son <strong class="text-on-surface">públicos</strong> — esa
+        visibilidad es lo que construye confianza y permite que tus clientes te
+        encuentren. Tus mensajes directos, tu email y tu billetera son
+        <strong class="text-on-surface">privados</strong>.
+      </p>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface">Qué NO hacemos</h2>
+      <ul class="space-y-2 text-body-lg text-on-surface-variant list-disc pl-5">
+        <li>No vendemos ni compartimos tus datos con terceros.</li>
+        <li>No mostramos publicidad ni usamos rastreadores de terceros.</li>
+        <li>No leemos tus mensajes privados (sólo se revisan si los reportas a moderación).</li>
+        <li>No guardamos tu recorrido ni tu ubicación en segundo plano.</li>
+      </ul>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface">Notificaciones y permisos</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        La app pide tu ubicación sólo para mostrarte publicaciones cercanas, y
+        permiso de notificaciones sólo si tú lo activas. Ambos se pueden
+        revocar desde tu dispositivo cuando quieras.
+      </p>
+    </section>
+
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface">Tus derechos</h2>
+      <p class="text-body-lg text-on-surface-variant">
+        Puedes editar tus datos desde tu perfil, y pedir la eliminación completa
+        de tu cuenta escribiendo por el
+        <%= link_to "formulario de contacto", new_feedback_path, class: "text-primary hover:underline" %>.
+        Las reglas económicas de la red son <%= link_to "públicas y auditables", economics_path, class: "text-primary hover:underline" %>.
+      </p>
+    </section>
+  </div>
+</article>

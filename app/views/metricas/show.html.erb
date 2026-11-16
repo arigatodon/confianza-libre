@@ -1,0 +1,91 @@
+<% content_for :title, "Métricas" %>
+
+<section class="space-y-8">
+  <header class="space-y-2">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Panel interno · últimos <%= MetricasController::DIAS %> días</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Métricas</h1>
+    <p class="text-body-md text-on-surface-variant max-w-2xl">
+      Visitas contadas por la propia app, sin cookies ni terceros. Un visitante
+      único es único por día; no se sigue a nadie entre días. No se cuentan bots
+      conocidos ni precargas de Turbo.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <% [ [ "Páginas vistas", @total_vistas ], [ "Visitantes únicos (suma diaria)", @total_unicos ],
+         [ "Vistas desde la app", @vistas_app ], [ "Vitrinas públicas", @totales["Vitrinas públicas"] ] ].each do |etiqueta, valor| %>
+      <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+        <p class="text-caption text-on-surface-variant"><%= etiqueta %></p>
+        <p class="text-headline-md text-on-surface tabular-nums"><%= number_with_delimiter(valor) %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 space-y-3">
+    <h2 class="text-label-md text-on-surface">Visitantes únicos por día</h2>
+    <div class="flex items-end gap-0.5 h-32" role="img" aria-label="Visitantes únicos por día">
+      <% @dias.each do |dia| %>
+        <% datos = @por_dia[dia] || { vistas: 0, unicos: 0 } %>
+        <div class="flex-1 h-full flex items-end" title="<%= l(dia, format: :short) %>: <%= datos[:unicos] %> únicos · <%= datos[:vistas] %> vistas">
+          <div class="w-full rounded-t-sm bg-primary" style="height: <%= [ (datos[:unicos] * 100.0 / @max_unicos).round, datos[:unicos].positive? ? 2 : 0 ].max %>%"></div>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex justify-between text-caption text-on-surface-variant">
+      <span><%= l(@dias.first, format: :short) %></span>
+      <span>máx. <%= @max_unicos %>/día</span>
+      <span>hoy</span>
+    </div>
+  </div>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 overflow-x-auto">
+    <h2 class="text-label-md text-on-surface mb-3">Embudo de activación</h2>
+    <table class="w-full text-body-md">
+      <thead>
+        <tr class="text-caption text-on-surface-variant text-left">
+          <th class="py-1 font-normal">Paso</th>
+          <th class="py-1 font-normal text-right">7 días</th>
+          <th class="py-1 font-normal text-right">30 días</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @embudo[7].each_key do |paso| %>
+          <tr class="border-t border-outline-variant/20">
+            <td class="py-1.5 text-on-surface"><%= paso %></td>
+            <td class="py-1.5 text-right tabular-nums"><%= @embudo[7][paso] %></td>
+            <td class="py-1.5 text-right tabular-nums"><%= @embudo[30][paso] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p class="text-caption text-on-surface-variant mt-3">
+      Totales históricos: <%= @totales.map { |k, v| "#{k} #{v}" }.join(" · ") %>.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <% [ [ "Páginas más vistas", @top_paginas ], [ "De dónde llegan", @top_referrers ],
+         [ "Campañas (utm)", @top_utm.map { |(fuente, campana), n| [ [ fuente, campana ].compact.join(" / "), n ] } ] ].each do |titulo, filas| %>
+      <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+        <h2 class="text-label-md text-on-surface mb-2"><%= titulo %></h2>
+        <% if filas.any? %>
+          <ul class="space-y-1 text-body-md">
+            <% filas.each do |nombre, n| %>
+              <li class="flex justify-between gap-3">
+                <span class="truncate text-on-surface-variant font-mono text-caption"><%= nombre %></span>
+                <span class="tabular-nums text-on-surface"><%= n %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-caption text-on-surface-variant">Sin datos todavía.</p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <p class="text-caption text-on-surface-variant">
+    Para medir una campaña, agrega <span class="font-mono">?utm_source=instagram&amp;utm_campaign=feria</span>
+    al link que compartes (por ejemplo en el QR de un afiche).
+  </p>
+</section>

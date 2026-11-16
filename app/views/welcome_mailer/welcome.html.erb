@@ -1,0 +1,18 @@
+<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">¡Tu cuenta ya está activa, @<%= @user.username %>!</h1>
+
+<p style="margin:0 0 16px;">
+  Verificaste tu correo, así que ya eres parte de <strong>Confianza</strong>. Esto es lo que puedes empezar a hacer:
+</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 8px; width:100%;">
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">🗺️&nbsp; <strong>Explorar</strong> publicaciones y personas cerca de ti.</td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">📣&nbsp; <strong>Publicar</strong> lo que ofreces: ventas, servicios, ayuda, eventos.</td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">🤝&nbsp; <strong>Iniciar interacciones</strong> y mover créditos comunitarios.</td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">⭐&nbsp; <strong>Construir tu reputación</strong> con cada intercambio.</td></tr>
+</table>
+
+<%= render "shared/email_cta", url: root_url, label: "Ir a Confianza" %>
+
+<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+  Tu perfil público vive en <a href="<%= profile_url(@user) %>" style="color:#0f5238; text-decoration:none;">confianza.world/<%= @user.username %></a>.
+</p>

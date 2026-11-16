@@ -1,0 +1,7 @@
+¡Te damos la bienvenida, @<%= @user.username %>!
+
+Gracias por unirte a Confianza. Para activar tu cuenta y poder iniciar interacciones, confirma tu correo entrando a este enlace:
+
+<%= email_verification_url(@token) %>
+
+El enlace vence en 7 días. Si no creaste esta cuenta, ignora este mensaje.

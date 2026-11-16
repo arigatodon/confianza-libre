@@ -1,0 +1,122 @@
+<% content_for :title, "Reporte ##{@report.id}" %>
+
+<%
+  target = @report.reportable
+  is_open = @report.open?
+  reward = EconomicParameter.get_int("mod_resolution_reward", 2)
+%>
+
+<article class="max-w-2xl mx-auto space-y-6">
+  <header class="space-y-1">
+    <div class="text-caption text-on-surface-variant flex items-center gap-2">
+      <%= link_to "Moderación", moderation_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <span>#<%= @report.id %></span>
+    </div>
+    <h1 class="text-headline-md text-on-surface">
+      <%= @report.reason_label_es %>
+      <% unless is_open %>
+        <span class="ml-2 text-caption px-2 py-0.5 rounded-full bg-primary-container/40 text-on-primary-container align-middle">
+          <%= @report.status_label_es %>
+        </span>
+      <% end %>
+    </h1>
+  </header>
+
+  <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow space-y-2">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Contenido reportado</p>
+    <% case target
+       when Post %>
+      <p class="text-body-md text-on-surface"><strong><%= target.title %></strong></p>
+      <p class="text-body-md text-on-surface-variant"><%= target.description.to_s.truncate(400) %></p>
+      <%= link_to "Ver publicación →", post_path(target), class: "text-label-md text-primary" %>
+    <% when Comment %>
+      <p class="text-body-md text-on-surface italic">"<%= target.body %>"</p>
+      <p class="text-caption text-on-surface-variant">
+        Comentario de <strong>@<%= target.user.username %></strong> en
+        <%= link_to target.post.title, post_path(target.post), class: "text-primary" %>
+      </p>
+    <% when Message %>
+      <p class="text-body-md text-on-surface italic">"<%= target.body %>"</p>
+      <p class="text-caption text-on-surface-variant">
+        Mensaje de <strong>@<%= target.user.username %></strong> en
+        <%= link_to "interacción ##{target.interaction.id}", interaction_path(target.interaction), class: "text-primary" %>
+      </p>
+    <% when User %>
+      <p class="text-body-md text-on-surface">
+        <strong>@<%= target.username %></strong>
+        <% if target.bio.present? %>· <%= target.bio.truncate(200) %><% end %>
+      </p>
+      <%= link_to "Ver perfil →", profile_path(target.username), class: "text-label-md text-primary" %>
+    <% end %>
+  </section>
+
+  <section class="rounded-xl bg-surface-container-low/40 border border-outline-variant/30 p-5 space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Reporte</p>
+    <p class="text-body-md text-on-surface">
+      Reportado por <strong>@<%= @report.reporter.username %></strong> · <%= l(@report.created_at, format: :short) rescue @report.created_at %>
+    </p>
+    <% if @report.body.present? %>
+      <p class="text-body-md text-on-surface-variant whitespace-pre-line mt-2"><%= @report.body %></p>
+    <% end %>
+  </section>
+
+  <% if is_open %>
+    <section class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-5 ambient-shadow space-y-3">
+      <p class="text-label-md text-on-surface">Resolver</p>
+      <p class="text-caption text-on-surface-variant">
+        Cada resolución no-desestimada paga <strong><%= reward %> C</strong> del fondo territorial al moderador.
+      </p>
+
+      <%= form_with url: resolve_moderation_report_path(@report), method: :patch, scope: nil, class: "space-y-3" do %>
+        <%= text_area_tag :note, nil, rows: 2,
+              placeholder: "Nota interna (opcional)",
+              class: "w-full px-3 py-2 rounded-lg bg-warm-surface border border-outline-variant/30 text-on-surface" %>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="submit" name="resolution" value="hide"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-error/90 text-on-error text-label-md hover:bg-error cursor-pointer"
+                  <%= "disabled" if target.is_a?(User) %>>
+            <span class="material-symbols-outlined" style="font-size:16px">visibility_off</span>
+            Ocultar contenido
+          </button>
+          <button type="submit" name="resolution" value="warn"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-600 text-white text-label-md hover:bg-amber-700 cursor-pointer">
+            <span class="material-symbols-outlined" style="font-size:16px">notification_important</span>
+            Advertir al autor
+          </button>
+          <% if target.is_a?(User) %>
+            <button type="submit" name="resolution" value="suspend"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-red-700 text-white text-label-md hover:bg-red-800 cursor-pointer">
+              <span class="material-symbols-outlined" style="font-size:16px">person_off</span>
+              Suspender usuario
+            </button>
+          <% end %>
+          <button type="submit" name="resolution" value="dismiss"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high cursor-pointer ml-auto">
+            <span class="material-symbols-outlined" style="font-size:16px">check_circle</span>
+            Desestimar (sin reward)
+          </button>
+        </div>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="rounded-xl bg-primary/5 border border-primary/20 p-5 space-y-1">
+      <p class="text-caption text-primary uppercase tracking-wider">Resolución</p>
+      <p class="text-body-md text-on-surface">
+        <strong><%= @report.status_label_es %></strong>
+        <% if @report.resolved_by %>· por <strong>@<%= @report.resolved_by.username %></strong><% end %>
+        <% if @report.resolved_at %>· <%= l(@report.resolved_at, format: :short) rescue @report.resolved_at %><% end %>
+      </p>
+      <% if @report.resolution_note.present? %>
+        <p class="text-body-md text-on-surface-variant whitespace-pre-line mt-1"><%= @report.resolution_note %></p>
+      <% end %>
+      <% if @report.reward_credits.to_i.positive? %>
+        <p class="text-caption text-primary mt-1">
+          Reward: <strong>+<%= @report.reward_credits %> C</strong>
+          <% if @report.territory %>del fondo de <%= @report.territory.name %><% end %>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
+</article>

@@ -1,0 +1,54 @@
+<%# locals: pair %>
+<% primary = pair[:primary] %>
+<% counter = pair[:counter] %>
+<article id="<%= dom_id(primary) %>" class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow">
+  <header class="flex items-center justify-between gap-2 text-caption">
+    <%= link_to profile_path(primary.reviewer.username || primary.reviewer.id),
+          class: "flex items-center gap-2 group min-w-0" do %>
+      <% if primary.reviewer.avatar.attached? && primary.reviewer.avatar.image? %>
+        <%= image_tag primary.reviewer.avatar, class: "w-7 h-7 rounded-full object-cover border border-outline-variant" %>
+      <% else %>
+        <span class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-xs font-semibold">
+          <%= (primary.reviewer.username || primary.reviewer.email_address).first.upcase %>
+        </span>
+      <% end %>
+      <span class="text-primary font-semibold truncate group-hover:underline">
+        @<%= primary.reviewer.username || primary.reviewer.email_address %>
+      </span>
+    <% end %>
+    <span class="text-earth-clay flex items-center" aria-label="Puntaje">
+      <% primary.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span><% end %>
+      <% (5 - primary.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:14px">star</span><% end %>
+    </span>
+  </header>
+
+  <% if primary.comment.present? %>
+    <p class="mt-3 text-body-md text-on-surface whitespace-pre-wrap"><%= primary.comment %></p>
+  <% end %>
+
+  <p class="mt-3 text-caption text-on-surface-variant flex items-center gap-1">
+    <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+    <%= time_ago_in_words(primary.created_at) %>
+  </p>
+
+  <% if counter %>
+    <div class="mt-3 pt-3 border-t border-outline-variant/30 flex items-start gap-2">
+      <span class="material-symbols-outlined text-on-surface-variant mt-0.5" style="font-size:14px">reply</span>
+      <div class="flex-1 min-w-0 text-caption text-on-surface-variant">
+        <div class="flex items-center gap-1 flex-wrap">
+          <span>Respondió</span>
+          <%= link_to "@#{counter.reviewer.username || counter.reviewer.email_address}",
+                profile_path(counter.reviewer.username || counter.reviewer.id),
+                class: "text-primary font-semibold hover:underline" %>
+          <span class="text-earth-clay inline-flex items-center align-middle ml-1">
+            <% counter.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:12px">star</span><% end %>
+            <% (5 - counter.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:12px">star</span><% end %>
+          </span>
+        </div>
+        <% if counter.comment.present? %>
+          <p class="mt-1 text-on-surface italic whitespace-pre-wrap"><%= truncate(counter.comment, length: 160) %></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</article>

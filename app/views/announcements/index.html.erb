@@ -1,0 +1,81 @@
+<% content_for :title, "Novedades" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Novedades",
+        description: "Bitácora abierta de Confianza: qué construimos, por qué, y qué decide la comunidad. Cada cambio de la red, contado en simple.",
+        canonical:   announcements_url) %>
+  <%= tag.link rel: "alternate", type: "application/rss+xml", title: "Novedades de Confianza", href: announcements_url(format: :rss) %>
+<% end %>
+
+<section class="space-y-6">
+  <header class="space-y-2">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Bitácora abierta</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Novedades</h1>
+    <p class="text-body-md text-on-surface-variant max-w-2xl">
+      Aquí contamos cada cambio de la red: qué construimos, por qué, y qué está
+      <strong>en consulta</strong> para que la comunidad marque el rumbo con su apoyo.
+      Sin letra chica — el desarrollo de Confianza es abierto, como sus
+      <%= link_to "reglas económicas", economics_path, class: "text-primary hover:underline" %>.
+    </p>
+    <div class="flex flex-wrap items-center gap-3 pt-1">
+      <%= link_to manifesto_path, class: "inline-flex items-center gap-1.5 text-label-md text-primary hover:underline" do %>
+        <span class="material-symbols-outlined" style="font-size:16px">history_edu</span>
+        Lee el manifiesto
+      <% end %>
+      <%= link_to announcements_path(format: :rss), class: "inline-flex items-center gap-1.5 text-label-md text-on-surface-variant hover:text-primary" do %>
+        <span class="material-symbols-outlined" style="font-size:16px">rss_feed</span>
+        RSS
+      <% end %>
+      <% if admin? %>
+        <%= link_to new_announcement_path, class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep" do %>
+          <span class="material-symbols-outlined" style="font-size:16px">add</span>
+          Nueva novedad
+        <% end %>
+      <% end %>
+    </div>
+  </header>
+
+  <% if admin? && @drafts.any? %>
+    <section class="rounded-xl border border-dashed border-outline-variant/60 p-4 space-y-2">
+      <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider">Borradores (sólo los ves tú)</h2>
+      <% @drafts.each do |draft| %>
+        <p class="text-body-md">
+          <%= link_to draft.title, announcement_path(draft), class: "text-primary hover:underline" %>
+          <span class="text-caption text-on-surface-variant">· <%= draft.kind_label_es %></span>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @announcements.any? %>
+    <div class="space-y-4">
+      <% @announcements.each do |announcement| %>
+        <article class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 hover:bg-surface-container transition-colors">
+          <%= link_to announcement_path(announcement), class: "block space-y-2" do %>
+            <div class="flex flex-wrap items-center gap-2 text-caption text-on-surface-variant">
+              <span class="px-2.5 py-0.5 rounded-full font-semibold
+                           <%= announcement.consulta? ? "bg-secondary-container text-on-secondary-container" : "bg-primary-fixed/40 text-on-primary-fixed-variant" %>">
+                <%= announcement.kind_label_es %>
+              </span>
+              <time datetime="<%= announcement.published_at.iso8601 %>">
+                <%= l(announcement.published_at, format: :long) rescue announcement.published_at.to_date %>
+              </time>
+              <% if announcement.supports_count.positive? %>
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined icon-filled text-primary" style="font-size:14px">favorite</span>
+                  <%= announcement.supports_count %> apoyos
+                </span>
+              <% end %>
+            </div>
+            <h2 class="text-headline-sm text-on-surface leading-snug"><%= announcement.title %></h2>
+            <p class="text-body-md text-on-surface-variant"><%= announcement.excerpt %></p>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-body-md text-on-surface-variant py-10 text-center">
+      Todavía no hay novedades publicadas. Pronto vas a poder seguir aquí cada paso de la red.
+    </p>
+  <% end %>
+</section>

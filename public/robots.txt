@@ -1,0 +1,20 @@
+# See https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Disallow: /session
+Disallow: /passwords
+Disallow: /settings
+Disallow: /verificar-email
+Disallow: /bienvenida
+Disallow: /billetera
+Disallow: /interactions
+Disallow: /mensajes
+Disallow: /notifications
+Disallow: /moderacion
+Disallow: /feedback
+Disallow: /ledger
+Disallow: /up
+# Links de invitación: variantes del signup, no indexar (contenido duplicado).
+Disallow: /invita/
+
+Sitemap: https://confianza.world/sitemap.xml

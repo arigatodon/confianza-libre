@@ -1,0 +1,60 @@
+<% content_for :title, "Mándanos feedback" %>
+
+<article class="max-w-xl mx-auto space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wide">Beta abierta</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Tu opinión nos sirve</h1>
+    <p class="text-body-md text-on-surface-variant">
+      Confianza está en beta. Si encontraste un bug, tienes una idea, o
+      simplemente algo te gustó (o no), cuéntanos. Lo leemos todo.
+    </p>
+  </header>
+
+  <%= form_with model: @feedback, url: feedbacks_path, scope: :feedback,
+        class: "space-y-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow" do |f| %>
+
+    <%= hidden_field_tag "feedback[url]", request.referer %>
+
+    <div>
+      <label class="block text-label-md text-on-surface mb-2">¿De qué se trata?</label>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <% Feedback::KINDS.keys.each do |k| %>
+          <% icon = { bug: "bug_report", idea: "lightbulb", love: "favorite", other: "chat_bubble" }[k] %>
+          <label class="cursor-pointer">
+            <%= f.radio_button :kind, k, class: "peer sr-only" %>
+            <span class="flex flex-col items-center gap-1 px-3 py-3 rounded-lg border border-outline-variant/40 bg-warm-surface text-on-surface-variant peer-checked:border-primary peer-checked:bg-primary-container/15 peer-checked:text-primary transition-colors">
+              <span class="material-symbols-outlined" style="font-size:22px"><%= icon %></span>
+              <span class="text-caption font-medium"><%= Feedback::KIND_LABELS_ES[k.to_s] %></span>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-label-md text-on-surface mb-1" for="feedback_body">Cuéntanos</label>
+      <%= f.text_area :body, rows: 6, maxlength: 4000,
+            required: true,
+            placeholder: "Qué pasó, qué esperabas, qué te gustaría ver…",
+            class: "w-full px-3 py-2 rounded-lg bg-warm-surface border border-outline-variant/30 text-on-surface placeholder:text-on-surface-variant" %>
+      <% if @feedback.errors[:body].any? %>
+        <p class="text-caption text-error mt-1"><%= @feedback.errors[:body].first %></p>
+      <% end %>
+    </div>
+
+    <% unless authenticated? %>
+      <p class="text-caption text-on-surface-variant flex items-start gap-1">
+        <span class="material-symbols-outlined" style="font-size:14px">info</span>
+        Estás escribiendo sin sesión iniciada. Si quieres que te respondamos,
+        <%= link_to "inicia sesión", new_session_path, class: "text-primary hover:underline" %> primero.
+      </p>
+    <% end %>
+
+    <div class="flex items-center justify-end gap-2">
+      <%= link_to "Cancelar", (request.referer || root_path),
+            class: "px-3 py-1.5 rounded-full text-label-md text-on-surface-variant hover:bg-surface-container" %>
+      <%= f.submit "Enviar feedback",
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" %>
+    </div>
+  <% end %>
+</article>

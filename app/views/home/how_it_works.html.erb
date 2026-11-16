@@ -1,0 +1,308 @@
+<% content_for :title, "Cómo funciona — Confianza" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Cómo funciona",
+        description: "Guía rápida de Confianza: publica, interactúa, evalúa y decide. La reputación se construye con hechos, los recursos circulan con créditos comunitarios y las reglas las vota la comunidad.",
+        canonical:   how_it_works_url) %>
+<% end %>
+
+<%# Hero %>
+<section class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="max-w-3xl mx-auto text-center space-y-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+      <span class="material-symbols-outlined text-primary" style="font-size:18px">menu_book</span>
+      <span class="text-label-md text-on-surface-variant text-sm">Guía rápida</span>
+    </div>
+    <h1 class="text-headline-lg-mobile md:text-headline-xl text-primary-container">
+      Cómo funciona Confianza
+    </h1>
+    <p class="text-body-lg text-on-surface-variant">
+      Confianza es una red social geolocalizada donde la reputación se construye
+      con hechos, los recursos circulan a través de créditos comunitarios y las
+      reglas las vota la comunidad. No hay bancos, ni blockchain, ni
+      intermediarios: solo vecinos que se ayudan y deciden juntos.
+    </p>
+  </div>
+</section>
+
+<%# Los 3 pasos extendidos %>
+<section class="bg-surface-container-low py-20 px-margin-mobile md:px-margin-desktop">
+  <div class="max-w-[1280px] mx-auto space-y-12">
+    <%# Paso 1 %>
+    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="md:col-span-5">
+        <div class="bg-surface rounded-xl p-8 ambient-shadow border-t-2 border-secondary">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center font-bold">1</span>
+            <span class="text-label-md text-on-surface-variant">PUBLICA</span>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined" style="font-size:32px">add_circle</span>
+          </div>
+          <h3 class="text-headline-md text-on-surface mb-3">Comparte lo que ofreces o necesitas</h3>
+          <p class="text-body-md text-on-surface-variant">
+            Habilidades, herramientas, tiempo, productos, eventos, pedidos de ayuda.
+            Cada publicación se geolocaliza y aparece para los vecinos cercanos.
+          </p>
+        </div>
+      </div>
+      <div class="md:col-span-7 space-y-4">
+        <h2 class="text-headline-md text-on-surface">Tu primera publicación</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Las publicaciones pueden ser de varios tipos: compra/venta, servicios,
+          delivery, eventos o pedidos de ayuda. Cada una se asocia a una categoría
+          y a una ubicación, para que la comunidad correcta la vea.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">place</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Todo es local.</strong>
+              Tus publicaciones se muestran a quienes están realmente cerca de ti.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">photo_library</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Multimedia.</strong>
+              Suma fotos para que se entienda mejor lo que ofreces o necesitas.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">label</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Categorías claras.</strong>
+              Cada categoría tiene su propia reputación: eres confiable en lo que haces.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <%# Paso 2 %>
+    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="md:col-span-7 space-y-4 order-2 md:order-1">
+        <h2 class="text-headline-md text-on-surface">Intercambios reales, créditos mutuos</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Cuando dos vecinos se ponen de acuerdo, pueden registrar el intercambio en la red.
+          Si participa el sistema de créditos comunitarios, queda asentado por
+          <strong class="text-on-surface">partida doble</strong>: cada movimiento se
+          contabiliza simétricamente. Nada se crea de la nada.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">savings</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Crédito mutuo.</strong>
+              No es dinero fiduciario ni criptomoneda. Es un registro contable entre vecinos
+              que confían entre sí.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">forum</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Conversación abierta.</strong>
+              Comentarios, mensajes directos y coordinación, todo dentro de la red.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">verified_user</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Sin intermediarios.</strong>
+              La plataforma no cobra comisiones por los intercambios entre vecinos.
+            </p>
+          </li>
+        </ul>
+      </div>
+      <div class="md:col-span-5 order-1 md:order-2">
+        <div class="bg-surface rounded-xl p-8 ambient-shadow border-t-2 border-primary">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed grid place-items-center font-bold">2</span>
+            <span class="text-label-md text-on-surface-variant">INTERACTÚA</span>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined" style="font-size:32px">sync_alt</span>
+          </div>
+          <h3 class="text-headline-md text-on-surface mb-3">Coordina y concreta el intercambio</h3>
+          <p class="text-body-md text-on-surface-variant">
+            Conecta con tus vecinos, acuerda los detalles y registra la operación con
+            créditos mutuos o de la forma que prefieran entre ustedes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <%# Paso 3 %>
+    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="md:col-span-5">
+        <div class="bg-surface rounded-xl p-8 ambient-shadow border-t-2 border-earth-clay">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 rounded-full bg-earth-clay/30 text-on-secondary-container grid place-items-center font-bold">3</span>
+            <span class="text-label-md text-on-surface-variant">EVALÚA</span>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined" style="font-size:32px">verified</span>
+          </div>
+          <h3 class="text-headline-md text-on-surface mb-3">Cierra el círculo de confianza</h3>
+          <p class="text-body-md text-on-surface-variant">
+            Confirma el intercambio y deja una reseña honesta. Cada evaluación
+            fortalece (o ajusta) tu nivel y el de la otra persona.
+          </p>
+        </div>
+      </div>
+      <div class="md:col-span-7 space-y-4">
+        <h2 class="text-headline-md text-on-surface">Reputación que se construye, no se compra</h2>
+        <p class="text-body-md text-on-surface-variant">
+          Tu nivel de confianza es la suma honesta de tu historial. No depende
+          de tu cuenta bancaria ni de quién te conoce: depende de lo que haces
+          en la comunidad.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">military_tech</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Reputación por categoría.</strong>
+              Puedes ser muy confiable cocinando y nuevo en electrónica: cada
+              área tiene su propio puntaje.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">public</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Reputación territorial.</strong>
+              Tu confianza tiene anclaje geográfico: pesa más donde realmente operas.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">trending_up</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Acceso progresivo.</strong>
+              A medida que crece tu nivel, puedes acceder a créditos mayores y a
+              recursos más valiosos de la red.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <%# Paso 4 %>
+    <div class="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
+      <div class="md:col-span-7 space-y-4 order-2 md:order-1">
+        <h2 class="text-headline-md text-on-surface">El poder también se reparte</h2>
+        <p class="text-body-md text-on-surface-variant">
+          En cualquier plataforma, las reglas las decide una empresa. Aquí las
+          decide la red: cada intercambio aporta un porcentaje al
+          <strong class="text-on-surface">fondo de tu comuna</strong>, y la
+          comunidad vota en qué usarlo, qué categorías nuevas crear y hasta
+          cómo cambiar las reglas de la economía.
+        </p>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">volunteer_activism</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Fondo territorial.</strong>
+              Propón destinar créditos del fondo a un vecino o una iniciativa
+              del barrio. Si la votación aprueba, se transfiere.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">balance</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Reglas votadas.</strong>
+              La quema, el aporte territorial, el quórum: cada parámetro tiene un
+              rango seguro y se cambia con una propuesta aprobada.
+              <%= link_to "Mira las reglas en vivo", economics_path, class: "text-primary hover:underline" %>.
+            </p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="material-symbols-outlined icon-filled text-primary mt-0.5">stairs</span>
+            <p class="text-body-md text-on-surface-variant">
+              <strong class="text-on-surface">Escalones de participación.</strong>
+              Proponer reglas requiere nivel 2 y el quórum crece con la red:
+              cuantos más somos, más participación exige cada decisión global.
+            </p>
+          </li>
+        </ul>
+      </div>
+      <div class="md:col-span-5 order-1 md:order-2">
+        <div class="bg-surface rounded-xl p-8 ambient-shadow border-t-2 border-organic-green-deep">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center font-bold">4</span>
+            <span class="text-label-md text-on-surface-variant">DECIDE</span>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-primary mb-4">
+            <span class="material-symbols-outlined" style="font-size:32px">how_to_vote</span>
+          </div>
+          <h3 class="text-headline-md text-on-surface mb-3">Gobierna tu comunidad</h3>
+          <p class="text-body-md text-on-surface-variant">
+            Vota propuestas, crea categorías nuevas y cambia las reglas del juego.
+            En Confianza la participación ciudadana no es promesa: ya funciona.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# Principios %>
+<section class="py-20 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="text-center mb-12 space-y-3">
+    <h2 class="text-headline-lg-mobile md:text-headline-lg text-primary-container">
+      Lo que <em>no</em> es Confianza
+    </h2>
+    <p class="text-body-md text-on-surface-variant max-w-2xl mx-auto">
+      Para entender el proyecto, a veces ayuda saber qué decisiones tomamos al diseñarlo.
+    </p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-surface rounded-xl p-6 ambient-shadow border border-outline-variant/30">
+      <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined">currency_bitcoin</span>
+      </div>
+      <h3 class="text-headline-md text-on-surface text-lg mb-2">No es blockchain</h3>
+      <p class="text-body-md text-on-surface-variant text-sm">
+        Sin tokens, sin criptomonedas, sin especulación. Los créditos son
+        registros contables entre vecinos, simples y verificables.
+      </p>
+    </div>
+    <div class="bg-surface rounded-xl p-6 ambient-shadow border border-outline-variant/30">
+      <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined">account_balance</span>
+      </div>
+      <h3 class="text-headline-md text-on-surface text-lg mb-2">No es un banco</h3>
+      <p class="text-body-md text-on-surface-variant text-sm">
+        No prestamos dinero ni intermediamos transacciones. Facilitamos que
+        los vecinos se coordinen y dejen registro de lo que hicieron.
+      </p>
+    </div>
+    <div class="bg-surface rounded-xl p-6 ambient-shadow border border-outline-variant/30">
+      <div class="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined">campaign</span>
+      </div>
+      <h3 class="text-headline-md text-on-surface text-lg mb-2">No es una red social tradicional</h3>
+      <p class="text-body-md text-on-surface-variant text-sm">
+        Nadie compite por likes ni seguidores. La métrica es la confianza real,
+        construida con acciones, no con contenido viral.
+      </p>
+    </div>
+  </div>
+</section>
+
+<%# CTA final %>
+<section class="px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto pb-20">
+  <div class="bg-primary-container text-on-primary rounded-xl px-8 py-12 md:px-16 md:py-16 text-center ambient-shadow-lg">
+    <h2 class="text-headline-lg-mobile md:text-headline-lg text-on-primary mb-3">
+      ¿Listo para unirte?
+    </h2>
+    <p class="text-body-md text-on-primary-container max-w-2xl mx-auto mb-8">
+      Crear una cuenta toma un minuto. Explora lo que tu zona tiene para ofrecer
+      y empieza a construir tu reputación desde el primer intercambio.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <%= link_to "Crear cuenta", signup_path,
+            class: "bg-on-primary text-primary hover:bg-surface-container-low px-7 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+      <%= link_to "Ingresar", new_session_path,
+            class: "border-2 border-on-primary text-on-primary px-7 py-3 rounded-full text-label-md hover:bg-primary transition-colors" %>
+    </div>
+  </div>
+</section>

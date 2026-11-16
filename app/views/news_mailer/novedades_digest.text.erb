@@ -1,0 +1,16 @@
+Hola @<%= @user.username %>, tus publicaciones ahora viajan más lejos.
+
+Novedades frescas en Confianza — y como aquí todo es abierto, te lo contamos en simple:
+
+* Estrenamos canal de Telegram — ahí llegan las publicaciones que los vecinos deciden difundir: https://t.me/confianzaWorld
+* Difusión con tu permiso — al publicar verás la casilla "Difundir en las redes de Confianza". Si la marcas, tu publicación sale sola al canal. Nada se difunde sin que tú lo marques.
+* Compartir por WhatsApp quedó mejor — cualquier link de Confianza pegado en un grupo muestra vista previa con tu publicación.
+* Tu link de invitación — quien entre con él queda apadrinado por ti: <%= invite_url(code: @user.username) %>
+
+¿OFRECES ALGO? ESTE ES EL MOMENTO
+
+Publica tu servicio, venta o pedido de ayuda, marca la casilla de difundir, y tu publicación llega al canal lista para que cualquiera la reenvíe por WhatsApp. Tú publicas una vez; la red hace el resto.
+
+Publica lo que ofreces: <%= new_post_url %>
+
+El detalle completo está en <%= announcements_url %>. Recibes este correo porque eres parte de la red Confianza.

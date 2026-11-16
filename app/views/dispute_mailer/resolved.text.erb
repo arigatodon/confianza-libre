@@ -1,0 +1,11 @@
+Tu disputa tiene veredicto
+
+Un moderador revisó la disputa sobre la interacción de “<%= @interaction.post.title %>” y decidió:
+
+<%= @dispute.verdict_label_es %><% if @dispute.verdict_partial? && @dispute.resolution_amount %> — <%= @dispute.resolution_amount %> créditos<% end %>
+
+<% if @dispute.resolution_note.present? %>Nota del moderador: "<%= @dispute.resolution_note %>"
+
+<% end %><%= interaction_url(@interaction) %>
+
+<% if @dispute.verdict_cancel? %>La interacción quedó cancelada y no se movieron créditos.<% else %>La interacción quedó cerrada y ambas partes ya pueden evaluarse.<% end %>

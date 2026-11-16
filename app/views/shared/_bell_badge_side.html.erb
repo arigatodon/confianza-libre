@@ -1,0 +1,6 @@
+<%# locals: count
+     Badge para el side nav (desktop): número inline al lado del label "Notificaciones". %>
+<span id="bell-badge-side"
+      class="ml-2 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-on-primary text-caption font-semibold <%= "hidden" if count.to_i.zero? %>">
+  <%= count.to_i > 99 ? "99+" : count.to_i %>
+</span>

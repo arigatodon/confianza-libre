@@ -1,0 +1,28 @@
+// Service worker de Confianza: muestra las notificaciones push y, al
+// tocarlas, abre (o enfoca) la página correspondiente.
+
+self.addEventListener("push", async (event) => {
+  const { title, options } = await event.data.json()
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+self.addEventListener("notificationclick", function(event) {
+  event.notification.close()
+  const path = event.notification.data?.path || "/"
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      for (let i = 0; i < clientList.length; i++) {
+        let client = clientList[i]
+        let clientPath = (new URL(client.url)).pathname
+
+        if (clientPath == path && "focus" in client) {
+          return client.focus()
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(path)
+      }
+    })
+  )
+})

@@ -1,0 +1,195 @@
+<%= form_with model: post, multipart: true, class: "space-y-5" do |f| %>
+  <% if post.errors.any? %>
+    <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-4 py-3 text-sm">
+      <p class="font-semibold mb-1 flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px">error</span>
+        <%= pluralize(post.errors.count, "error", plural: "errores") %> al guardar
+      </p>
+      <ul class="list-disc ml-7">
+        <% post.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%# Ofrezco vs busco: define de qué lado del mercado está la publicación y a
+      quién le avisa el matching (Fase 2.2). %>
+  <fieldset>
+    <legend class="block text-label-md text-on-surface mb-1.5">¿Qué publicas?</legend>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="flex items-center gap-2 rounded-lg border border-outline-variant/50 px-3 py-2.5 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/30">
+        <%= f.radio_button :pedido, false, checked: !post.pedido? %>
+        <span class="text-body-md text-on-surface">Ofrezco algo</span>
+      </label>
+      <label class="flex items-center gap-2 rounded-lg border border-outline-variant/50 px-3 py-2.5 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-fixed/30">
+        <%= f.radio_button :pedido, true, checked: post.pedido? %>
+        <span class="text-body-md text-on-surface">Busco algo</span>
+      </label>
+    </div>
+    <p class="text-caption text-on-surface-variant mt-1">
+      Si buscas, avisaremos a quienes ofrecen esa categoría cerca (y al revés).
+    </p>
+  </fieldset>
+
+  <div>
+    <%= f.label :title, "Título", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.text_field :title, required: true, placeholder: "Ej: Vendo bicicleta usada" %>
+  </div>
+
+  <div>
+    <%= f.label :description, "Descripción", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.text_area :description, rows: 4, placeholder: "Cuenta más sobre tu publicación…" %>
+  </div>
+
+  <div>
+    <%= f.label :category_id, "Categoría", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.collection_select :category_id, Category.publishable.order(:name), :id, :name,
+          { prompt: "Elige…" }, { required: true } %>
+  </div>
+
+  <div>
+    <%= f.label :suggested_credits, "Créditos sugeridos (opcional)", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.number_field :suggested_credits, min: 0, step: 1, placeholder: "Ej: 100" %>
+    <p class="text-caption text-on-surface-variant mt-1">
+      Valor de referencia que ofreces/pides. Quien inicie una interacción puede
+      aceptarlo o contraproponer.
+    </p>
+  </div>
+
+  <%# Ubicación: modal con mapa %>
+  <div data-controller="location-picker"
+       class="rounded-lg bg-primary-fixed/30 border border-primary-fixed-dim/50 p-4 space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0 flex items-start gap-2">
+        <span class="material-symbols-outlined icon-filled text-primary shrink-0 mt-0.5">location_on</span>
+        <div>
+          <p class="text-label-md text-on-surface">Ubicación</p>
+          <p class="text-caption text-on-surface-variant mt-0.5" data-location-picker-target="summary">
+            Sin ubicación elegida
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2 shrink-0">
+        <button type="button" data-action="location-picker#open"
+                class="px-3 py-1.5 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep transition-colors cursor-pointer">
+          Elegir en mapa
+        </button>
+        <% if post.latitude && post.longitude %>
+          <button type="button" data-action="location-picker#clear"
+                  class="px-3 py-1.5 rounded-full border border-outline text-on-surface text-caption hover:bg-surface-container cursor-pointer">
+            Limpiar
+          </button>
+        <% end %>
+      </div>
+    </div>
+
+    <%= f.hidden_field :latitude,  data: { location_picker_target: "latitudeField" } %>
+    <%= f.hidden_field :longitude, data: { location_picker_target: "longitudeField" } %>
+
+    <%# Modal %>
+    <div data-location-picker-target="modal"
+         class="hidden fixed inset-0 z-50 bg-inverse-surface/70 backdrop-blur-sm flex items-center justify-center p-4"
+         data-action="click->location-picker#modalBackdropClick">
+      <div class="bg-surface rounded-xl ambient-shadow-lg w-full max-w-2xl overflow-hidden flex flex-col" style="max-height:90vh">
+        <div class="px-5 py-3 border-b border-outline-variant/40 flex items-center justify-between">
+          <h3 class="text-label-md text-on-surface">Elige la ubicación</h3>
+          <button type="button" data-action="location-picker#close"
+                  class="text-on-surface-variant hover:text-on-surface cursor-pointer">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div data-location-picker-target="mapContainer"
+             class="bg-surface-container" style="height:60vh; min-height:320px;"></div>
+        <div class="px-5 py-3 border-t border-outline-variant/40 flex items-center justify-between flex-wrap gap-2">
+          <div class="text-caption text-on-surface-variant">
+            Toca el mapa para marcar tu ubicación.
+            <span data-location-picker-target="coords" class="font-mono text-on-surface ml-1"></span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" data-action="location-picker#useCurrentLocation"
+                    class="px-3 py-1.5 rounded-full border border-outline text-on-surface text-caption hover:bg-surface-container cursor-pointer">
+              <span class="material-symbols-outlined align-middle mr-1" style="font-size:14px">my_location</span>
+              Usar mi ubicación
+            </button>
+            <button type="button" data-location-picker-target="confirmBtn"
+                    data-action="location-picker#confirm" disabled
+                    class="px-4 py-1.5 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep transition-colors cursor-pointer opacity-50 cursor-not-allowed">
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :visibility_radius_km, "Radio de visibilidad (km)", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.number_field :visibility_radius_km, min: 0.5, step: 0.5,
+          value: (post.visibility_radius.to_f / 1000.0).round(1) %>
+    <p class="text-caption text-on-surface-variant mt-1">A qué distancia será visible. Default: 5 km.</p>
+  </div>
+
+  <% if post.persisted? && post.media.attached? %>
+    <div>
+      <span class="block text-label-md text-on-surface mb-1.5">Multimedia actual</span>
+      <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        <% post.media.each do |item| %>
+          <label class="relative block rounded-lg overflow-hidden border border-outline-variant/50 cursor-pointer">
+            <% if item.blob.image? %>
+              <%= image_tag item.variant(resize_to_limit: [ 240, 240 ]), class: "w-full h-24 object-cover" %>
+            <% elsif item.blob.video? %>
+              <div class="w-full h-24 flex items-center justify-center bg-surface-container text-on-surface-variant">
+                <span class="material-symbols-outlined">movie</span>
+              </div>
+            <% else %>
+              <div class="w-full h-24 flex items-center justify-center bg-surface-container text-on-surface-variant">
+                <span class="material-symbols-outlined">audio_file</span>
+              </div>
+            <% end %>
+            <span class="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-inverse-surface/70 text-inverse-on-surface text-caption px-2 py-1">
+              <%= check_box_tag "remove_media[]", item.id, false, class: "accent-error" %>
+              Quitar
+            </span>
+          </label>
+        <% end %>
+      </div>
+      <p class="text-caption text-on-surface-variant mt-1">
+        Marcá “Quitar” en los que quieras eliminar. Los demás se conservan.
+      </p>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :media, (post.persisted? && post.media.attached? ? "Agregar multimedia" : "Multimedia"),
+          class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.file_field :media, multiple: true, accept: "image/*,video/*,audio/*" %>
+    <p class="text-caption text-on-surface-variant mt-1">
+      Lo que subas se <strong>agrega</strong> a la multimedia existente; no la reemplaza.
+    </p>
+  </div>
+
+  <div>
+    <%= f.label :status, "Estado", class: "block text-label-md text-on-surface mb-1.5" %>
+    <%= f.select :status, Post::STATUS_LABELS_ES.map { |k, v| [ v, k ] } %>
+  </div>
+
+  <%# Consentimiento de difusión en redes externas %>
+  <label class="flex items-start gap-3 rounded-lg bg-primary-fixed/30 border border-primary-fixed-dim/50 p-4 cursor-pointer">
+    <%= f.check_box :difundir, class: "mt-1 accent-primary shrink-0" %>
+    <span>
+      <span class="block text-label-md text-on-surface">Difundir en las redes de Confianza</span>
+      <span class="block text-caption text-on-surface-variant mt-0.5">
+        Tu publicación se comparte también en los canales públicos de Confianza
+        (Telegram, Bluesky…) para llegar a más vecinos. Solo se muestra el título,
+        la foto, tu nombre de usuario y tu comuna — nunca tu ubicación exacta.
+      </span>
+    </span>
+  </label>
+
+  <div class="pt-2 flex items-center justify-between gap-3">
+    <%= f.submit class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+    <%= link_to "Cancelar", (post.persisted? ? post : posts_path),
+          class: "text-label-md text-on-surface-variant hover:text-on-surface" %>
+  </div>
+<% end %>

@@ -1,0 +1,11 @@
+<% content_for :title, "Nueva publicación" %>
+
+<section class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Comparte con tu comunidad</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Nueva publicación</h1>
+  </header>
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6">
+    <%= render "form", post: @post %>
+  </div>
+</section>

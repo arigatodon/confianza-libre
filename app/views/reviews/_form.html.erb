@@ -1,0 +1,45 @@
+<%# locals: post, interaction, reviewed_user, review %>
+<%= form_with model: review, url: post_reviews_path(post), class: "space-y-3 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 ambient-shadow" do |f| %>
+  <% if review.errors.any? %>
+    <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-3 py-2 text-xs">
+      <%= review.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :interaction_id, value: interaction.id %>
+
+  <p class="text-caption text-on-surface-variant flex items-center gap-2">
+    <span class="material-symbols-outlined" style="font-size:14px">person</span>
+    Evaluando a
+    <%= link_to "@#{reviewed_user.username || reviewed_user.email_address}",
+                profile_path(reviewed_user.username || reviewed_user.id),
+                class: "text-primary font-semibold hover:underline" %>
+    <% if interaction.agreed_credits.to_i > 0 %>
+      · <span class="text-on-surface-variant">acuerdo: <%= interaction.agreed_credits %> C</span>
+    <% end %>
+  </p>
+
+  <div>
+    <%= f.label :score, "Puntaje", class: "block text-label-md text-on-surface mb-1" %>
+    <div class="flex gap-3 flex-wrap">
+      <% (1..5).each do |n| %>
+        <label class="flex items-center gap-1 cursor-pointer text-body-md text-on-surface px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors">
+          <%= f.radio_button :score, n, checked: review.score == n %>
+          <span class="text-earth-clay"><%= "★" * n %></span>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
+  <% if post.category.max_credit_multiplier.to_f > 0.2 %>
+    <div>
+      <%= f.label :comment, "Comentario", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.text_area :comment, rows: 3, placeholder: "Cuenta cómo fue la interacción…" %>
+    </div>
+  <% end %>
+
+  <div class="flex justify-end">
+    <%= f.submit "Enviar evaluación",
+          class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep cursor-pointer" %>
+  </div>
+<% end %>

@@ -1,0 +1,21 @@
+<%# Cuentas externas con las que el usuario puede entrar (Google, Microsoft). %>
+<% if oauth_identities.any? %>
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6 space-y-3">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary" style="font-size:20px">login</span>
+      <h2 class="text-headline-md text-on-surface">Cómo entras</h2>
+    </div>
+    <ul class="space-y-1">
+      <% oauth_identities.each do |ident| %>
+        <li class="text-body-md text-on-surface flex items-center gap-2">
+          <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">check_circle</span>
+          <%= ident.provider_label_es %><%= " · #{ident.email}" if ident.email.present? %>
+        </li>
+      <% end %>
+    </ul>
+    <p class="text-caption text-on-surface-variant">
+      También puedes entrar con email y contraseña: si nunca definiste una, créala desde
+      <%= link_to "Olvidé mi contraseña", new_password_path, class: "text-primary hover:underline" %>.
+    </p>
+  </div>
+<% end %>

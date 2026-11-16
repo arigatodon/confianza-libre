@@ -1,0 +1,39 @@
+<% content_for :title, "Chat con @#{@other.username || @other.email_address}" %>
+<%= turbo_stream_from @conversation, :messages %>
+
+<section class="max-w-2xl mx-auto space-y-4"
+         data-controller="chat"
+         data-chat-user-id-value="<%= Current.session.user_id %>">
+  <header class="flex items-center gap-3">
+    <%= link_to conversations_path, class: "text-on-surface-variant hover:text-primary" do %>
+      <span class="material-symbols-outlined">arrow_back</span>
+    <% end %>
+    <%= link_to profile_path(@other.username || @other.id), class: "flex items-center gap-2 min-w-0" do %>
+      <span class="w-9 h-9 shrink-0 rounded-full bg-secondary-container text-on-secondary-container grid place-items-center overflow-hidden">
+        <% if @other.avatar.attached? %>
+          <%= image_tag @other.avatar.variant(resize_to_fill: [ 72, 72 ]), class: "w-full h-full object-cover" %>
+        <% else %>
+          <span class="font-bold text-sm"><%= (@other.username || @other.email_address).first.upcase %></span>
+        <% end %>
+      </span>
+      <span class="min-w-0">
+        <span class="block text-label-md text-on-surface font-semibold truncate">@<%= @other.username || @other.email_address %></span>
+        <span class="block text-caption text-primary"><%= verification_level_label_es(@other) %></span>
+      </span>
+    <% end %>
+  </header>
+
+  <div id="messages-conv-<%= @conversation.id %>"
+       class="space-y-2 max-h-[60vh] overflow-y-auto rounded-xl bg-warm-surface p-3 min-h-44 border border-outline-variant/30"
+       data-chat-target="list">
+    <% if @messages.any? %>
+      <%= render @messages %>
+    <% else %>
+      <p class="text-caption text-on-surface-variant text-center py-8 italic">
+        Acá empieza la conversación con @<%= @other.username || @other.email_address %>.
+      </p>
+    <% end %>
+  </div>
+
+  <%= render "conversations/message_form", conversation: @conversation %>
+</section>

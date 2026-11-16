@@ -1,0 +1,11 @@
+Abrieron una disputa en una interacción tuya
+
+@<%= @opener.username %> abrió una disputa sobre la interacción de “<%= @interaction.post.title %>”. Esto es lo que planteó:
+
+"<%= @dispute.argument %>"
+
+Puedes responder con tu versión de los hechos una sola vez. Después, un moderador que no es parte de la interacción revisará ambos lados y decidirá.
+
+<%= interaction_url(@interaction) %>
+
+Mientras la disputa esté abierta, los créditos de esta interacción quedan congelados. El chat sigue disponible por si quieren resolverlo conversando.

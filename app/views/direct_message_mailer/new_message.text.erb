@@ -1,0 +1,9 @@
+@<%= @sender.username %> te mandó un mensaje en Confianza:
+
+"<%= @message.body.truncate(140) %>"
+
+Lee y responde aquí: <%= conversation_url(@message.conversation) %>
+
+Perfil de @<%= @sender.username %>: <%= profile_url(@sender.username || @sender.id) %>
+
+Para no llenarte la casilla, avisamos como máximo una vez cada 12 horas por conversación.

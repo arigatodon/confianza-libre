@@ -1,0 +1,120 @@
+<% content_for :title, "Panel de moderación" %>
+
+<article class="space-y-8">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Comunidad · L3+</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Moderación</h1>
+    <p class="text-body-md text-on-surface-variant">
+      Cada resolución no-desestimada paga <strong><%= EconomicParameter.get_int("mod_resolution_reward", 2) %> C</strong>
+      del fondo territorial del contenido reportado.
+    </p>
+  </header>
+
+  <section class="space-y-3">
+    <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+      <span class="material-symbols-outlined icon-filled text-error" style="font-size:22px">gavel</span>
+      Disputas sin resolver
+      <span class="text-caption text-on-surface-variant">(<%= @open_disputes.size %>)</span>
+    </h2>
+
+    <% if @open_disputes.any? %>
+      <% @open_disputes.each do |d| %>
+        <%= render "dispute_row", dispute: d %>
+      <% end %>
+    <% else %>
+      <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-8 text-center">
+        <span class="material-symbols-outlined text-on-surface-variant" style="font-size:32px">verified</span>
+        <p class="text-body-md text-on-surface-variant mt-1">No hay disputas abiertas.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">fingerprint</span>
+      Verificaciones de identidad
+      <span class="text-caption text-on-surface-variant">(<%= @pending_identity.size %>)</span>
+    </h2>
+
+    <% if @pending_identity.any? %>
+      <% @pending_identity.each do |iv| %>
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-4 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <p class="text-label-md text-on-surface">
+              @<%= iv.user.username %>
+              <span class="text-caption text-on-surface-variant">· <%= time_ago_in_words(iv.created_at) %></span>
+            </p>
+            <span class="text-caption text-on-surface-variant">Nivel actual: <%= verification_level_label_es(iv.user) %></span>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <% iv.documents.each do |doc| %>
+              <%= link_to moderation_identity_document_path(iv, doc.id), target: "_blank", rel: "noopener",
+                    class: "inline-flex items-center gap-1 text-label-md text-primary border border-primary/40 rounded-lg px-3 py-2 hover:bg-primary-fixed/30" do %>
+                <span class="material-symbols-outlined" style="font-size:16px">image</span>
+                Ver documento
+              <% end %>
+            <% end %>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+            <%= form_with url: resolve_moderation_identity_path(iv), method: :patch do %>
+              <%= hidden_field_tag :decision, "approve" %>
+              <button type="submit"
+                      class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors">
+                <span class="material-symbols-outlined" style="font-size:18px">check</span>
+                Aprobar (sube a identidad)
+              </button>
+            <% end %>
+
+            <%= form_with url: resolve_moderation_identity_path(iv), method: :patch, class: "flex gap-2" do %>
+              <%= hidden_field_tag :decision, "reject" %>
+              <input type="text" name="note" required placeholder="Motivo del rechazo"
+                     class="flex-1 px-3 py-2 rounded-lg bg-warm-surface border border-outline-variant/30 text-on-surface text-body-md">
+              <button type="submit"
+                      class="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg border border-error/40 text-error text-label-md hover:bg-error-container/40 transition-colors">
+                Rechazar
+              </button>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-8 text-center">
+        <span class="material-symbols-outlined text-on-surface-variant" style="font-size:32px">verified_user</span>
+        <p class="text-body-md text-on-surface-variant mt-1">No hay solicitudes de identidad pendientes.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+      <span class="material-symbols-outlined icon-filled text-error" style="font-size:22px">flag</span>
+      Reportes abiertos
+      <span class="text-caption text-on-surface-variant">(<%= @open_reports.size %>)</span>
+    </h2>
+
+    <% if @open_reports.any? %>
+      <% @open_reports.each do |r| %>
+        <%= render "row", report: r %>
+      <% end %>
+    <% else %>
+      <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-8 text-center">
+        <span class="material-symbols-outlined text-on-surface-variant" style="font-size:32px">verified</span>
+        <p class="text-body-md text-on-surface-variant mt-1">No hay reportes abiertos. Buen trabajo de la comunidad.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <% if @recent_resolved.any? %>
+    <section class="space-y-3">
+      <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:22px">history</span>
+        Resueltos recientemente
+      </h2>
+      <% @recent_resolved.each do |r| %>
+        <%= render "row", report: r %>
+      <% end %>
+    </section>
+  <% end %>
+</article>

@@ -1,0 +1,37 @@
+<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">Hola @<%= @user.username %>, tus publicaciones ahora viajan más lejos 📣</h1>
+
+<p style="margin:0 0 16px;">
+  Novedades frescas en <strong>Confianza</strong> — y como aquí todo es abierto,
+  te lo contamos en simple:
+</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px; width:100%;">
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">
+    📢&nbsp; <strong><a href="https://t.me/confianzaWorld" style="color:#0f5238;">Estrenamos canal de Telegram</a></strong> — ahí llegan las publicaciones que los vecinos deciden difundir, con su tarjeta y su link. Únete y compártelo.
+  </td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">
+    ✅&nbsp; <strong>Difusión con tu permiso</strong> — al publicar verás una casilla nueva: "Difundir en las redes de Confianza". Si la marcas, tu publicación sale sola al canal con una tarjeta con tu título, tu @usuario y tu comuna. Nada se difunde sin que tú lo marques.
+  </td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">
+    💬&nbsp; <strong>Compartir por WhatsApp quedó mejor</strong> — cualquier link de Confianza que pegues en un grupo ahora muestra una vista previa con la información de tu publicación. Pruébalo en el grupo de tu junta de vecinos.
+  </td></tr>
+  <tr><td style="padding:6px 0; font-size:15px; color:#1a2420;">
+    🤝&nbsp; <strong>Tu link de invitación</strong> — <a href="<%= invite_url(code: @user.username) %>" style="color:#0f5238;">confianza.world/invita/<%= @user.username %></a>. Quien entre con él queda apadrinado por ti y arranca con crédito extra.
+  </td></tr>
+</table>
+
+<h2 style="margin:24px 0 12px; font-size:18px; color:#0f5238;">¿Ofreces algo? Este es el momento 📍</h2>
+
+<p style="margin:0 0 16px;">
+  Publica tu servicio, venta o pedido de ayuda, marca la casilla de difundir, y
+  tu publicación llega al canal lista para que cualquiera la reenvíe por
+  WhatsApp. Tú publicas una vez; la red hace el resto.
+</p>
+
+<%= render "shared/email_cta", url: new_post_url, label: "Publicar lo que ofrezco" %>
+
+<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+  El detalle completo está en <a href="<%= announcements_url %>" style="color:#0f5238;">/novedades</a>.
+  Recibes este correo porque eres parte de la red Confianza. Si algo te gustaría
+  que exista, <a href="<%= new_feedback_url %>" style="color:#0f5238;">cuéntanos</a>.
+</p>

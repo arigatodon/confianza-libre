@@ -1,0 +1,323 @@
+<% content_for :title, "Interacción ##{@interaction.id}" %>
+<%# Refresh broadcast: cualquier update de la interaction → morph del DOM. %>
+<%= turbo_stream_from @interaction %>
+<% viewer = Current.session.user %>
+<% other  = @interaction.other_party(viewer) %>
+<% is_sender   = @interaction.sender_id   == viewer.id %>
+<% is_receiver = @interaction.receiver_id == viewer.id %>
+
+<article class="space-y-8">
+  <header class="space-y-3">
+    <div class="flex items-center gap-2 text-caption text-on-surface-variant uppercase tracking-wider">
+      <%= link_to "Mis interacciones", interactions_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <span>#<%= @interaction.id %></span>
+    </div>
+
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+      <%= link_to @interaction.post.title, @interaction.post, class: "hover:text-primary" %>
+    </h1>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="inline-flex items-center gap-1.5 text-label-md font-semibold px-3 py-1 rounded-full bg-surface-container-high text-on-surface">
+        <span class="material-symbols-outlined icon-filled" style="font-size:16px"><%= @interaction.status_icon %></span>
+        <%= @interaction.status_label_es %>
+      </span>
+      <span class="text-caption text-on-surface-variant">
+        <%= is_sender ? "Vos iniciaste" : "Te contactó" %>
+        <%= link_to "@#{other.username || other.email_address}",
+                    profile_path(other.username || other.id),
+                    class: "text-primary font-semibold hover:underline" %>
+      </span>
+      <% if @interaction.agreed_credits.to_i > 0 %>
+        <span class="inline-flex items-center gap-1 text-label-md text-on-surface">
+          <span class="material-symbols-outlined icon-filled text-organic-green-deep" style="font-size:16px">payments</span>
+          <%= @interaction.agreed_credits %> C acordados
+        </span>
+      <% end %>
+    </div>
+  </header>
+
+  <%# Timeline de estados %>
+  <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow">
+    <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider mb-3">Estado</h2>
+    <ol class="space-y-2">
+      <% steps = %w[requested accepted in_progress completed] %>
+      <% current_idx = steps.index(@interaction.status) || -1 %>
+      <% steps.each_with_index do |step, idx| %>
+        <% reached = current_idx >= idx && !%w[canceled disputed].include?(@interaction.status) %>
+        <% active  = step == @interaction.status %>
+        <li class="flex items-center gap-3">
+          <span class="w-7 h-7 rounded-full grid place-items-center <%= reached ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant' %>">
+            <span class="material-symbols-outlined icon-filled" style="font-size:16px"><%= Interaction::STATUS_ICONS[step] %></span>
+          </span>
+          <span class="text-body-md <%= active ? 'text-on-surface font-semibold' : reached ? 'text-on-surface' : 'text-on-surface-variant' %>">
+            <%= Interaction::STATUS_LABELS_ES[step] %>
+          </span>
+        </li>
+      <% end %>
+      <% if %w[canceled disputed].include?(@interaction.status) %>
+        <li class="flex items-center gap-3 pt-2 border-t border-outline-variant/30">
+          <span class="w-7 h-7 rounded-full grid place-items-center bg-error-container text-on-error-container">
+            <span class="material-symbols-outlined icon-filled" style="font-size:16px"><%= @interaction.status_icon %></span>
+          </span>
+          <span class="text-body-md text-on-surface font-semibold"><%= @interaction.status_label_es %></span>
+        </li>
+      <% end %>
+    </ol>
+
+    <% if @interaction.in_progress? || @interaction.completed? %>
+      <div class="mt-4 pt-4 border-t border-outline-variant/30 text-caption text-on-surface-variant space-y-1">
+        <p class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined" style="font-size:14px"><%= @interaction.sender_completed_at ? "check_circle" : "schedule" %></span>
+          @<%= @interaction.sender.username %> <%= @interaction.sender_completed_at ? "confirmó el cierre" : "aún no confirmó" %>
+        </p>
+        <p class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined" style="font-size:14px"><%= @interaction.receiver_completed_at ? "check_circle" : "schedule" %></span>
+          @<%= @interaction.receiver.username %> <%= @interaction.receiver_completed_at ? "confirmó el cierre" : "aún no confirmó" %>
+        </p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Bloque de negociación: panel para aceptar/contraproponer cuando "te toca" %>
+  <% if @interaction.negotiation_open? %>
+    <% awaiting = @interaction.awaiting_response_from %>
+    <% my_turn  = awaiting == viewer %>
+    <section class="rounded-xl bg-primary-container/20 border border-primary-fixed-dim/40 p-5 ambient-shadow space-y-3">
+      <header class="flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-primary">compare_arrows</span>
+        <h2 class="text-label-md text-on-surface font-semibold">
+          <% if my_turn %>
+            Te toca responder
+          <% else %>
+            Esperando respuesta de @<%= awaiting.username %>
+          <% end %>
+        </h2>
+      </header>
+
+      <p class="text-body-md text-on-surface">
+        <% if @interaction.requested? %>
+          @<%= @interaction.sender.username %> ofrece
+        <% else %>
+          @<%= @interaction.receiver.username %> contrapropone
+        <% end %>
+        <strong class="text-primary"><%= @interaction.agreed_credits %> C</strong>.
+      </p>
+
+      <% if my_turn %>
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <%= button_to accept_interaction_path(@interaction), method: :patch,
+                class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep" do %>
+            <span class="material-symbols-outlined" style="font-size:18px">check</span>
+            Aceptar <%= @interaction.agreed_credits %> C
+          <% end %>
+
+          <%= form_with url: counter_interaction_path(@interaction), method: :patch, local: true,
+                class: "inline-flex items-end gap-2" do |f| %>
+            <%= number_field_tag "interaction[agreed_credits]", @interaction.agreed_credits,
+                  min: 0, step: 1, class: "w-28",
+                  aria: { label: "Contrapropuesta en créditos" } %>
+            <%= f.submit "Contraproponer",
+                  class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary text-primary text-label-md hover:bg-primary-fixed/30 cursor-pointer" %>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <%# Botones contextuales según rol y estado %>
+  <section class="flex flex-wrap gap-3">
+    <% case @interaction.status %>
+    <% when "requested", "negotiating" %>
+      <%= button_to cancel_interaction_path(@interaction), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container",
+            form: { data: { turbo_confirm: "¿Cancelar la interacción?" } } do %>
+        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+        Cancelar
+      <% end %>
+
+    <% when "accepted" %>
+      <%= button_to start_interaction_path(@interaction), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep" do %>
+        <span class="material-symbols-outlined" style="font-size:18px">play_arrow</span>
+        Iniciar
+      <% end %>
+      <%= button_to cancel_interaction_path(@interaction), method: :patch,
+            class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container",
+            form: { data: { turbo_confirm: "¿Cancelar la interacción?" } } do %>
+        <span class="material-symbols-outlined" style="font-size:18px">close</span>
+        Cancelar
+      <% end %>
+      <% if @interaction.dispute.blank? %>
+        <%= render "interactions/dispute_form", interaction: @interaction %>
+      <% end %>
+
+    <% when "in_progress" %>
+      <% unless @interaction.confirmed_by?(viewer) %>
+        <% confirm_msg = @interaction.agreed_credits.to_i > 0 \
+             ? "Al confirmar el cierre se transferirán #{@interaction.agreed_credits} C cuando ambos confirmen. ¿Seguir?" \
+             : "¿Confirmar el cierre de esta interacción?" %>
+        <%= button_to confirm_interaction_path(@interaction), method: :patch,
+              class: "inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep",
+              form: { data: { turbo_confirm: confirm_msg } } do %>
+          <span class="material-symbols-outlined icon-filled" style="font-size:18px">task_alt</span>
+          Confirmar cierre
+        <% end %>
+      <% else %>
+        <p class="text-caption text-on-surface-variant italic">Ya confirmaste — esperando a la otra parte.</p>
+      <% end %>
+      <% if @interaction.dispute.blank? %>
+        <%= render "interactions/dispute_form", interaction: @interaction %>
+      <% end %>
+    <% end %>
+  </section>
+
+  <%# Estado de la disputa: argumento, respuesta de la contraparte y veredicto. %>
+  <% if (d = @interaction.dispute).present? %>
+    <section class="rounded-xl bg-error-container/10 border border-error/30 p-5 ambient-shadow space-y-3">
+      <h2 class="text-label-md text-error uppercase tracking-wider flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled" style="font-size:18px">gavel</span>
+        Disputa · <%= d.status_label_es %>
+      </h2>
+
+      <div class="text-body-md text-on-surface space-y-2">
+        <p><strong>@<%= d.opener.username %>:</strong> <%= d.argument %></p>
+        <% if d.response.present? %>
+          <p><strong>@<%= d.counterpart&.username %>:</strong> <%= d.response %></p>
+        <% end %>
+      </div>
+
+      <% if d.open? && d.counterpart == viewer %>
+        <%= form_with url: respond_dispute_interaction_path(@interaction), method: :patch, local: true, class: "space-y-2" do %>
+          <textarea name="dispute[response]" rows="3" required
+            class="w-full rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2 text-body-md"
+            placeholder="Tu versión de los hechos..."></textarea>
+          <button type="submit"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep">
+            Responder
+          </button>
+        <% end %>
+      <% elsif d.open? %>
+        <p class="text-caption text-on-surface-variant italic">Esperando la respuesta de @<%= d.counterpart&.username %>.</p>
+      <% elsif d.responded? %>
+        <p class="text-caption text-on-surface-variant italic">Un moderador la va a revisar.</p>
+      <% end %>
+
+      <% if d.resolved? %>
+        <p class="text-body-md text-on-surface pt-2 border-t border-error/20">
+          <strong>Veredicto:</strong> <%= d.verdict_label_es %>
+          <% if d.resolution_note.present? %> — <%= d.resolution_note %><% end %>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
+
+  <%# Chat 1-a-1 entre las dos partes.
+      data-turbo-permanent + id estable: morph del refresh de la interaction
+      no toca el chat — preserva la suscripción WebSocket, el Stimulus
+      observer, los mensajes en el DOM y el texto a medio escribir. %>
+  <% if (is_sender || is_receiver) && !@interaction.canceled? %>
+    <%= turbo_stream_from @interaction, :messages %>
+
+    <section id="chat-pane-<%= @interaction.id %>"
+             data-turbo-permanent
+             class="rounded-xl bg-surface-container-lowest p-5 ambient-shadow border border-outline-variant/30 space-y-4"
+             data-controller="chat typing"
+             data-chat-user-id-value="<%= viewer.id %>"
+             data-typing-interaction-id-value="<%= @interaction.id %>"
+             data-typing-viewer-id-value="<%= viewer.id %>">
+      <header class="flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">chat</span>
+        <h2 class="text-headline-md text-on-surface flex-1">Chat</h2>
+        <span class="text-caption text-on-surface-variant">
+          con @<%= other.username || other.email_address %>
+        </span>
+      </header>
+
+      <div id="messages-<%= @interaction.id %>"
+           class="space-y-2 max-h-96 overflow-y-auto rounded-lg bg-warm-surface p-3 min-h-32"
+           data-chat-target="list">
+        <% if @interaction.messages.visible.any? %>
+          <%= render @interaction.messages.visible.ordered %>
+        <% else %>
+          <p class="text-caption text-on-surface-variant text-center py-6 italic">
+            Todavía no hay mensajes. Decile algo a @<%= other.username || other.email_address %>.
+          </p>
+        <% end %>
+      </div>
+
+      <div data-typing-target="indicator" class="hidden text-caption text-on-surface-variant italic flex items-center gap-1">
+        <span class="inline-flex gap-0.5">
+          <span class="w-1 h-1 rounded-full bg-on-surface-variant animate-pulse"></span>
+          <span class="w-1 h-1 rounded-full bg-on-surface-variant animate-pulse" style="animation-delay:150ms"></span>
+          <span class="w-1 h-1 rounded-full bg-on-surface-variant animate-pulse" style="animation-delay:300ms"></span>
+        </span>
+        <span data-typing-target="label">@<%= other.username || other.email_address %> está escribiendo…</span>
+      </div>
+
+      <%= render "interactions/message_form", interaction: @interaction %>
+    </section>
+  <% end %>
+
+  <%# Si está completed y hubo transferencia, mostrar desglose %>
+  <% if @interaction.completed? && @interaction.credit_transaction.present? %>
+    <% tx = @interaction.credit_transaction %>
+    <section class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-5 ambient-shadow space-y-2">
+      <h2 class="text-label-md text-on-surface-variant uppercase tracking-wider">Transferencia de créditos</h2>
+      <div class="grid grid-cols-2 gap-y-1 text-body-md">
+        <span class="text-on-surface-variant">Total</span>
+        <span class="text-on-surface text-right font-semibold"><%= tx.total_amount %> C</span>
+        <span class="text-on-surface-variant">Al receptor</span>
+        <span class="text-on-surface text-right"><%= tx.total_amount - tx.burn_amount - tx.community_amount %> C</span>
+        <span class="text-on-surface-variant">Fondo territorial</span>
+        <span class="text-on-surface text-right"><%= tx.community_amount %> C</span>
+        <span class="text-on-surface-variant">Quema</span>
+        <span class="text-on-surface text-right"><%= tx.burn_amount %> C</span>
+      </div>
+    </section>
+  <% end %>
+
+  <%# Review inline al estar completed %>
+  <% if @interaction.completed? && @interaction.review_pending_for?(viewer) %>
+    <% reviewed_user = @interaction.other_party(viewer) %>
+    <% new_review = @interaction.post.reviews.build(
+         reviewer:      viewer,
+         reviewed_user: reviewed_user,
+         interaction:   @interaction,
+         score:         5
+       ) %>
+    <section class="space-y-3 pt-6 border-t border-outline-variant/40">
+      <h2 class="text-headline-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-earth-clay">star</span>
+        Evaluá a @<%= reviewed_user.username || reviewed_user.email_address %>
+      </h2>
+      <%= render "reviews/form",
+                 post: @interaction.post,
+                 interaction: @interaction,
+                 reviewed_user: reviewed_user,
+                 review: new_review %>
+    </section>
+  <% end %>
+
+  <%# Reviews ya dejadas en esta interacción %>
+  <% if @reviews.any? %>
+    <section class="space-y-3 pt-6 border-t border-outline-variant/40">
+      <h2 class="text-headline-md text-on-surface">Evaluaciones de esta interacción</h2>
+      <% @reviews.each do |r| %>
+        <article class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4">
+          <header class="flex items-center justify-between gap-2 text-caption">
+            <span><strong>@<%= r.reviewer.username %></strong> → @<%= r.reviewed_user.username %></span>
+            <span class="text-earth-clay flex items-center">
+              <% r.score.times do %><span class="material-symbols-outlined icon-filled" style="font-size:14px">star</span><% end %>
+              <% (5 - r.score).times do %><span class="material-symbols-outlined text-outline-variant" style="font-size:14px">star</span><% end %>
+            </span>
+          </header>
+          <% if r.comment.present? %>
+            <p class="mt-2 text-body-md text-on-surface whitespace-pre-wrap"><%= r.comment %></p>
+          <% end %>
+        </article>
+      <% end %>
+    </section>
+  <% end %>
+</article>

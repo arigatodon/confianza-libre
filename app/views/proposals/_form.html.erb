@@ -1,0 +1,144 @@
+<%# locals: territory, proposal %>
+<%
+  viewer       = Current.session&.user
+  can_propose_rules = viewer && viewer.level.to_i >= Proposal.rules_min_level
+  kind_options = [
+    [ "fund_transfer", "payments",     "Créditos del fondo", "Destinar créditos del fondo territorial a un vecino o iniciativa." ],
+    [ "new_category",  "category",     "Nueva categoría",    "Proponer una categoría nueva para publicar en la red." ],
+    [ "rule_change",   "balance",      "Cambio de regla",    "Cambiar un parámetro económico de la red (las reglas del juego)." ],
+    [ "grant_moderation",  "shield_person", "Nombrar moderador",   "Dar el rol de moderador a un vecino (resuelve reportes y disputas)." ],
+    [ "revoke_moderation", "remove_moderator", "Revocar moderación", "Quitar el rol de moderador a quien lo tiene." ]
+  ]
+%>
+<%= form_with model: proposal, url: territory_proposals_path(territory.slug),
+      data: { controller: "proposal-form" },
+      class: "space-y-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-5 ambient-shadow" do |f| %>
+  <% if proposal.errors.any? %>
+    <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-3 py-2 text-sm">
+      <%= proposal.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <%# Selector de tipo de propuesta %>
+  <fieldset>
+    <legend class="block text-label-md text-on-surface mb-2">¿Qué propones?</legend>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <% kind_options.each do |value, icon, label, hint| %>
+        <% locked = value != "fund_transfer" && !can_propose_rules %>
+        <label class="rounded-lg border p-3 cursor-pointer transition-colors
+                      <%= locked ? "opacity-50 cursor-not-allowed border-outline-variant/30" : "border-outline-variant/50 hover:border-primary has-checked:border-primary has-checked:bg-primary-fixed/20" %>">
+          <span class="flex items-center gap-2">
+            <%= f.radio_button :kind, value,
+                  checked: (proposal.kind.presence || "fund_transfer") == value,
+                  disabled: locked,
+                  data: { action: "proposal-form#update" },
+                  class: "accent-current" %>
+            <span class="material-symbols-outlined text-primary" style="font-size:18px"><%= icon %></span>
+            <span class="text-label-md text-on-surface"><%= label %></span>
+          </span>
+          <span class="block text-caption text-on-surface-variant mt-1"><%= hint %></span>
+        </label>
+      <% end %>
+    </div>
+    <% unless can_propose_rules %>
+      <p class="text-caption text-on-surface-variant mt-2">
+        Para proponer reglas o categorías necesitas <strong>nivel <%= Proposal.rules_min_level %></strong>:
+        la confianza para cambiar el juego se gana participando.
+      </p>
+    <% end %>
+  </fieldset>
+
+  <div>
+    <%= f.label :title, "Título", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_field :title, required: true, placeholder: "Ej: 200 C para el evento de barrio" %>
+  </div>
+
+  <div>
+    <%= f.label :body, "Detalle", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_area :body, rows: 4, required: true, placeholder: "Cuenta qué propones, por qué la comunidad ganaría con esto." %>
+  </div>
+
+  <%# --- Campos de fund_transfer --- %>
+  <div data-proposal-form-target="section" data-kind="fund_transfer" class="grid grid-cols-2 gap-3">
+    <div>
+      <%= f.label :amount, "Monto (C)", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.number_field :amount, min: 1, step: 1, required: true %>
+    </div>
+    <div>
+      <%= f.label :beneficiary_id, "Beneficiario (username)", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.collection_select :beneficiary_id,
+            User.where.not(id: Current.session&.user_id).order(:username),
+            :id, :username,
+            { include_blank: "Elige…" }, { required: true } %>
+    </div>
+  </div>
+
+  <%# --- Campos de new_category --- %>
+  <div data-proposal-form-target="section" data-kind="new_category" class="hidden">
+    <%= f.label :category_name, "Nombre de la categoría", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.text_field :category_name, required: true, maxlength: 40,
+          placeholder: "Ej: Huerta y semillas" %>
+    <p class="text-caption text-on-surface-variant mt-1">
+      Si la comunidad la aprueba, la categoría queda disponible para publicar.
+    </p>
+  </div>
+
+  <%# --- Campos de rule_change --- %>
+  <div data-proposal-form-target="section" data-kind="rule_change" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div>
+      <%= f.label :parameter_key, "Regla a cambiar", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.select :parameter_key,
+            Proposal::GOVERNABLE_PARAMETERS.map { |key, rule|
+              [ "#{rule[:label]} — actual: #{EconomicParameter.get(key) || "sin fijar"} · rango #{rule[:min]}–#{rule[:max]}", key ]
+            },
+            { include_blank: "Elige la regla…", selected: proposal.parameter_key },
+            { required: true } %>
+    </div>
+    <div>
+      <%= f.label :parameter_value, "Nuevo valor", class: "block text-label-md text-on-surface mb-1" %>
+      <%= f.number_field :parameter_value, step: 1, required: true %>
+      <p class="text-caption text-on-surface-variant mt-1">
+        Tiene que caer dentro del rango seguro de la regla.
+      </p>
+    </div>
+    <label class="md:col-span-2 flex items-start gap-2 cursor-pointer">
+      <%= f.check_box :parameter_global, { checked: proposal.global_rule? }, "1", "0" %>
+      <span>
+        <span class="block text-body-md text-on-surface">Aplicar a toda la red</span>
+        <span class="block text-caption text-on-surface-variant">
+          Desmarcado, el cambio rige solo en <strong><%= territory.name %></strong> (regla local).
+          Marcado, cambia el valor global de la red y necesita el quórum de toda la comunidad.
+        </span>
+      </span>
+    </label>
+  </div>
+
+  <%# --- Nombrar moderador --- %>
+  <div data-proposal-form-target="section" data-kind="grant_moderation" class="hidden">
+    <%= f.label :beneficiary_id, "Vecino a nombrar moderador", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.collection_select :beneficiary_id,
+          User.where(status: :active).where(moderator_since: nil).where.not(id: Current.session&.user_id).order(:username),
+          :id, :username,
+          { include_blank: "Elige…" }, { disabled: true } %>
+  </div>
+
+  <%# --- Revocar moderación --- %>
+  <div data-proposal-form-target="section" data-kind="revoke_moderation" class="hidden">
+    <%= f.label :beneficiary_id, "Moderador a revocar", class: "block text-label-md text-on-surface mb-1" %>
+    <%= f.collection_select :beneficiary_id,
+          User.where.not(moderator_since: nil).order(:username),
+          :id, :username,
+          { include_blank: "Elige…" }, { disabled: true } %>
+  </div>
+
+  <div class="flex items-center justify-between gap-3">
+    <p class="text-caption text-on-surface-variant">
+      Quórum base: <strong><%= EconomicParameter.get_int("proposal_quorum", 10) %></strong> votos
+      (para reglas y categorías sube al <strong><%= EconomicParameter.get_int("rules_quorum_percent", 10) %>%</strong> de la red activa) ·
+      Mayoría: <strong><%= EconomicParameter.get_decimal("proposal_majority_percent", 60.0) %>%</strong> ·
+      Votación abre por <strong><%= EconomicParameter.get_int("proposal_voting_days", 7) %></strong> días.
+    </p>
+    <%= f.submit "Crear propuesta",
+          class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" %>
+  </div>
+<% end %>

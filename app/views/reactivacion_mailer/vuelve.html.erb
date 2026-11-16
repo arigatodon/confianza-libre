@@ -1,0 +1,21 @@
+<div style="font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; line-height: 1.55; color: #1a2420; max-width: 560px;">
+  <p>Hola @<%= @user.username %>:</p>
+
+  <p>Soy Igor, el que está detrás de Confianza. Te escribo porque te registraste hace un tiempo y quería contarte qué cambió.</p>
+
+  <% if @publico %>
+    <p>Ya tienes publicaciones en la red. Ahora cada perfil puede ser una <strong>vitrina</strong>: una página con tu WhatsApp, tu horario, lo que ofreces y las reseñas de tus clientes, con un QR para imprimir. Sirve como link para la bio de tu Instagram o tu estado de WhatsApp.</p>
+    <p><a href="<%= onboarding_vitrina_url %>" style="color: #0f5238; font-weight: 600;">Activa tu vitrina aquí</a> (dos minutos).</p>
+  <% else %>
+    <p>Si ofreces algo —un oficio, productos, comida, clases—, ahora puedes tener tu <strong>vitrina gratis</strong>: una página con tu WhatsApp, tu horario, tus servicios y las reseñas de tus clientes, con un QR para imprimir. Sirve como link para la bio de tu Instagram o tu estado de WhatsApp.</p>
+    <p><a href="<%= onboarding_vitrina_url %>" style="color: #0f5238; font-weight: 600;">Crea tu vitrina aquí</a> (dos minutos).</p>
+  <% end %>
+
+  <p>Y si prefieres, respóndeme este correo con lo que haces y un par de fotos, y te la armo yo.</p>
+
+  <p>Estamos partiendo barrio por barrio, así que cada persona que se suma cuenta. Si conoces a alguien que trabaje bien —tu gásfiter, tu almacén, la vecina que cose—, este es tu link para invitarlo: <a href="<%= invite_url(code: @user.username) %>" style="color: #0f5238;"><%= invite_url(code: @user.username).sub(%r{\Ahttps?://}, "") %></a></p>
+
+  <p>Gracias por estar desde el principio.<br>Igor</p>
+
+  <p style="font-size: 13px; color: #6b7770; margin-top: 24px;">Si no quieres que te vuelva a escribir, respóndeme "no" y listo.</p>
+</div>

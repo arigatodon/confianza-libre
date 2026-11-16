@@ -1,0 +1,9 @@
+Tienes una nueva solicitud de interacción
+
+@<%= @sender.username %> inició una interacción contigo a partir de tu publicación “<%= @post.title %>”.<% if @interaction.agreed_credits.to_i.positive? %> Te ofrece <%= @interaction.agreed_credits %> créditos.<% end %>
+
+Entra para revisar los detalles, conversar y aceptar o contraproponer:
+
+<%= interaction_url(@interaction) %>
+
+También la encontrarás en tus notificaciones dentro de Confianza.

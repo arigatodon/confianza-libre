@@ -1,0 +1,310 @@
+<% content_for :title, "Mi perfil" %>
+
+<section class="max-w-2xl mx-auto space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Ajustes</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Mi perfil</h1>
+    <p class="text-body-md text-on-surface-variant">Actualiza tu información pública.</p>
+  </header>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6">
+    <%= form_with model: @user, url: settings_path, method: :patch, multipart: true, class: "space-y-5" do |f| %>
+      <% if @user.errors.any? %>
+        <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-4 py-3 text-sm">
+          <p class="font-semibold mb-1 flex items-center gap-2">
+            <span class="material-symbols-outlined icon-filled" style="font-size:18px">error</span>
+            <%= pluralize(@user.errors.count, "error", plural: "errores") %>
+          </p>
+          <ul class="list-disc ml-7">
+            <% @user.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= render "users/avatar_picker", f: f, user: @user %>
+
+      <div>
+        <%= f.label :username, "Nombre de usuario", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_field :username, required: true, autocomplete: "username", pattern: "[a-zA-Z0-9_]+" %>
+        <p class="text-caption text-on-surface-variant mt-1">
+          confianza.app/<span class="font-mono text-on-surface"><%= @user.username %></span>
+        </p>
+      </div>
+
+      <div>
+        <%= f.label :email_address, "Email", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.email_field :email_address, required: true, autocomplete: "email" %>
+      </div>
+
+      <div>
+        <%= f.label :bio, "Sobre ti", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_area :bio, rows: 4, maxlength: 280 %>
+      </div>
+
+      <fieldset class="rounded-lg border border-outline-variant/40 bg-surface-container-low/50 p-4 space-y-3">
+        <legend class="text-label-md text-on-surface px-2 flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px">storefront</span>
+          Tu vitrina
+        </legend>
+
+        <div>
+          <%= f.label :headline, "A qué te dedicas", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.text_field :headline, maxlength: 80,
+                placeholder: "Ej: Gásfiter y electricista · Almacén La Esquina" %>
+          <p class="text-caption text-on-surface-variant mt-1">
+            Se muestra bajo tu nombre en el perfil y el directorio de vecinos.
+          </p>
+        </div>
+
+        <label class="flex items-start gap-3 cursor-pointer">
+          <%= f.check_box :showcase, class: "mt-1" %>
+          <span>
+            <span class="block text-body-md text-on-surface">Vitrina pública</span>
+            <span class="block text-caption text-on-surface-variant">
+              Tu perfil completo queda visible para cualquiera, incluso sin cuenta,
+              y aparece en buscadores — ideal si ofreces servicios o productos.
+              Apagada, tu perfil completo solo lo ve la comunidad de Confianza;
+              hacia afuera se muestra una tarjeta mínima.
+            </span>
+          </span>
+        </label>
+
+        <div>
+          <span class="block text-caption text-on-surface-variant mb-1.5">Plantilla — ¿qué muestra tu vitrina?</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <% ([ [ "", User::PLANTILLA_DEFAULT ] ] + User::VITRINA_PLANTILLAS.to_a).each do |clave, config| %>
+              <label class="flex items-center gap-2 rounded-lg border border-outline-variant/40 px-3 py-2 cursor-pointer has-checked:border-primary has-checked:bg-primary-fixed/20 transition-colors">
+                <%= f.radio_button :vitrina_plantilla, clave, checked: @user.vitrina_plantilla.to_s == clave %>
+                <span class="material-symbols-outlined text-on-surface-variant" style="font-size:18px"><%= config[:icono] %></span>
+                <span class="text-body-md text-on-surface"><%= config[:nombre] %></span>
+              </label>
+            <% end %>
+          </div>
+          <p class="text-caption text-on-surface-variant mt-1">
+            La plantilla ordena tu perfil según tu rubro: una tienda muestra primero
+            el catálogo, un oficio muestra primero su reputación.
+          </p>
+        </div>
+
+        <div>
+          <%= f.label :portada, "Foto de portada", class: "block text-caption text-on-surface-variant mb-1" %>
+          <% if @user.portada.attached? && @user.portada.image? %>
+            <%= image_tag @user.portada, class: "w-full h-28 object-cover rounded-lg mb-2" %>
+          <% end %>
+          <%= f.file_field :portada, accept: "image/*",
+                class: "block w-full text-body-md text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary file:text-on-primary file:cursor-pointer" %>
+          <p class="text-caption text-on-surface-variant mt-1">
+            Tu local, tus productos, tu trabajo — se muestra arriba de tu perfil.
+          </p>
+        </div>
+
+        <div>
+          <span class="block text-caption text-on-surface-variant mb-1.5">Color de tu vitrina</span>
+          <div class="flex items-center gap-3">
+            <% User::ACCENT_COLORS.each do |hex, nombre| %>
+              <label class="flex items-center gap-1.5 cursor-pointer" title="<%= nombre %>">
+                <%= f.radio_button :accent_color, hex, checked: @user.acento == hex %>
+                <span class="w-6 h-6 rounded-full inline-block border-2 border-surface-container-lowest ring-1 ring-outline-variant" style="background-color: <%= hex %>"></span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+
+        <div>
+          <%= f.label :whatsapp, "WhatsApp de contacto", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.telephone_field :whatsapp, placeholder: "+56912345678" %>
+          <p class="text-caption text-on-surface-variant mt-1">
+            Con código de país. Aparece como botón "<%= @user.plantilla[:cta] %>" en tu vitrina.
+          </p>
+        </div>
+
+        <div>
+          <%= f.label :horario, "Horario", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.text_field :horario, maxlength: 120, placeholder: "Ej: Lun a Sáb · 9:00 a 19:00" %>
+        </div>
+
+        <div class="space-y-2">
+          <span class="block text-caption text-on-surface-variant">Tus links (para que te encuentren en todos lados)</span>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant shrink-0" style="font-size:18px">photo_camera</span>
+            <%= f.url_field :link_instagram, placeholder: "https://instagram.com/tu_cuenta" %>
+          </div>
+          <p class="text-caption text-on-surface-variant pl-7 -mt-1">
+            Si difundes una publicación, te etiquetamos con esta cuenta en Instagram
+            para que te llegue la notificación y puedas compartirla en tus historias.
+          </p>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant shrink-0" style="font-size:18px">thumb_up</span>
+            <%= f.url_field :link_facebook, placeholder: "https://facebook.com/tu_pagina" %>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-on-surface-variant shrink-0" style="font-size:18px">language</span>
+            <%= f.url_field :link_web, placeholder: "https://tusitio.cl" %>
+          </div>
+          <p class="text-caption text-on-surface-variant">
+            Y al revés: usa <span class="font-mono text-on-surface">confianza.world/<%= @user.username %></span>
+            como el link en la bio de tu Instagram — ahí está tu catálogo, tu
+            WhatsApp y tu reputación, todo en un solo lugar.
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset class="rounded-lg border border-outline-variant/40 bg-surface-container-low/50 p-4 space-y-3">
+        <legend class="text-label-md text-on-surface px-2 flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px">join_inner</span>
+          Avisos de match
+        </legend>
+
+        <label class="flex items-start gap-3 cursor-pointer">
+          <%= f.check_box :match_notifications, class: "mt-1" %>
+          <span>
+            <span class="block text-body-md text-on-surface">Avísame de pedidos y ofertas cerca</span>
+            <span class="block text-caption text-on-surface-variant">
+              Cuando alguien cerca publique algo que calza con lo que ofreces
+              (o con lo que buscas), te llega un aviso. Desmárcalo para no recibir ninguno.
+            </span>
+          </span>
+        </label>
+
+        <div>
+          <%= f.label :match_radius_km, "Radio de avisos (km)", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.number_field :match_radius_km, min: 1, max: 100, step: 1, class: "w-28" %>
+        </div>
+
+        <div>
+          <span class="block text-caption text-on-surface-variant mb-1">Categorías que me interesan</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <%= f.collection_check_boxes :match_category_ids, Category.publishable.order(:name), :id, :name do |b| %>
+              <label class="flex items-center gap-2 text-body-md text-on-surface">
+                <%= b.check_box %>
+                <%= b.text %>
+              </label>
+            <% end %>
+          </div>
+          <p class="text-caption text-on-surface-variant mt-1">
+            Si no eliges ninguna, usamos las categorías de tus propias publicaciones.
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset class="rounded-lg border border-outline-variant/40 bg-surface-container-low/50 p-4 space-y-3">
+        <legend class="text-label-md text-on-surface px-2 flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:16px">lock</span>
+          Cambiar contraseña
+          <span class="text-caption text-on-surface-variant font-normal">(opcional)</span>
+        </legend>
+
+        <div>
+          <%= f.label :password, "Nueva contraseña", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.password_field :password, autocomplete: "new-password", minlength: 8, maxlength: 72 %>
+        </div>
+        <div>
+          <%= f.label :password_confirmation, "Confirmar nueva contraseña", class: "block text-caption text-on-surface-variant mb-1" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", minlength: 8, maxlength: 72 %>
+        </div>
+      </fieldset>
+
+      <div class="pt-2 flex items-center justify-between gap-3 flex-wrap">
+        <%= f.submit "Guardar cambios",
+              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+        <%= link_to "Cancelar", profile_path(@user.username || @user.id),
+              class: "text-label-md text-on-surface-variant hover:text-on-surface" %>
+      </div>
+    <% end %>
+
+    <div class="pt-6 mt-6 border-t border-outline-variant/30">
+      <%= link_to onboarding_path,
+            class: "inline-flex items-center gap-1.5 text-label-md text-on-surface-variant hover:text-primary" do %>
+        <span class="material-symbols-outlined" style="font-size:16px">school</span>
+        Repetir el tour de bienvenida
+      <% end %>
+    </div>
+  </div>
+
+  <%= render "users/acceso", oauth_identities: @oauth_identities %>
+
+  <%= render "users/api_keys", user: @user, api_keys: @api_keys %>
+
+  <%# Alertas guardadas (Fase 2.3): búsquedas que avisan cuando aparece algo así. %>
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6 space-y-4">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary" style="font-size:20px">notifications_active</span>
+      <h2 class="text-headline-md text-on-surface">Mis alertas</h2>
+    </div>
+
+    <% if @saved_searches.any? %>
+      <ul class="divide-y divide-outline-variant/30">
+        <% @saved_searches.each do |s| %>
+          <li class="flex items-center justify-between gap-3 py-3">
+            <span class="text-body-md text-on-surface min-w-0">
+              <span class="block truncate"><%= s.summary %></span>
+            </span>
+            <%= button_to saved_search_path(s), method: :delete,
+                  class: "shrink-0 inline-flex items-center gap-1 text-caption text-on-surface-variant hover:text-error transition-colors",
+                  form: { data: { turbo_confirm: "¿Eliminar esta alerta?" } } do %>
+              <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+              Borrar
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-body-md text-on-surface-variant">
+        Todavía no tienes alertas. Guarda una búsqueda desde
+        <%= link_to "Explorar", explore_path, class: "text-primary hover:underline" %>
+        y te avisaremos cuando aparezca algo que coincida.
+      </p>
+    <% end %>
+  </div>
+
+  <%# Verificación de identidad: sube al nivel máximo de verificación (identity),
+      requisito para el nivel 5. Form aparte (multipart) del de perfil. %>
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6 space-y-4">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary" style="font-size:20px">fingerprint</span>
+      <h2 class="text-headline-md text-on-surface">Verificación de identidad</h2>
+    </div>
+
+    <% if @user.verification_identity? %>
+      <p class="text-body-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">verified_user</span>
+        Tu identidad está verificada. Es el nivel máximo de confianza de la red.
+      </p>
+    <% else %>
+      <% if @identity_verification&.pending? %>
+        <div class="rounded-lg bg-primary-fixed/20 border border-primary/20 p-4">
+          <p class="text-body-md text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" style="font-size:18px">hourglass_top</span>
+            Tu solicitud está en revisión. Te avisaremos cuando un moderador la resuelva.
+          </p>
+        </div>
+      <% else %>
+        <% if @identity_verification&.rejected? %>
+          <div class="rounded-lg bg-error-container/60 border border-error/30 p-4">
+            <p class="text-body-md text-on-error-container">
+              Tu solicitud anterior fue rechazada<%= ": #{@identity_verification.note}" if @identity_verification.note.present? %>
+            </p>
+            <p class="text-caption text-on-error-container/80 mt-1">Puedes volver a intentarlo.</p>
+          </div>
+        <% end %>
+
+        <p class="text-body-md text-on-surface-variant">
+          Sube 1 o 2 fotos de tu documento de identidad. Un moderador de la comunidad
+          las revisará y las imágenes se borran a los 30 días — no guardamos documentos.
+        </p>
+
+        <%= form_with url: identity_verification_path, method: :post, multipart: true, class: "space-y-3" do %>
+          <input type="file" name="identity_verification[documents][]" accept="image/*" multiple required
+                 class="block w-full text-body-md text-on-surface file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary file:text-on-primary file:cursor-pointer">
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer">
+            <span class="material-symbols-outlined" style="font-size:18px">upload</span>
+            Enviar para verificación
+          </button>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</section>

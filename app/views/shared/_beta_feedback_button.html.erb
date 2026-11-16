@@ -1,0 +1,15 @@
+<%# Botón flotante de feedback. Visible en desktop (md+) abajo-derecha,
+    fuera del path de moderación/feedback para no estorbar al moderador.
+    En mobile se evita porque el bottom nav + FAB ya ocupan ese espacio. %>
+<% unless request.path.start_with?("/feedback", "/moderacion") %>
+  <div class="hidden md:block fixed bottom-6 right-6 z-40">
+    <%= link_to new_feedback_path,
+          class: "inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high/95 backdrop-blur border border-outline-variant/40 text-on-surface text-label-md ambient-shadow hover:bg-primary hover:text-on-primary hover:border-primary transition-colors" do %>
+      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">campaign</span>
+      <span class="flex flex-col leading-tight">
+        <span class="text-caption uppercase tracking-wide opacity-70" style="font-size:9px">Beta</span>
+        <span>Mandanos feedback</span>
+      </span>
+    <% end %>
+  </div>
+<% end %>

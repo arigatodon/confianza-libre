@@ -1,0 +1,8 @@
+Drift en el ledger — reconciliación semanal
+
+Cuentas corregidas desde el ledger (<%= @drifted.size %>):
+<% @drifted.each do |d| %>
+- #<%= d[:account_id] %> <%= d[:account_type] %> <%= d[:owner] %>: <%= d[:cached] %> → <%= d[:expected] %>
+<% end %>
+
+Σ cached_balance tras reconciliar: <%= @total_after %> <%= @total_after.zero? ? "(partida doble sana)" : "— ¡debería ser 0! Revisar a mano." %>

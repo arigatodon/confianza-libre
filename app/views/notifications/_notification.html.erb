@@ -1,0 +1,15 @@
+<%# locals: notification %>
+<%= link_to (notification.link_path || notification_path(notification)),
+      id: dom_id(notification),
+      class: "flex items-start gap-3 rounded-xl border border-outline-variant/30 #{notification.read? ? "bg-surface-container-lowest" : "bg-primary-fixed/20"} p-4 hover:bg-surface-container transition-colors" do %>
+  <span class="w-9 h-9 rounded-full bg-primary-container/30 text-primary grid place-items-center shrink-0">
+    <span class="material-symbols-outlined icon-filled" style="font-size:18px"><%= notification.icon %></span>
+  </span>
+  <div class="flex-1 min-w-0 space-y-0.5">
+    <p class="text-body-md text-on-surface"><%= notification.body %></p>
+    <p class="text-caption text-on-surface-variant flex items-center gap-1">
+      <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+      <%= time_ago_in_words(notification.created_at) %>
+    </p>
+  </div>
+<% end %>

@@ -1,0 +1,95 @@
+<% content_for :title, "Feedback de usuarios" %>
+
+<%
+  filter_chip = ->(value, label, count) {
+    active = @filter == value
+    base = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-label-md transition-colors"
+    cls = active ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+    link_to feedbacks_path(status: value), class: "#{base} #{cls}" do
+      ("#{label} <span class=\"text-caption opacity-80\">#{count}</span>").html_safe
+    end
+  }
+  kind_color = {
+    "bug"   => "text-error",
+    "idea"  => "text-organic-green-deep",
+    "love"  => "text-pink-600",
+    "other" => "text-on-surface-variant"
+  }
+  kind_icon = {
+    "bug"   => "bug_report",
+    "idea"  => "lightbulb",
+    "love"  => "favorite",
+    "other" => "chat_bubble"
+  }
+%>
+
+<section class="space-y-6">
+  <header class="flex flex-col gap-1">
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Feedback de usuarios</h1>
+    <p class="text-body-md text-on-surface-variant">Todo lo que mandan a través del formulario público. Marcalo según lo trabajes.</p>
+  </header>
+
+  <div class="flex flex-wrap gap-2">
+    <%= filter_chip.call("pending",  "Sin leer",   @counts["pending"]) %>
+    <%= filter_chip.call("read",     "Leídos",     @counts["read"]) %>
+    <%= filter_chip.call("done",     "Resueltos",  @counts["done"]) %>
+    <%= filter_chip.call("archived", "Archivados", @counts["archived"]) %>
+    <%= filter_chip.call("unresolved", "Sin resolver", @counts["unresolved"]) %>
+    <%= filter_chip.call("all", "Todos", @counts["all"]) %>
+  </div>
+
+  <% if @feedbacks.empty? %>
+    <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-8 text-center">
+      <span class="material-symbols-outlined text-on-surface-variant" style="font-size:42px">inbox</span>
+      <p class="text-body-md text-on-surface-variant mt-2">No hay feedback en esta categoría.</p>
+    </div>
+  <% else %>
+    <ul class="space-y-3">
+      <% @feedbacks.each do |fb| %>
+        <li class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4 ambient-shadow">
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined <%= kind_color[fb.kind] %>" style="font-size:22px"><%= kind_icon[fb.kind] %></span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-label-md font-semibold"><%= fb.kind_label_es %></span>
+                <span class="text-caption text-on-surface-variant">·</span>
+                <span class="text-caption text-on-surface-variant">
+                  <% if fb.user %>
+                    <%= link_to "@#{fb.user.username || fb.user.email_address}", profile_path(fb.user.username || fb.user.id), class: "text-primary hover:underline" %>
+                  <% else %>
+                    <em>anónimo</em>
+                  <% end %>
+                </span>
+                <span class="text-caption text-on-surface-variant">·</span>
+                <span class="text-caption text-on-surface-variant"><%= time_ago_in_words(fb.created_at) %> atrás</span>
+                <% unless fb.pending? %>
+                  <span class="ml-auto text-caption px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">
+                    <%= fb.status_label_es %>
+                  </span>
+                <% end %>
+              </div>
+              <p class="text-body-md text-on-surface mt-1 line-clamp-3 whitespace-pre-line"><%= fb.body %></p>
+              <% if fb.url.present? %>
+                <p class="text-caption text-on-surface-variant mt-1 truncate">
+                  <span class="material-symbols-outlined align-text-bottom" style="font-size:12px">link</span>
+                  <%= fb.url %>
+                </p>
+              <% end %>
+              <div class="flex flex-wrap items-center gap-2 mt-3">
+                <%= link_to "Ver", feedback_path(fb), class: "text-caption text-primary hover:underline" %>
+                <% if fb.pending? || fb.read? %>
+                  <%= button_to "Marcar resuelto", feedback_path(fb, status: :done), method: :patch,
+                        class: "text-caption px-2 py-1 rounded-full bg-primary-container/30 text-primary hover:bg-primary-container/50" %>
+                <% end %>
+                <% unless fb.archived? %>
+                  <%= button_to "Archivar", feedback_path(fb, status: :archived), method: :patch,
+                        class: "text-caption px-2 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high" %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

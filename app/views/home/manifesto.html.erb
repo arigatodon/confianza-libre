@@ -1,0 +1,169 @@
+<% content_for :title, "Manifiesto" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Manifiesto",
+        description: "Antes del dinero existió la deuda entre personas. Confianza es una red donde el valor nace del compromiso entre vecinos, todos parten de cero y las reglas las decide la comunidad.",
+        og_type:     "article",
+        canonical:   manifesto_url) %>
+<% end %>
+
+<article class="py-16 md:py-24 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto">
+  <div class="max-w-2xl mx-auto space-y-14">
+
+    <%# Hero %>
+    <header class="text-center space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container-high rounded-full">
+        <span class="material-symbols-outlined text-primary" style="font-size:18px">history_edu</span>
+        <span class="text-label-md text-on-surface-variant text-sm">Por qué existe Confianza</span>
+      </div>
+      <h1 class="text-headline-lg-mobile md:text-headline-xl text-primary-container">
+        Manifiesto
+      </h1>
+      <p class="text-body-lg text-on-surface-variant">
+        Antes del dinero existió algo más simple y más humano:
+        la deuda entre personas que se conocen.
+      </p>
+    </header>
+
+    <%# 1. La historia %>
+    <section class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">El samurái y el arrocero</h2>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        Un samurái derrotado cae a un río. Un aldeano que trabaja el arroz lo
+        rescata y lo cuida hasta que despierta. El samurái no tiene con qué
+        pagarle — y no hace falta: se queda trabajando la tierra con él, día
+        tras día, hasta que los dos sienten que la deuda está saldada.
+        Entonces sigue su camino.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        En esa historia no hay billetes, ni bancos, ni precios. Hay algo
+        anterior a todo eso: <strong class="text-on-surface">una deuda entre dos
+        personas, medida por ellas mismas, saldada con trabajo y cerrada con un
+        apretón de manos.</strong> Así funcionaron las comunidades durante miles
+        de años. El dinero vino después — y en el camino nos hizo olvidar que el
+        valor nace del compromiso entre personas, no de un papel.
+      </p>
+    </section>
+
+    <%# 2. El problema %>
+    <section class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Lo que el dinero nos hizo</h2>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        El dinero oficial depende de cuánto decidan emitir quienes lo controlan.
+        Cada año hay más billetes persiguiendo las mismas cosas, y eso tiene un
+        nombre: inflación. Favorece a quien puede mover mucho dinero rápido, y
+        castiga a quien ahorra el fruto de su trabajo. El que guarda, pierde.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        Después aparecieron las alternativas digitales que prometían liberarnos.
+        Pero sin confianza entre las personas, terminaron repitiendo la historia:
+        acumulación en pocas manos, precios manipulados por los que más tienen,
+        especulación en vez de comunidad. No eran una herramienta para vivir
+        mejor — eran otro casino.
+      </p>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        El problema nunca fue la tecnología. <strong class="text-on-surface">El
+        problema es quién emite el valor y quién decide las reglas.</strong>
+      </p>
+    </section>
+
+    <%# 3. La propuesta %>
+    <section class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Lo que proponemos</h2>
+      <p class="text-body-lg text-on-surface-variant leading-relaxed">
+        En Confianza nadie emite el dinero, porque no hay dinero: hay
+        <strong class="text-on-surface">créditos que nacen del compromiso entre
+        dos personas</strong>, como la deuda del samurái. Cuando alguien te hace
+        un favor, te vende algo o te enseña algo, el crédito registra esa deuda
+        — y se salda devolviendo valor a la red, no comprando billetes.
+      </p>
+      <ul class="space-y-3 text-body-lg text-on-surface-variant leading-relaxed list-none">
+        <li class="flex gap-3">
+          <span class="material-symbols-outlined text-primary shrink-0 mt-1" style="font-size:20px">balance</span>
+          <span><strong class="text-on-surface">Todos parten de cero.</strong>
+          Aquí no entras con capital: entras con tu nombre. Lo que tienes es lo
+          que la red confía en ti, y eso se construye participando — no se
+          compra ni se hereda.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="material-symbols-outlined text-primary shrink-0 mt-1" style="font-size:20px">verified</span>
+          <span><strong class="text-on-surface">La reputación se gana con hechos.</strong>
+          Evaluamos servicios y personas como en las grandes plataformas, pero sin
+          intermediarios que se queden con la comisión y los datos. La calificación
+          es de la comunidad, no de una empresa.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="material-symbols-outlined text-primary shrink-0 mt-1" style="font-size:20px">location_on</span>
+          <span><strong class="text-on-surface">El valor se queda en el territorio.</strong>
+          Cada intercambio aporta una parte pequeña a un fondo común del barrio
+          — un impuesto mínimo que no se lo lleva nadie: queda ahí, y la
+          comunidad vota en qué usarlo y quién lo ejecuta. La participación
+          ciudadana que las comunas todavía no hacen, aquí ya funciona.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="material-symbols-outlined text-primary shrink-0 mt-1" style="font-size:20px">how_to_vote</span>
+          <span><strong class="text-on-surface">Las reglas las cambia la comunidad.</strong>
+          La quema, el aporte territorial, el quórum: todo parámetro de la economía
+          es público, auditable y se puede cambiar con una propuesta votada por
+          la red. El poder de decidir no vive en una oficina — vive en cada voto.</span>
+        </li>
+      </ul>
+    </section>
+
+    <%# 4. Compromisos %>
+    <section class="space-y-4">
+      <h2 class="text-headline-md text-on-surface">Nuestros compromisos</h2>
+      <div class="space-y-3">
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+          <p class="text-body-lg text-on-surface-variant leading-relaxed">
+            <strong class="text-on-surface">Todo abierto.</strong> Las
+            <%= link_to "reglas económicas", economics_path, class: "text-primary hover:underline" %>
+            son públicas y cada cambio del sistema se cuenta en las
+            <%= link_to "novedades", announcements_path, class: "text-primary hover:underline" %>,
+            en lenguaje simple. Si algo no se puede explicar en simple, todavía no está listo.
+          </p>
+        </div>
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+          <p class="text-body-lg text-on-surface-variant leading-relaxed">
+            <strong class="text-on-surface">La confianza no se compra.</strong>
+            No hay forma de pagar para tener mejor reputación, más alcance o más
+            voz. Aquí el único camino es participar.
+          </p>
+        </div>
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+          <p class="text-body-lg text-on-surface-variant leading-relaxed">
+            <strong class="text-on-surface">Sin especulación.</strong> Los créditos
+            sirven para intercambiar valor real entre vecinos, no para acumular ni
+            apostar. Esto no es una criptomoneda ni quiere serlo.
+          </p>
+        </div>
+        <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 p-4">
+          <p class="text-body-lg text-on-surface-variant leading-relaxed">
+            <strong class="text-on-surface">El rumbo se decide aquí adentro.</strong>
+            Qué se construye y quién lo ejecuta se decide con propuestas y apoyos
+            de la comunidad, no en una sala de directorio.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <%# 5. Cierre + CTA %>
+    <section class="text-center space-y-6 pt-4">
+      <p class="text-body-lg text-on-surface-variant leading-relaxed max-w-xl mx-auto">
+        Confianza es una apuesta simple: que entre vecinos podemos generar
+        oportunidades, mejorar nuestro entorno y construir patrimonio común —
+        sin pedirle permiso a un banco.
+      </p>
+      <p class="text-headline-sm text-primary-container font-semibold">
+        Antes del dinero, la deuda. Antes de la deuda, la confianza.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <%= link_to "Unirse a la red", signup_path,
+              class: "bg-primary hover:bg-organic-green-deep text-on-primary px-8 py-3 rounded-full text-label-md transition-colors shadow-sm" %>
+        <%= link_to "Cómo funciona", how_it_works_path,
+              class: "border border-primary text-primary hover:bg-primary-fixed/30 px-8 py-3 rounded-full text-label-md transition-colors" %>
+      </div>
+    </section>
+
+  </div>
+</article>

@@ -1,0 +1,20 @@
+@<%= @user.username %>, tu lugar en la red te espera.
+
+Creaste tu cuenta en Confianza pero quedó a un paso: verificar tu correo. Es un clic, y desbloquea todo lo demás:
+
+* Publicar lo que ofreces o necesitas: servicios, ventas, ayuda, eventos.
+* Créditos comunitarios — al verificar subes a nivel 1 y se abre tu cupo.
+* Tu perfil público en confianza.world/<%= @user.username %>, visible en Google con tu reputación.
+
+Verifica tu cuenta aquí: <%= email_verification_url(@token) %>
+
+MIENTRAS NO ESTABAS, LA RED DIO UN SALTO
+
+* El manifiesto — por qué existe Confianza: <%= manifesto_url %>
+* Novedades — la bitácora abierta del proyecto: <%= announcements_url %>
+* La comunidad cambia las reglas — la economía se decide votando: <%= economics_url %>
+* Canal de Telegram — las publicaciones que los vecinos deciden difundir llegan ahí: https://t.me/confianzaWorld
+
+Tu perfil verificado es tu punto de encuentro: une tus redes sociales, las búsquedas de Google y a tus vecinos — sin comisiones, sin intermediarios, con una reputación que te pertenece.
+
+El enlace vence en 7 días. Si no creaste esta cuenta, ignora este mensaje.

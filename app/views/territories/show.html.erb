@@ -1,0 +1,189 @@
+<% content_for :title, @territory.name %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       @territory.name,
+        description: "El territorio #{@territory.name} en Confianza: fondo comunitario, vecinos activos, publicaciones y propuestas de la comunidad.",
+        canonical:   territory_url(@territory)) %>
+<% end %>
+<%# Refresh broadcast: aportes al fondo (transferencias) → morph del balance + historial. %>
+<%= turbo_stream_from @territory, :wallet %>
+<% fund_balance = @fund&.cached_balance.to_i %>
+
+<article class="space-y-8">
+  <header class="space-y-2">
+    <div class="flex items-center gap-2 text-caption text-on-surface-variant">
+      <%= link_to "Territorios", territories_path, class: "hover:text-primary" %>
+      <span>/</span>
+      <span>#<%= @territory.id %></span>
+    </div>
+
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+      <%= @territory.name %>
+    </h1>
+    <p class="text-body-md text-on-surface-variant flex items-center gap-2">
+      <span class="material-symbols-outlined" style="font-size:16px">location_on</span>
+      <%= [ @territory.admin1, @territory.country_code ].compact.join(" · ") %>
+      <% if @territory.source == "admin" %>
+        <span class="text-caption px-2 py-0.5 rounded-full bg-surface-container">División administrativa</span>
+      <% end %>
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Fondo principal %>
+    <section class="lg:col-span-2 relative overflow-hidden rounded-xl bg-primary/5 p-6 ambient-shadow"
+             style="border-top: 2px solid theme('colors.primary'); border-left:1px solid theme('colors.primary'); border-right:1px solid theme('colors.primary'); border-bottom:1px solid theme('colors.primary'); border-style: solid; border-width: 1px;">
+      <span class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+        <span class="material-symbols-outlined icon-filled" style="font-size:120px">volunteer_activism</span>
+      </span>
+
+      <div class="relative z-10 space-y-4">
+        <div>
+          <p class="text-label-md text-primary uppercase tracking-wider mb-1">Fondo comunitario</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-headline-lg text-primary font-bold"><%= number_with_delimiter(fund_balance) %></span>
+            <span class="text-body-lg text-on-surface-variant">C acumulados</span>
+          </div>
+        </div>
+
+        <p class="text-body-md text-on-surface-variant max-w-prose">
+          Cada transacción en este territorio aporta un porcentaje al fondo
+          (hoy <strong class="text-on-surface"><%= EconomicParameter.get_decimal("territory_percent", 3.0) %>%</strong>).
+          Cuando se habilite gobernanza, la comunidad votará propuestas para
+          destinar estos créditos a proyectos locales.
+        </p>
+      </div>
+    </section>
+
+    <%# Stats column %>
+    <aside class="grid grid-cols-3 lg:grid-cols-1 gap-3">
+      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Transacciones</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:transactions]) %></p>
+      </div>
+      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Personas activas</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:distinct_users]) %></p>
+      </div>
+      <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Publicaciones con economía</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(@stats[:distinct_posts]) %></p>
+      </div>
+    </aside>
+  </div>
+
+  <%# Historial de aportes %>
+  <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
+    <header class="flex justify-between items-center mb-4">
+      <h2 class="text-headline-md text-on-surface">Aportes recientes al fondo</h2>
+      <span class="text-caption text-on-surface-variant"><%= @recent_transactions.size %> de <%= @stats[:transactions] %></span>
+    </header>
+
+    <% if @recent_transactions.any? %>
+      <div class="flex flex-col gap-3">
+        <% @recent_transactions.each do |tx| %>
+          <% i = tx.interaction %>
+          <%= link_to (i&.post ? post_path(i.post) : "#"),
+                class: "flex items-center justify-between gap-3 p-3 rounded-lg bg-warm-surface hover:bg-surface-container transition-colors" do %>
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-10 h-10 rounded-full bg-primary-container/30 text-primary grid place-items-center shrink-0">
+                <span class="material-symbols-outlined icon-filled" style="font-size:18px">volunteer_activism</span>
+              </span>
+              <div class="min-w-0">
+                <p class="text-label-md text-on-surface truncate">
+                  <%= i&.post&.title || "Transacción ##{tx.id}" %>
+                </p>
+                <p class="text-caption text-on-surface-variant truncate">
+                  <% if i %>
+                    @<%= i.sender.username %> → @<%= i.receiver.username %>
+                  <% end %>
+                  · <%= l(tx.created_at, format: :short) rescue tx.created_at.to_s %>
+                </p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-headline-md text-primary font-semibold">
+                +<%= number_with_delimiter(tx.community_amount) %>
+              </p>
+              <p class="text-caption text-on-surface-variant">de <%= tx.total_amount %> C</p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-10">
+        <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">savings</span>
+        <p class="text-body-md text-on-surface-variant">Todavía no hubo aportes al fondo.</p>
+        <p class="text-caption text-on-surface-variant mt-1">
+          La primera transacción en este territorio va a aparecer aquí.
+        </p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Reglas locales vs heredadas (Fase 3.1) %>
+  <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
+    <header class="flex items-center gap-2 mb-4">
+      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">balance</span>
+      <h2 class="text-headline-md text-on-surface flex-1">Reglas de la comuna</h2>
+    </header>
+    <p class="text-caption text-on-surface-variant mb-3">
+      Cada regla rige con el valor global de la red salvo que esta comuna la haya
+      cambiado por votación (marcada como <strong>local</strong>).
+    </p>
+    <dl class="divide-y divide-outline-variant/30">
+      <% @rules.each do |r| %>
+        <div class="flex items-center justify-between gap-3 py-2">
+          <dt class="text-body-md text-on-surface-variant min-w-0"><%= r[:label] %></dt>
+          <dd class="flex items-center gap-2 shrink-0">
+            <span class="text-label-md text-on-surface font-semibold"><%= r[:value] || "—" %></span>
+            <% if r[:local] %>
+              <span class="text-caption px-2 py-0.5 rounded-full bg-primary-fixed/50 text-on-primary-fixed-variant">Local</span>
+            <% else %>
+              <span class="text-caption px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">Global</span>
+            <% end %>
+          </dd>
+        </div>
+      <% end %>
+    </dl>
+  </section>
+
+  <%# Propuestas %>
+  <section class="space-y-4">
+    <header class="flex items-center gap-2">
+      <span class="material-symbols-outlined icon-filled text-primary" style="font-size:22px">how_to_vote</span>
+      <h2 class="text-headline-md text-on-surface flex-1">Propuestas</h2>
+      <span class="text-caption text-on-surface-variant">
+        <%= @proposals.size %> activa(s)
+      </span>
+    </header>
+
+    <% if authenticated? && @new_proposal %>
+      <details <%= "open" if @new_proposal.errors.any? %> class="rounded-xl border border-outline-variant/30 bg-surface-container-low/30 p-1">
+        <summary class="cursor-pointer px-4 py-3 text-label-md text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px">add</span>
+          Proponer un gasto del fondo
+        </summary>
+        <div class="p-2">
+          <%= render "proposals/form", territory: @territory, proposal: @new_proposal %>
+        </div>
+      </details>
+    <% end %>
+
+    <% if @proposals.any? %>
+      <div class="space-y-3">
+        <% @proposals.each do |p| %>
+          <%= render "proposals/card", proposal: p %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-6 text-center">
+        <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:32px">how_to_vote</span>
+        <p class="text-body-md text-on-surface-variant">Todavía nadie propuso cómo usar este fondo.</p>
+        <% if authenticated? %>
+          <p class="text-caption text-on-surface-variant mt-1">Anímate a ser la primera persona.</p>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+</article>

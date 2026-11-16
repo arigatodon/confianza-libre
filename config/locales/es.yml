@@ -1,0 +1,10 @@
+es:
+  # Formatos de fecha/hora propios de Confianza (sobrescriben los de rails-i18n).
+  date:
+    formats:
+      long: "%-d de %B de %Y"
+      short: "%-d de %b"
+  time:
+    formats:
+      long: "%-d de %B de %Y, %H:%M"
+      short: "%-d de %b, %H:%M"

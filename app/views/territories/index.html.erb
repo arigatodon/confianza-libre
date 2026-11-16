@@ -1,0 +1,33 @@
+<% content_for :title, "Territorios" %>
+<% content_for :head do %>
+  <%= seo_meta_tags(
+        title:       "Territorios",
+        description: "Comunas y municipios donde la red Confianza está activa: fondo territorial, vecinos y actividad comunitaria de cada territorio.",
+        canonical:   territories_url) %>
+<% end %>
+
+<section class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Comunidades</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Territorios</h1>
+    <p class="text-body-md text-on-surface-variant max-w-2xl">
+      Cada comuna o municipio donde la red está activa se descubre cuando un
+      vecino publica o intercambia. El <strong>fondo territorial</strong> se
+      acumula con cada transacción y la comunidad decide cómo se usa.
+    </p>
+  </header>
+
+  <% if @territories.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <% @territories.each do |t| %>
+        <%= render "card", territory: t %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 p-10 text-center">
+      <span class="material-symbols-outlined text-on-surface-variant mb-2" style="font-size:36px">map</span>
+      <p class="text-body-md text-on-surface-variant">No hay territorios habilitados todavía.</p>
+      <p class="text-caption text-on-surface-variant mt-1">Se crean automáticamente con la primera publicación de cada comuna.</p>
+    </div>
+  <% end %>
+</section>

@@ -1,0 +1,90 @@
+<% content_for :title, "Crea tu vitrina" %>
+
+<article class="max-w-2xl mx-auto">
+  <div class="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 p-6 md:p-8 ambient-shadow space-y-6">
+    <header class="space-y-2 text-center">
+      <div class="w-16 h-16 mx-auto rounded-full bg-primary-container/30 grid place-items-center">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:34px">storefront</span>
+      </div>
+      <h1 class="text-headline-md md:text-headline-lg text-on-surface">Crea tu vitrina</h1>
+      <p class="text-body-md text-on-surface-variant max-w-prose mx-auto">
+        Si ofreces algo —un oficio, productos, comida, clases— tu vitrina es tu
+        página en internet: un link para tu Instagram o tu WhatsApp, con tu
+        contacto, tus servicios y las reseñas de tus clientes. Te toma dos minutos.
+      </p>
+    </header>
+
+    <%= form_with model: @user, url: onboarding_vitrina_path, method: :patch, multipart: true, class: "space-y-5" do |f| %>
+      <% if @user.errors.any? %>
+        <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-4 py-3 text-sm">
+          <ul class="list-disc ml-5">
+            <% @user.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <span class="block text-label-md text-on-surface mb-1.5">¿Qué ofreces?</span>
+        <div class="grid grid-cols-2 gap-2">
+          <% User::VITRINA_PLANTILLAS.each do |clave, config| %>
+            <label class="flex items-center gap-2 rounded-lg border border-outline-variant/40 px-3 py-2.5 cursor-pointer has-focus-visible:ring-2 has-focus-visible:ring-primary has-checked:border-primary has-checked:bg-primary-fixed/20 transition-colors">
+              <%= f.radio_button :vitrina_plantilla, clave, checked: @user.vitrina_plantilla.to_s == clave, class: "sr-only" %>
+              <span class="material-symbols-outlined text-primary" style="font-size:20px"><%= config[:icono] %></span>
+              <span class="text-body-md text-on-surface"><%= config[:nombre] %></span>
+            </label>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :headline, "En una línea, a qué te dedicas", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= f.text_field :headline, maxlength: 80, required: true,
+              placeholder: "Ej: Gásfiter y electricista en Ñuñoa · Almacén La Esquina" %>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :whatsapp, "WhatsApp de contacto", class: "block text-label-md text-on-surface mb-1.5" %>
+          <%= f.telephone_field :whatsapp, placeholder: "+56912345678" %>
+          <p class="text-caption text-on-surface-variant mt-1">Con +56. Tus clientes te escriben con un toque.</p>
+        </div>
+        <div>
+          <%= f.label :horario, "Horario (opcional)", class: "block text-label-md text-on-surface mb-1.5" %>
+          <%= f.text_field :horario, maxlength: 120, placeholder: "Ej: Lun a Sáb · 9:00 a 19:00" %>
+        </div>
+      </div>
+
+      <% unless @user.avatar.attached? %>
+        <%= render "users/avatar_picker", f: f, user: @user %>
+      <% end %>
+
+      <label class="flex items-start gap-3 cursor-pointer rounded-lg bg-surface-container-low/60 p-3">
+        <%= f.check_box :showcase, { checked: true, class: "mt-1" }, "1", "0" %>
+        <span>
+          <span class="block text-body-md text-on-surface">Publicar mi vitrina</span>
+          <span class="block text-caption text-on-surface-variant">
+            Cualquiera con tu link la puede ver, incluso sin cuenta, y aparece en
+            Google. Puedes apagarla cuando quieras desde Ajustes.
+          </span>
+        </span>
+      </label>
+
+      <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-outline-variant/30">
+        <%= link_to "Ahora no, solo quiero mirar", explore_path,
+              class: "text-label-md text-on-surface-variant hover:text-on-surface text-center" %>
+        <%= f.button type: "submit",
+              class: "inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer" do %>
+          <span class="material-symbols-outlined" style="font-size:18px">rocket_launch</span>
+          Crear mi vitrina
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <p class="text-caption text-on-surface-variant text-center mt-6">
+    Portada, color y links a tus redes los agregas después en
+    <%= link_to "Ajustes", settings_path, class: "text-primary hover:underline" %>.
+  </p>
+</article>

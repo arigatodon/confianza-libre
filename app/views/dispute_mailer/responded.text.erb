@@ -1,0 +1,9 @@
+Respondieron tu disputa
+
+@<%= @counterpart.username %> respondió la disputa que abriste sobre la interacción de “<%= @interaction.post.title %>”:
+
+"<%= @dispute.response %>"
+
+Con ambas versiones sobre la mesa, un moderador revisará el caso y decidirá. Te avisaremos cuando haya veredicto.
+
+<%= interaction_url(@interaction) %>

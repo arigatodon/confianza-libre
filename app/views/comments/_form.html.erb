@@ -1,0 +1,20 @@
+<div id="new_comment">
+  <% if authenticated? %>
+    <%= form_with model: comment, url: post_comments_path(post), class: "space-y-2" do |f| %>
+      <% if comment.errors.any? %>
+        <div class="rounded-lg bg-error-container border border-error/30 text-on-error-container px-3 py-2 text-xs">
+          <%= comment.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+      <%= f.text_area :body, rows: 2, required: true, placeholder: "Sumá tu comentario…" %>
+      <div class="flex justify-end">
+        <%= f.submit "Comentar",
+              class: "inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep cursor-pointer" %>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="text-body-md text-on-surface-variant">
+      <%= link_to "Entrá", new_session_path, class: "text-primary font-semibold hover:underline" %> para comentar.
+    </p>
+  <% end %>
+</div>

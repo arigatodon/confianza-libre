@@ -1,0 +1,4 @@
+<%# El broadcast del modelo ya appendea el mensaje. Acá sólo se resetea el form. %>
+<%= turbo_stream.replace "dm-form-#{@conversation.id}" do %>
+  <%= render "conversations/message_form", conversation: @conversation %>
+<% end %>

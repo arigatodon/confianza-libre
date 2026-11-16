@@ -1,0 +1,62 @@
+<%# Claves de la API pública: publicar en Confianza desde un sitio propio. %>
+<div id="api" class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-5 md:p-6 space-y-4">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-primary" style="font-size:20px">webhook</span>
+    <h2 class="text-headline-md text-on-surface">Publicar desde tu web</h2>
+  </div>
+
+  <p class="text-body-md text-on-surface-variant">
+    Con una clave de API tu sitio (o tu tienda, o un script) puede crear publicaciones
+    en Confianza en tu nombre. Cada publicación sale igual que si la hicieras aquí:
+    aparece para tus vecinos y, si lo pides, se difunde en las redes de Confianza.
+    <%= link_to "Cómo conectarla →", api_docs_path, class: "text-primary hover:underline" %>
+  </p>
+
+  <% if flash[:api_key_nueva].present? %>
+    <div class="rounded-lg bg-primary-fixed/20 border border-primary/30 p-4 space-y-2">
+      <p class="text-label-md text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined icon-filled text-primary" style="font-size:18px">key</span>
+        Tu clave nueva — cópiala ahora, no la volveremos a mostrar:
+      </p>
+      <code class="block w-full break-all rounded-md bg-surface-container px-3 py-2 font-mono text-sm text-on-surface select-all"><%= flash[:api_key_nueva] %></code>
+    </div>
+  <% end %>
+
+  <% if api_keys.any? %>
+    <ul class="divide-y divide-outline-variant/30">
+      <% api_keys.each do |k| %>
+        <li class="flex items-center justify-between gap-3 py-3">
+          <span class="min-w-0">
+            <span class="block text-body-md text-on-surface truncate"><%= k.name %></span>
+            <span class="block text-caption text-on-surface-variant font-mono">
+              <%= k.masked %>
+              · <%= k.last_used_at ? "usada #{time_ago_in_words(k.last_used_at)} atrás" : "sin uso todavía" %>
+            </span>
+          </span>
+          <%= button_to api_key_path(k), method: :delete,
+                class: "shrink-0 inline-flex items-center gap-1 text-caption text-on-surface-variant hover:text-error transition-colors",
+                form: { data: { turbo_confirm: "¿Revocar esta clave? Lo que la use dejará de funcionar." } } do %>
+            <span class="material-symbols-outlined" style="font-size:16px">block</span>
+            Revocar
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if user.email_verified? %>
+    <%= form_with url: api_keys_path, method: :post, class: "flex flex-col sm:flex-row gap-2" do |f| %>
+      <%= f.text_field :"api_key[name]", placeholder: "Nombre (ej: mi sitio en Netlify)", maxlength: 60,
+            class: "flex-1" %>
+      <button type="submit"
+              class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer">
+        <span class="material-symbols-outlined" style="font-size:18px">add</span>
+        Crear clave
+      </button>
+    <% end %>
+  <% else %>
+    <p class="text-caption text-on-surface-variant">
+      Verifica tu email para poder crear claves de API.
+    </p>
+  <% end %>
+</div>

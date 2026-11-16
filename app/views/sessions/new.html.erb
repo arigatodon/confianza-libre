@@ -1,0 +1,42 @@
+<% content_for :title, "Entrar" %>
+
+<section class="max-w-md mx-auto space-y-6 pt-6">
+  <header class="space-y-2 text-center">
+    <span class="inline-flex w-14 h-14 rounded-2xl bg-primary text-on-primary items-center justify-center mx-auto">
+      <span class="material-symbols-outlined icon-filled" style="font-size:28px">handshake</span>
+    </span>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Entrar</h1>
+    <p class="text-body-md text-on-surface-variant">Tu comunidad, cerca de ti.</p>
+  </header>
+
+  <div class="rounded-xl bg-surface-container-lowest border border-outline-variant/30 ambient-shadow p-6">
+    <%= form_with url: session_url, class: "space-y-4" do |form| %>
+      <div>
+        <%= form.label :email_address, "Email", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username",
+              value: params[:email_address], placeholder: "tunombre@email.com" %>
+      </div>
+
+      <div>
+        <%= form.label :password, "Contraseña", class: "block text-label-md text-on-surface mb-1.5" %>
+        <%= form.password_field :password, required: true, autocomplete: "current-password", maxlength: 72 %>
+      </div>
+
+      <div class="pt-2 flex items-center justify-between gap-3 flex-wrap">
+        <%= form.submit "Entrar",
+              class: "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep transition-colors cursor-pointer" %>
+        <%= link_to "Olvidé mi contraseña", new_password_path,
+              class: "text-caption text-on-surface-variant hover:text-on-surface" %>
+      </div>
+    <% end %>
+
+    <div class="mt-5">
+      <%= render "shared/login_social" %>
+    </div>
+  </div>
+
+  <p class="text-center text-body-md text-on-surface-variant">
+    ¿No tienes cuenta?
+    <%= link_to "Regístrate", signup_path, class: "text-primary font-semibold hover:underline" %>
+  </p>
+</section>

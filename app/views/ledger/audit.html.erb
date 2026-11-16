@@ -1,0 +1,144 @@
+<% content_for :title, "Auditoría del ledger" %>
+<% d = @data %>
+<%
+  partida_doble_ok = d[:sum_global].zero? && d[:ledger_delta].zero? && d[:unbalanced_transaction_ids].empty?
+%>
+
+<article class="space-y-8">
+  <header class="space-y-2">
+    <p class="text-caption text-on-surface-variant uppercase tracking-wider">Transparencia</p>
+    <h1 class="text-headline-lg-mobile md:text-headline-lg text-on-surface">Auditoría del ledger</h1>
+    <p class="text-body-md text-on-surface-variant max-w-prose">
+      Confianza opera con
+      <strong class="text-on-surface">contabilidad de partida doble</strong>.
+      Toda transacción suma cero: por cada crédito que entra a una cuenta,
+      otra acumula un débito de igual monto. Esta página deja la integridad
+      a la vista — si alguna vez se rompe, este número deja de ser cero.
+    </p>
+    <p class="text-caption text-on-surface-variant">
+      Datos generados a <%= l(d[:generated_at], format: :long) rescue d[:generated_at].to_s %>
+      · Cacheado 5 min.
+    </p>
+  </header>
+
+  <%# Veredicto principal %>
+  <section class="rounded-xl p-6 ambient-shadow <%= partida_doble_ok ? "bg-primary/5 border border-primary/30" : "bg-error-container border border-error" %>">
+    <header class="flex items-center gap-3">
+      <span class="w-12 h-12 rounded-full grid place-items-center <%= partida_doble_ok ? "bg-primary text-on-primary" : "bg-error text-on-error" %>">
+        <span class="material-symbols-outlined icon-filled" style="font-size:26px">
+          <%= partida_doble_ok ? "verified" : "warning" %>
+        </span>
+      </span>
+      <div>
+        <h2 class="text-headline-md text-on-surface">
+          <%= partida_doble_ok ? "Partida doble sana" : "Partida doble rota" %>
+        </h2>
+        <p class="text-caption text-on-surface-variant">
+          Σ global de balances = <strong><%= d[:sum_global] %></strong> ·
+          Σ credits − Σ debits = <strong><%= d[:ledger_delta] %></strong>
+        </p>
+      </div>
+    </header>
+
+    <% unless partida_doble_ok %>
+      <div class="mt-4 pt-4 border-t border-error/30 text-body-md text-on-error-container">
+        <% if d[:unbalanced_transaction_ids].any? %>
+          <p>Transacciones con ledger desbalanceado: <strong><%= d[:unbalanced_transaction_ids].join(", ") %></strong></p>
+        <% end %>
+        <p class="text-caption mt-2">Esto requiere atención inmediata.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <%# Stats globales %>
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Cuentas de usuario</p>
+      <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(d[:users_with_account]) %></p>
+      <p class="text-caption text-on-surface-variant">balance Σ <%= number_with_delimiter(d[:balances_by_type][:user]) %></p>
+    </div>
+    <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Fondos territoriales</p>
+      <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(d[:territories_with_fund]) %></p>
+      <p class="text-caption text-on-surface-variant">balance Σ <%= number_with_delimiter(d[:balances_by_type][:community]) %></p>
+    </div>
+    <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Quema</p>
+      <p class="text-headline-md text-error font-bold mt-1"><%= number_with_delimiter(d[:balances_by_type][:burn]) %></p>
+      <p class="text-caption text-on-surface-variant">monotónica</p>
+    </div>
+    <div class="rounded-xl bg-surface-container-lowest p-4 border border-outline-variant/30">
+      <p class="text-caption text-on-surface-variant uppercase tracking-wider">Sistema</p>
+      <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(d[:balances_by_type][:system]) %></p>
+      <p class="text-caption text-on-surface-variant">ajustes admin</p>
+    </div>
+  </section>
+
+  <%# Reconciliación %>
+  <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
+    <h2 class="text-headline-md text-on-surface mb-4">Reconciliación</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-body-md">
+      <div class="flex justify-between items-baseline gap-3 pb-2 border-b border-outline-variant/30">
+        <span class="text-on-surface-variant">Σ debits del ledger</span>
+        <span class="font-mono text-on-surface"><%= number_with_delimiter(d[:ledger_debits]) %></span>
+      </div>
+      <div class="flex justify-between items-baseline gap-3 pb-2 border-b border-outline-variant/30">
+        <span class="text-on-surface-variant">Σ credits del ledger</span>
+        <span class="font-mono text-on-surface"><%= number_with_delimiter(d[:ledger_credits]) %></span>
+      </div>
+      <div class="flex justify-between items-baseline gap-3 pb-2 border-b border-outline-variant/30">
+        <span class="text-on-surface-variant">Σ todos los cached_balance</span>
+        <span class="font-mono <%= d[:sum_global].zero? ? "text-primary" : "text-error" %>"><%= number_with_delimiter(d[:sum_global]) %></span>
+      </div>
+      <div class="flex justify-between items-baseline gap-3 pb-2 border-b border-outline-variant/30">
+        <span class="text-on-surface-variant">Cuentas totales</span>
+        <span class="font-mono text-on-surface"><%= number_with_delimiter(d[:accounts_total]) %></span>
+      </div>
+    </div>
+  </section>
+
+  <%# Actividad económica %>
+  <section class="rounded-xl bg-surface-container-lowest p-6 ambient-shadow border border-outline-variant/30">
+    <h2 class="text-headline-md text-on-surface mb-4">Actividad económica</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Transacciones</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1">
+          <%= number_with_delimiter(d[:transactions_completed]) %>
+          <span class="text-caption text-on-surface-variant font-normal">/ <%= number_with_delimiter(d[:transactions_total]) %></span>
+        </p>
+        <p class="text-caption text-on-surface-variant">completadas / totales</p>
+      </div>
+      <div>
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Volumen total</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1"><%= number_with_delimiter(d[:total_volume_completed]) %> C</p>
+        <p class="text-caption text-on-surface-variant">movidos en transacciones cerradas</p>
+      </div>
+      <div>
+        <p class="text-caption text-on-surface-variant uppercase tracking-wider">Aportes a la red</p>
+        <p class="text-headline-md text-on-surface font-bold mt-1">
+          <%= number_with_delimiter(d[:total_burned]) %> + <%= number_with_delimiter(d[:total_territorial]) %>
+        </p>
+        <p class="text-caption text-on-surface-variant">a quema + fondos</p>
+      </div>
+    </div>
+  </section>
+
+  <%# Explicación %>
+  <section class="rounded-xl bg-surface-container-low/40 p-5 border border-outline-variant/30 text-body-md text-on-surface-variant space-y-2">
+    <h3 class="text-label-md text-on-surface font-semibold">Cómo leer este reporte</h3>
+    <p>
+      Cada transacción genera entradas en el ledger: una o más de tipo
+      <code class="text-on-surface">debit</code> (lo que sale de la cuenta del
+      emisor) y otras de tipo <code class="text-on-surface">credit</code> (lo
+      que entra al receptor, al fondo territorial y a la quema). La suma de
+      débitos siempre tiene que ser igual a la suma de créditos.
+    </p>
+    <p>
+      <strong>Σ de cached_balance = 0</strong>: la denormalización por cuenta
+      coincide con el ledger.
+      <strong>Σ debits − Σ credits = 0</strong>: el ledger es consistente.
+      Cualquier valor distinto de cero indica un bug y queda visible aquí.
+    </p>
+  </section>
+</article>

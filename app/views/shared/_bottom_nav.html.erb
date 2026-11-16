@@ -1,0 +1,89 @@
+<%# Bottom Nav — sólo móvil. FAB central (sólo si está logueado) %>
+<%
+  current = request.path
+  bn_link = ->(path, label, icon, active) {
+    active_class = active ? "text-primary" : "text-on-surface-variant hover:text-on-surface"
+    "flex flex-col items-center gap-0.5 w-16 py-1.5 transition-colors #{active_class}"
+  }
+%>
+<nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-surface-container-low/95 backdrop-blur border-t border-outline-variant/30">
+  <div class="h-16 px-4 flex items-center justify-around">
+    <%= link_to root_path, class: bn_link.call(root_path, "Inicio", "dynamic_feed", current == "/") do %>
+      <% if current == "/" %>
+        <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
+          <span class="material-symbols-outlined icon-filled" style="font-size:22px">dynamic_feed</span>
+        </span>
+      <% else %>
+        <span class="material-symbols-outlined" style="font-size:22px">dynamic_feed</span>
+      <% end %>
+      <span class="text-caption font-medium" style="font-size:10px">Inicio</span>
+    <% end %>
+
+    <%= link_to explore_path, class: bn_link.call(explore_path, "Mapa", "map", current.start_with?("/explore")) do %>
+      <% if current.start_with?("/explore") %>
+        <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
+          <span class="material-symbols-outlined icon-filled" style="font-size:22px">map</span>
+        </span>
+      <% else %>
+        <span class="material-symbols-outlined" style="font-size:22px">map</span>
+      <% end %>
+      <span class="text-caption font-medium" style="font-size:10px">Mapa</span>
+    <% end %>
+
+    <% if authenticated? %>
+      <%# FAB central elevado %>
+      <div class="relative -top-5">
+        <%= link_to new_post_path,
+              class: "w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-lg hover:bg-organic-green-deep transition-colors border-4 border-background" do %>
+          <span class="material-symbols-outlined" style="font-size:28px">add</span>
+          <span class="sr-only">Crear publicación</span>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="w-14"></div>
+    <% end %>
+
+    <% if authenticated? %>
+      <%= link_to wallet_path, class: bn_link.call(wallet_path, "Billetera", "account_balance_wallet", current.start_with?("/billetera")) do %>
+        <% if current.start_with?("/billetera") %>
+          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
+            <span class="material-symbols-outlined icon-filled" style="font-size:22px">account_balance_wallet</span>
+          </span>
+        <% else %>
+          <span class="material-symbols-outlined" style="font-size:22px">account_balance_wallet</span>
+        <% end %>
+        <span class="text-caption font-medium" style="font-size:10px">Billetera</span>
+      <% end %>
+    <% else %>
+      <%= link_to posts_path, class: bn_link.call(posts_path, "Feed", "grid_view", current.start_with?("/posts")) do %>
+        <% if current.start_with?("/posts") %>
+          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
+            <span class="material-symbols-outlined icon-filled" style="font-size:22px">grid_view</span>
+          </span>
+        <% else %>
+          <span class="material-symbols-outlined" style="font-size:22px">grid_view</span>
+        <% end %>
+        <span class="text-caption font-medium" style="font-size:10px">Feed</span>
+      <% end %>
+    <% end %>
+
+    <% if authenticated? && (u = Current.session.user) %>
+      <% my_profile = profile_path(u.username || u.id) %>
+      <%= link_to my_profile, class: bn_link.call(my_profile, "Perfil", "person", current == my_profile) do %>
+        <% if current == my_profile %>
+          <span class="w-10 flex justify-center bg-primary-container/20 rounded-full py-0.5">
+            <span class="material-symbols-outlined icon-filled" style="font-size:22px">person</span>
+          </span>
+        <% else %>
+          <span class="material-symbols-outlined" style="font-size:22px">person</span>
+        <% end %>
+        <span class="text-caption font-medium" style="font-size:10px">Perfil</span>
+      <% end %>
+    <% else %>
+      <%= link_to new_session_path, class: bn_link.call(new_session_path, "Entrar", "login", current.start_with?("/session")) do %>
+        <span class="material-symbols-outlined" style="font-size:22px">login</span>
+        <span class="text-caption font-medium" style="font-size:10px">Entrar</span>
+      <% end %>
+    <% end %>
+  </div>
+</nav>

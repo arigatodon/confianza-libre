@@ -1,0 +1,74 @@
+<% content_for :title, "Logros" %>
+
+<div class="max-w-4xl mx-auto px-gutter py-6 space-y-6">
+  <%# ---- Encabezado con resumen de progreso ---- %>
+  <header class="rounded-2xl bg-primary text-on-primary p-6 ambient-shadow">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-headline-md font-bold flex items-center gap-2">
+          <span class="material-symbols-outlined icon-filled">emoji_events</span>
+          Tus logros
+        </h1>
+        <p class="text-body-md text-on-primary/80 mt-1">
+          Nivel <%= @user.level %> · <%= verification_level_label_es(@user) %>
+        </p>
+      </div>
+      <div class="text-right">
+        <div class="text-display-sm font-bold leading-none">
+          <%= @catalog.unlocked_count %><span class="text-on-primary/60 text-headline-sm">/<%= @catalog.total %></span>
+        </div>
+        <p class="text-caption text-on-primary/80 mt-1">desbloqueados</p>
+      </div>
+    </div>
+
+    <% pct = @catalog.total.positive? ? (@catalog.unlocked_count.to_f / @catalog.total * 100).round : 0 %>
+    <div class="mt-4 h-2.5 rounded-full bg-on-primary/20 overflow-hidden">
+      <div class="h-full rounded-full bg-primary-fixed transition-all" style="width: <%= pct %>%"></div>
+    </div>
+  </header>
+
+  <%# ---- Logros agrupados por categoría ---- %>
+  <% @catalog.grouped.each do |category, badges| %>
+    <section class="space-y-3">
+      <h2 class="text-label-md text-on-surface-variant uppercase tracking-wide px-1"><%= category %></h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <% badges.each do |b| %>
+          <div class="rounded-xl border p-4 flex flex-col gap-2 transition-colors
+                      <%= b.unlocked ? 'bg-surface border-primary/30 ambient-shadow' : 'bg-surface-container/40 border-outline-variant/40' %>">
+            <div class="flex items-center justify-between">
+              <span class="w-11 h-11 rounded-full grid place-items-center
+                           <%= b.unlocked ? 'bg-primary-container text-on-primary-container' : 'bg-surface-container-high text-on-surface-variant/50' %>">
+                <span class="material-symbols-outlined <%= 'icon-filled' if b.unlocked %>"><%= b.icon %></span>
+              </span>
+              <% if b.unlocked %>
+                <span class="material-symbols-outlined icon-filled text-primary" style="font-size:20px" title="Desbloqueado">check_circle</span>
+              <% else %>
+                <span class="material-symbols-outlined text-on-surface-variant/40" style="font-size:20px" title="Bloqueado">lock</span>
+              <% end %>
+            </div>
+
+            <div>
+              <p class="text-label-md <%= b.unlocked ? 'text-on-surface' : 'text-on-surface-variant' %>"><%= b.name %></p>
+              <p class="text-caption text-on-surface-variant mt-0.5 leading-snug"><%= b.description %></p>
+            </div>
+
+            <% if b.progress? && !b.unlocked %>
+              <div class="mt-auto pt-1">
+                <div class="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                  <div class="h-full rounded-full bg-primary/70" style="width: <%= b.percent %>%"></div>
+                </div>
+                <p class="text-caption text-on-surface-variant mt-1">
+                  <%= b.current %><%= b.unit %> / <%= b.target %><%= b.unit %>
+                </p>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <p class="text-caption text-on-surface-variant text-center pt-2">
+    Los logros se calculan en tiempo real según tu actividad. Seguí usando Confianza para desbloquearlos.
+  </p>
+</div>

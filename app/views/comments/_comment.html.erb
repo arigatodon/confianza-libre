@@ -1,0 +1,32 @@
+<article id="<%= dom_id(comment) %>" class="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-4 flex gap-3 ambient-shadow">
+  <% if comment.user.avatar.attached? && comment.user.avatar.image? %>
+    <%= image_tag comment.user.avatar, class: "w-9 h-9 rounded-full object-cover border border-outline-variant shrink-0" %>
+  <% else %>
+    <div class="w-9 h-9 shrink-0 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-xs font-semibold">
+      <%= (comment.user.username || comment.user.email_address).first.upcase %>
+    </div>
+  <% end %>
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center justify-between gap-2 text-caption text-on-surface-variant">
+      <%= link_to "@#{comment.user.username || comment.user.email_address}",
+            profile_path(comment.user.username || comment.user.id),
+            class: "text-primary font-semibold hover:underline truncate" %>
+      <span class="flex items-center gap-1">
+        <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+        <%= time_ago_in_words(comment.created_at) %>
+      </span>
+    </div>
+    <p class="mt-1 text-body-md text-on-surface whitespace-pre-wrap break-words"><%= comment.body %></p>
+    <div class="mt-2 flex items-center gap-3">
+      <% if authenticated? && (Current.session.user_id == comment.user_id || Current.session.user_id == comment.post.user_id) %>
+        <%= button_to post_comment_path(comment.post, comment), method: :delete,
+              class: "inline-flex items-center gap-1 text-caption text-on-surface-variant hover:text-error",
+              form: { data: { turbo_confirm: "¿Eliminar comentario?" } } do %>
+          <span class="material-symbols-outlined" style="font-size:14px">delete</span>
+          Eliminar
+        <% end %>
+      <% end %>
+      <%= report_link(comment) %>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,19 @@
+<h1 style="margin:0 0 16px; font-size:22px; color:#0f5238;">Tienes una nueva solicitud de interacción</h1>
+
+<p style="margin:0 0 16px;">
+  <strong>@<%= @sender.username %></strong> inició una interacción contigo a partir de tu publicación
+  <strong>“<%= @post.title %>”</strong>.
+  <% if @interaction.agreed_credits.to_i.positive? %>
+    Te ofrece <strong><%= @interaction.agreed_credits %> créditos</strong>.
+  <% end %>
+</p>
+
+<p style="margin:0 0 8px;">
+  Entra para revisar los detalles, conversar y aceptar o contraproponer:
+</p>
+
+<%= render "shared/email_cta", url: interaction_url(@interaction), label: "Ver la solicitud" %>
+
+<p style="margin:16px 0 0; font-size:14px; color:#6b7770;">
+  También la encontrarás en tus notificaciones dentro de Confianza.
+</p>

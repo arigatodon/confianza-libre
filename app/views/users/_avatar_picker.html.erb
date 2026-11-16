@@ -1,0 +1,76 @@
+<%# Usage: render "users/avatar_picker", f: f, user: @user %>
+<div data-controller="avatar-picker" class="rounded-lg bg-surface-container-low border border-outline-variant/30 p-4">
+  <div class="flex items-center gap-4">
+    <div data-avatar-picker-target="preview" class="shrink-0">
+      <% if user.respond_to?(:avatar) && user.avatar.attached? && user.avatar.image? %>
+        <%= image_tag user.avatar, class: "w-16 h-16 rounded-full object-cover border border-outline-variant" %>
+      <% else %>
+        <div class="w-16 h-16 rounded-full bg-primary-container text-on-primary-container grid place-items-center text-2xl font-semibold">
+          <%= ((user.username || user.email_address || "?")[0] || "?").upcase %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-label-md text-on-surface">Foto de perfil</p>
+      <p class="text-caption text-on-surface-variant">JPG o PNG, hasta ~5 MB.</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <button type="button" data-action="avatar-picker#takePhoto"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary text-on-primary text-caption font-semibold hover:bg-organic-green-deep transition-colors cursor-pointer">
+          <span class="material-symbols-outlined" style="font-size:14px">photo_camera</span>
+          Tomar foto
+        </button>
+        <button type="button" data-action="avatar-picker#browse"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-outline text-on-surface text-caption hover:bg-surface-container cursor-pointer">
+          <span class="material-symbols-outlined" style="font-size:14px">folder_open</span>
+          Examinar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <%= f.file_field :avatar, accept: "image/*",
+        data: { avatar_picker_target: "input" },
+        style: "position:absolute;left:-9999px;width:1px;height:1px;opacity:0;",
+        tabindex: -1 %>
+
+  <%# Modal webcam %>
+  <div data-avatar-picker-target="modal"
+       class="hidden fixed inset-0 z-50 bg-inverse-surface/70 backdrop-blur-sm flex items-center justify-center p-4"
+       data-action="click->avatar-picker#modalBackdropClick">
+    <div class="bg-surface rounded-xl ambient-shadow-lg w-full max-w-sm overflow-hidden">
+      <div class="px-4 py-3 border-b border-outline-variant/40 flex items-center justify-between">
+        <h3 class="text-label-md text-on-surface">Tomar foto</h3>
+        <button type="button" data-action="avatar-picker#closeModal"
+                class="text-on-surface-variant hover:text-on-surface cursor-pointer">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="relative bg-inverse-surface aspect-square">
+        <video data-avatar-picker-target="video" playsinline muted autoplay
+               class="w-full h-full object-cover" style="transform: scaleX(-1)"></video>
+        <canvas data-avatar-picker-target="canvas" class="hidden absolute inset-0 w-full h-full"></canvas>
+        <div data-avatar-picker-target="error"
+             class="hidden absolute inset-0 grid place-items-center text-on-primary text-sm text-center p-6 bg-inverse-surface"></div>
+      </div>
+
+      <div class="p-3 flex items-center justify-center gap-2">
+        <button type="button" data-avatar-picker-target="captureBtn"
+                data-action="avatar-picker#capture"
+                class="px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer">
+          Capturar
+        </button>
+        <button type="button" data-avatar-picker-target="retryBtn"
+                data-action="avatar-picker#retry"
+                class="hidden px-4 py-2 rounded-full border border-outline text-on-surface text-label-md hover:bg-surface-container cursor-pointer">
+          Reintentar
+        </button>
+        <button type="button" data-avatar-picker-target="confirmBtn"
+                data-action="avatar-picker#confirm"
+                class="hidden px-4 py-2 rounded-full bg-primary text-on-primary text-label-md hover:bg-organic-green-deep cursor-pointer">
+          Usar esta foto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
